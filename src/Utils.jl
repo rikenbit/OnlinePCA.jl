@@ -1,7 +1,7 @@
 using ProgressMeter:
     Progress, next!
 using ArgParse:
-    @add_arg_table
+    ArgParseSettings, parse_args, @add_arg_table
 using StatsBase:
     percentile
 using DataFrames:
