@@ -161,8 +161,15 @@ subplots(out_rsvrg4, group) # Bottom, Right
 ![RSVRG-PCA](./docs/src/figure/rsvrg.png)
 
 # Command line usage
-All the PCA algorithms also can be performed as command line tools with same parameter names like below.
+All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.
 
 ```bash
+# CSV → Julia Binary
+julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/csv2sl --csvfile Data.csv --slfile Data.dat
+
+# Summary statistics from Julia Binary
+julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/sumr --slfile Data.dat
+
+# PCA
 julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja --input Data.dat --dim 3 --scheduling robbins-monro --stepsize 10, --numepoch 10 --meanlist Feature_LogMeans.csv
 ```
