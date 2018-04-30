@@ -15,6 +15,8 @@ module OnlinePCA
 
 	export csv2sl, sumr, oja, ccipca, gd, rsgd, svrg, rsvrg
 
+	include("csv2sl.jl")
+	include("sumr.jl")
 	include("oja.jl")
 	include("ccipca.jl")
 	include("gd.jl")
