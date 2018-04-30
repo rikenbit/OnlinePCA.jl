@@ -3,7 +3,7 @@ module OnlinePCA
 	using ProgressMeter:
 		Progress, next!
 	using ArgParse:
-		@add_arg_table
+		ArgParseSettings, @add_arg_table
 	using StatsBase:
 		percentile
 	using DataFrames:
