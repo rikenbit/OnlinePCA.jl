@@ -13,8 +13,9 @@ module OnlinePCA
 	using Distributions:
 		Gamma, ccdf, Chisq
 
-	export csv2sl, sumr, oja, ccipca, gd, rsgd, svrg, rsvrg
+	export init, WλV, RecError, ∇f, ∇fn, sym, Pw, parse_commandline, csv2sl, sumr, oja, ccipca, gd, rsgd, svrg, rsvrg
 
+	include("Utils.jl")
 	include("csv2sl.jl")
 	include("sumr.jl")
 	include("oja.jl")
