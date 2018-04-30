@@ -52,8 +52,7 @@ sumr(slfile=tmp*"/Data.dat", outdir=tmp)
 ## Setting for plot
 ```julia
 using PlotlyJS
-using Blink
-Blink.AtomShell.install()
+using DataFrames
 
 function subplots(respca, group)
 	# data frame
