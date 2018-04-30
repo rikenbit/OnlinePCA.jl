@@ -68,7 +68,8 @@ function gd(;input="", output=".", logscale=true, pseudocount=1, meanlist="", li
                     W .= W .+ v
                 # GD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇f(W, input, D, N, M)
+                    grad = ∇f(W, input, D * Float32(stepsize), N, M)
+                    grad = grad / Float32(stepsize)
                     v .= v .+ grad .* grad
                     W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
                 else

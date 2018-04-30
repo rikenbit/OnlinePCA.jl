@@ -68,7 +68,8 @@ function oja(;input="", output=".", logscale=true, pseudocount=1, meanlist="", l
                     W .= W .+ v
                 # SGD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇fn(W, x, D, M)
+                    grad = ∇fn(W, x, D * Float32(stepsize), M)
+                    grad = grad / Float32(stepsize)
                     v .= v .+ grad .* grad
                     W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
                 else

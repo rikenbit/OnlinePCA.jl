@@ -1,7 +1,19 @@
 module OnlinePCA
 
+	using ProgressMeter:
+		Progress, next!
+	using ArgParse:
+		@add_arg_table
+	using StatsBase:
+		percentile
+	using DataFrames:
+		DataFrame
+	using GLM:
+		glm, coef, IdentityLink, @formula
+	using Distributions:
+		Gamma, ccdf, Chisq
+
 	export csv2sl, sumr, oja, ccipca, gd, rsgd, svrg, rsvrg
-	import ProgressMeter, ArgParse, StatsBase, DataFrames, GLM, Distributions
 
 	include("oja.jl")
 	include("ccipca.jl")

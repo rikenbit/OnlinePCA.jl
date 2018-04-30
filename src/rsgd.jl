@@ -68,7 +68,8 @@ function rsgd(;input="", output=".", logscale=true, pseudocount=1, meanlist="", 
                     W .= W .+ v
                 # RSGD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = Pw(∇fn(W, x, D, M), W)
+                    grad = Pw(∇fn(W, x, D * Float32(stepsize), M), W)
+                    grad = grad / Float32(stepsize)
                     v .= v .+ grad .* grad
                     W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
                 else

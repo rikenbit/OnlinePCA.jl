@@ -1,9 +1,15 @@
-# using ProgressMeter
-# using ArgParse
-# using StatsBase
-# using DataFrames
-# using GLM
-# using Distributions
+using ProgressMeter:
+    Progress, next!
+using ArgParse:
+    @add_arg_table
+using StatsBase:
+    percentile
+using DataFrames:
+    DataFrame
+using GLM:
+    glm, coef, IdentityLink, @formula
+using Distributions:
+    Gamma, ccdf, Chisq
 
 function init(slfile)
     N = 0

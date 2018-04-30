@@ -71,7 +71,8 @@ function svrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", 
                     W .= W .+ v
                 # SVRG × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇fn(W, x, D, M) .- ∇fn(Ws, x, D, M) .+ u
+                    grad = ∇fn(W, x, D * Float32(stepsize), M) .- ∇fn(Ws, x, D * Float32(stepsize), M) .+ u
+                    grad = grad / Float32(stepsize)
                     v .= v .+ grad .* grad
                     W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
                 else

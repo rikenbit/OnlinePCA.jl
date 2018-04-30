@@ -70,7 +70,8 @@ function rsvrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="",
                     W .= W .+ v
                 # RSVRG × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = Pw(∇fn(W, x, D, M), W) .- Pw(∇fn(Ws, x, D, M), Ws) .+ u
+                    grad = Pw(∇fn(W, x, D * Float32(stepsize), M), W) .- Pw(∇fn(Ws, x, D * Float32(stepsize), M), Ws) .+ u
+                    grad = grad / Float32(stepsize)
                     v .= v .+ grad .* grad
                     W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
                 else
