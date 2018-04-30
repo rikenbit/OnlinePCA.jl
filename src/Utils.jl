@@ -1,16 +1,14 @@
-using ProgressMeter
-using ArgParse
-using HDF5
-
-# 固有値と逆側の固有ベクトルを返す
+# Eigen value, Loading, Scores
 function WλV(W, input, dim)
     V = zeros(Float32, 0)
+    Scores = zeros(Float32, 0)
     N = 0
     M = 0
     open(input) do file
-        N = read(file, Int64)  # no.gene
-        M = read(file, Int64) # no.cell
+        N = read(file, Int64)  # Number of Features (e.g. Genes)
+        M = read(file, Int64) # Number of samples (e.g. Cells)
         V = zeros(Float32, N, dim)
+        Scores = zeros(Float32, M, dim)
         for n = 1:N
             # Data Import
             x = deserialize(file)
@@ -22,20 +20,24 @@ function WλV(W, input, dim)
     for n = 1:dim
         V[:, n] .= V[:, n] ./ λ[n]
     end
-    λ .= λ .* λ ./ N
-    # 多分
-    # λ .= 1 ./ (λ .* N)
-    # が正解
+
+    # λ .= λ .* λ ./ N
+    λ .= 1 ./ (M .* λ)
+
     # Sort by Eigen value
     idx = sortperm(λ, rev=true)
     W .= W[:, idx]
     λ .= λ[idx]
     V .= V[:, idx]
+    for n = 1:dim
+        Scores[:, n] .= (M .* λ[n])^(3/2) .* W[:, n]
+    end
+
     # Return
-    return W, λ, V
+    return W, λ, V, Scores
 end
 
-# 再構築誤差
+# Reconstuction Error
 function RecError(W, input)
     N = 0
     M = 0
@@ -45,8 +47,8 @@ function RecError(W, input)
     AllVar = 0.0
     ARE = 0.0
     open(input) do file
-        N = read(file, Int64)  # no.gene
-        M = read(file, Int64) # no.cell
+        N = read(file, Int64)  # Number of Features (e.g. Genes)
+        M = read(file, Int64) # Number of samples (e.g. Cells)
         for n = 1:N
             # Data Import
             x = deserialize(file)
@@ -63,12 +65,12 @@ function RecError(W, input)
     return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "AllVar"=>AllVar]
 end
 
-# 全勾配
+# Full Gradient
 function ∇f(W, input, D, N, M)
     tmpW = W
     open(input) do file
-        N = read(file, Int64) # no. gene
-        M = read(file, Int64) # no. cell
+        N = read(file, Int64) # Number of Features (e.g. Genes)
+        M = read(file, Int64) # Number of samples (e.g. Cells)
         for n = 1:N
             # Data Import
             x = deserialize(file)
@@ -79,7 +81,7 @@ function ∇f(W, input, D, N, M)
     end
 end
 
-# 確率勾配
+# Stochastic Gradient
 function ∇fn(W, x, D, M)
     return Float32(2 / M) * x * (x' * W * D)
 end
@@ -89,12 +91,12 @@ function sym(Y)
     return (Y + Y') / 2
 end
 
-# リーマン勾配
+# Riemannian Gradient
 function Pw(Z, W)
     return Z - W * sym(W' * Z)
 end
 
-# オプション設定
+# Options
 function parse_commandline()
     s = ArgParseSettings()
 
@@ -105,6 +107,27 @@ function parse_commandline()
         "--output", "-o"
             help = "output file"
             default = "."
+            required = false
+        "--logscale"
+            help = "whether the value are converted to log-scale"
+            arg_type = Bool
+            default = true
+        "--pseudocount", "-p"
+            help = "log10(exp + pseudocount)"
+            arg_type = Float64
+            default = 1.0
+        "--meanlist", "-m"
+            help = "mean vector of each gene"
+            default = ""
+            required = false
+        "--liblist"
+            help = "library size of each cell"
+            default = ""
+            required = false
+        "--cellmasklist"
+            help = "Cells to be remove"
+            default = ""
+            required = false
         "--dim", "-d"
             help = "dimention of PCA"
             arg_type = Int
