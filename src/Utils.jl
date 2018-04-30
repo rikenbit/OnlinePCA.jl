@@ -1,3 +1,20 @@
+# using ProgressMeter
+# using ArgParse
+# using StatsBase
+# using DataFrames
+# using GLM
+# using Distributions
+
+function init(slfile)
+    N = 0
+    M = 0
+    open(slfile) do file
+        N = read(file, Int64)
+        M = read(file, Int64)
+    end
+    return N, M
+end
+
 # Eigen value, Loading, Scores
 function WλV(W, input, dim)
     V = zeros(Float32, 0)

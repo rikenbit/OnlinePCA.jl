@@ -26,7 +26,7 @@ julia> Pkg.add("OnlinePCA")
 julia> Pkg.clone("git://github.com/rikenbit/OnlinePCA.jl.git")
 ```
 
-# Usage
+# Basic API usage
 ## SGD-PCA
 ```julia
 using OnlinePCA, Gadfly
@@ -53,4 +53,14 @@ using OnlinePCA, Gadfly
 ## RSVRG-PCA
 ```julia
 
+```
+
+## CCIPCA
+```julia
+
+```
+
+# Command line usage
+```bash
+julia bin/oja.jl
 ```

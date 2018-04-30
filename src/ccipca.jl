@@ -1,11 +1,10 @@
 include("Utils.jl")
 
-function rsvrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", liblist="", cellmasklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=0.00000001, logfile=false)
+function ccipca(;input="", output=".", logscale=true, pseudocount=1, meanlist="", liblist="", cellmasklist="", dim=3, stepsize=0.1, numepoch=5, logfile=false)
     # Initialization
     N, M = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
-    Ws = zeros(Float32, M, dim) # Eigen vectors
-    v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
+    X = zeros(Float32, M, dim+1) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
     for i=1:dim
         W[i,i] = 1
@@ -35,54 +34,51 @@ function rsvrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="",
     # progress
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * Float32(stepsize), N, M)
-        Ws = W
         open(input) do file
             N = read(file, Int64)
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                x = deserialize(file)
+                X[:, 1] = deserialize(file)
                 if logscale
-                    x = log10.(x + pseudocount)
+                    X[:, 1] = log10.(X[:, 1] + pseudocount)
                 end
                 if cellmasklist != ""
-                    x = x[cellmaskvec]
+                    X[:, 1] = X[:, 1][cellmaskvec]
                 end
                 if (meanlist != "") && (liblist != "")
-                    x = (x - meanvec[n, 1]) ./ libvec
+                    X[:, 1] = (X[:, 1] - meanvec[n, 1]) ./ libvec
                 end
                 if (meanlist != "") && (liblist == "")
-                    x = x - meanvec[n, 1]
+                    X[:, 1] = X[:, 1] - meanvec[n, 1]
                 end
                 if (meanlist == "") && (liblist != "")
-                    x = x ./ libvec
+                    X[:, 1] = X[:, 1] ./ libvec
                 end
-                # RSVRG × Robbins-Monro
-                if scheduling == "robbins-monro"
-                    W .= W .+ Pw(∇fn(W, x, D * Float32(stepsize)/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * Float32(stepsize)/(N*(s-1)+n), M), Ws) .+ u
-                # RSVRG × Momentum
-                elseif scheduling == "momentum"
-                    v .= g .* v .+ Pw(∇fn(W, x, D * Float32(stepsize), M), W) .- Pw(∇fn(Ws, x, D * Float32(stepsize), M), Ws) .+ u
-                # RSVRG × NAG
-                elseif scheduling == "nag"
-                    v = g .* v + Pw(∇fn(W - g .* v, x, D * Float32(stepsize), M), W - g .* v) .- Pw(∇fn(Ws, x, D * Float32(stepsize), M), Ws) .+ u
-                    W .= W .+ v
-                # RSVRG × Adagrad
-                elseif scheduling == "adagrad"
-                    grad = Pw(∇fn(W, x, D, M), W) .- Pw(∇fn(Ws, x, D, M), Ws) .+ u
-                    v .= v .+ grad .* grad
-                    W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
-                else
-                    error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
+
+                k = N * (s - 1) + n
+                for i = 1:min(dim, k)
+                    if i == k
+                        W[:, i] = X[:, i]
+                    else
+                        w1 = (k - 1 - stepsize) / k
+                        w2 = (1 + stepsize) / k
+                        Wi = W[:, i]
+                        Xi = X[:, i]
+                        # Eigen vector update
+                        W[:, i] = w1 * Wi + w2 * Xi * dot(Xi, Wi/norm(Wi))
+                        # Data for calculating i+1 th Eigen vector
+                        Wi = W[:, i]
+                        Wnorm = Wi / norm(Wi)
+                        X[:, i+1] = Xi - dot(Xi, Wnorm) * Wnorm
+                    end
                 end
+
                 # NaN
                 if any(isnan, W)
                     error("NaN values are generated. Select other stepsize")
                 end
 
-                # Retraction
-                W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if typeof(logfile) == String
                      if(mod((N*(s-1)+n), 1000) == 0)
