@@ -1,0 +1,36 @@
+using OnlinePCA
+
+function main()
+    parsed_args = parse_commandline()
+    println("Parsed args:")
+    for (arg,val) in parsed_args
+        println("  $arg  =>  $val")
+    end
+
+    out = rsgd(input=parsed_args["input"],
+        output=parsed_args["output"],
+        logscale=parsed_args["logscale"],
+        pseudocount=parsed_args["pseudocount"],
+        meanlist=parsed_args["meanlist"],
+        liblist=parsed_args["liblist"],
+        cellmasklist=parsed_args["cellmasklist"],
+        dim=parsed_args["dim"],
+        stepsize=parsed_args["stepsize"],
+        numepoch=parsed_args["numepoch"],
+        scheduling=parsed_args["scheduling"],
+        g=parsed_args["g"],
+        epsilon=parsed_args["epsilon"],
+        logfile=parsed_args["logfile"])
+
+    writecsv(parsed_args["output"]*"/Eigen_vectors.csv", out[1])
+    writecsv(parsed_args["output"]*"/Eigen_values.csv", out[2])
+    writecsv(parsed_args["output"]*"/Loadings.csv", out[3])
+    writecsv(parsed_args["output"]*"/Scores.csv", out[4])
+
+    touch(parsed_args["output"]*"/Eigen_vectors.csv")
+    touch(parsed_args["output"]*"/Eigen_values.csv")
+    touch(parsed_args["output"]*"/Loadings.csv")
+    touch(parsed_args["output"]*"/Scores.csv")
+end
+
+main()

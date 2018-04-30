@@ -1,0 +1,30 @@
+using OnlinePCA
+
+function main()
+    parsed_args = parse_commandline()
+    println("Parsed args:")
+    for (arg,val) in parsed_args
+        println("  $arg  =>  $val")
+    end
+
+    csv2sl(csvfile=parsed_args["csvfile"],
+        slfile=parsed_args["slfile"])
+end
+
+# Options
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--csvfile", "-c"
+            help = "input file (csv)"
+            required = true
+        "--slfile", "-s"
+            help = "output file (serialized)"
+            required = true
+    end
+
+    return parse_args(s)
+end
+
+main()

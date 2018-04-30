@@ -1,0 +1,34 @@
+using OnlinePCA
+
+function main()
+    parsed_args = parse_commandline()
+    println("Parsed args:")
+    for (arg,val) in parsed_args
+        println("  $arg  =>  $val")
+    end
+
+    sumr(slfile=parsed_args["slfile"], outdir=parsed_args["outdir"], pseudocount=parsed_args["pseudocount"])
+end
+
+# Options
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--slfile", "-s"
+            help = "input file (serialized)"
+            required = true
+        "--outdir", "-o"
+            help = "output directory"
+            default = "."
+            required = false
+        "--pseudocount", "-p"
+            help = "log10(exp + pseudocount)"
+            arg_type = Float64
+            default = 1.0
+    end
+
+    return parse_args(s)
+end
+
+main()
