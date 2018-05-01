@@ -24,5 +24,4 @@ module OnlinePCA
 	include("rsgd.jl")
 	include("svrg.jl")
 	include("rsvrg.jl")
-
 end
