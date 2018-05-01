@@ -39,13 +39,6 @@ sumr(slfile=tmp*"/Data.dat", outdir=tmp)
 @test eval(parse("isfile(\""*tmp*"/Feature_Means.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Feature_NoZeros.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Feature_Vars.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_Pvals.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a0.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a1.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_afits.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_useForFit.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_varFitRatios.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_DF.csv"*"\")")) == true
 
 rm(tmp*"/Sample_NoCounts.csv")
 rm(tmp*"/Feature_CV2s.csv")
@@ -53,13 +46,6 @@ rm(tmp*"/Feature_LogMeans.csv")
 rm(tmp*"/Feature_Means.csv")
 rm(tmp*"/Feature_NoZeros.csv")
 rm(tmp*"/Feature_Vars.csv")
-rm(tmp*"/HVG_Pvals.csv")
-rm(tmp*"/HVG_a0.csv")
-rm(tmp*"/HVG_a1.csv")
-rm(tmp*"/HVG_afits.csv")
-rm(tmp*"/HVG_useForFit.csv")
-rm(tmp*"/HVG_varFitRatios.csv")
-rm(tmp*"/HVG_DF.csv")
 
 #
 # Summary of data (Command line)
@@ -74,13 +60,51 @@ eval(parse(sumrcom))
 @test eval(parse("isfile(\""*tmp*"/Feature_Means.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Feature_NoZeros.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Feature_Vars.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_Pvals.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a0.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a1.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_afits.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_useForFit.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_varFitRatios.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_DF.csv"*"\")")) == true
+
+
+#
+# Filtering (Julia API)
+#
+
+#
+# Filtering (Command line)
+#
+
+# #
+# # HVG (Julia API)
+# #
+
+# @test eval(parse("isfile(\""*tmp*"/HVG_pvals.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_a0.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_a1.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_afits.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_useForFit.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_varFitRatios.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_df.csv"*"\")")) == true
+
+# rm(tmp*"/HVG_pvals.csv")
+# rm(tmp*"/HVG_a0.csv")
+# rm(tmp*"/HVG_a1.csv")
+# rm(tmp*"/HVG_afits.csv")
+# rm(tmp*"/HVG_useForFit.csv")
+# rm(tmp*"/HVG_varFitRatios.csv")
+# rm(tmp*"/HVG_DF.csv")
+
+
+# #
+# # HVG (Command line)
+# #
+
+
+# @test eval(parse("isfile(\""*tmp*"/HVG_pvals.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_a0.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_a1.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_afits.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_useForFit.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_varFitRatios.csv"*"\")")) == true
+# @test eval(parse("isfile(\""*tmp*"/HVG_DF.csv"*"\")")) == true
+
+
 
 #
 # oja (Julia API)

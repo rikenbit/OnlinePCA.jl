@@ -66,12 +66,12 @@ function sumr(;slfile="", outdir=".", pseudocount=1.0)
     # Initialization
     N, M = init(slfile)
 
-    # 1 / 2 : Sum of counts in each cell
-    println("1 / 2 : Sum of counts in each cell are calculated...")
+    # 1 / 2 : Sum of counts in each column
+    println("1 / 2 : Sum of counts in each column are calculated...")
     Sample_NoCounts = nocounts(slfile, N, M)
 
-    # 2 / 2 : Gene-wise statistics
-    println("2 / 2 : Gene-wise statistics are calculated...")
+    # 2 / 2 : Row-wise statistics
+    println("2 / 2 : Row-wise statistics are calculated...")
     Feature_Means, Feature_LogMeans, Feature_Vars, Feature_CV2s, Feature_NoZeros = stats(slfile, N, M, pseudocount)
 
     # Save

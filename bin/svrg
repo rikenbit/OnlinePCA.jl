@@ -26,7 +26,7 @@ function parse_commandline()
             help = "mean vector of each row"
             default = ""
             required = false
-        "--colliblist"
+        "--colsumlist"
             help = "Sum of counts of each column"
             default = ""
             required = false
@@ -79,7 +79,7 @@ function main()
         logscale=parsed_args["logscale"],
         pseudocount=parsed_args["pseudocount"],
         rowmeanlist=parsed_args["rowmeanlist"],
-        colliblist=parsed_args["colliblist"],
+        colsumlist=parsed_args["colsumlist"],
         masklist=parsed_args["masklist"],
         dim=parsed_args["dim"],
         stepsize=parsed_args["stepsize"],
