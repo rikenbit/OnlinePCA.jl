@@ -13,11 +13,15 @@ module OnlinePCA
 	using Distributions:
 		Gamma, ccdf, Chisq
 
-	export init, WλV, RecError, ∇f, ∇fn, sym, Pw, parse_commandline, csv2sl, sumr, oja, ccipca, gd, rsgd, svrg, rsvrg
+	# initとか消せるか確認
+
+	export init, WλV, RecError, ∇f, ∇fn, sym, Pw, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
 
 	include("Utils.jl")
 	include("csv2sl.jl")
 	include("sumr.jl")
+	include("filtering.jl")
+	include("hvg.jl")
 	include("oja.jl")
 	include("ccipca.jl")
 	include("gd.jl")

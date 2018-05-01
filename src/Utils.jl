@@ -1,16 +1,3 @@
-using ProgressMeter:
-    Progress, next!
-using ArgParse:
-    ArgParseSettings, parse_args, @add_arg_table
-using StatsBase:
-    percentile
-using DataFrames:
-    DataFrame
-using GLM:
-    glm, coef, IdentityLink, @formula
-using Distributions:
-    Gamma, ccdf, Chisq
-
 function init(slfile)
     N = 0
     M = 0
@@ -117,68 +104,4 @@ end
 # Riemannian Gradient
 function Pw(Z, W)
     return Z - W * sym(W' * Z)
-end
-
-# Options
-function parse_commandline()
-    s = ArgParseSettings()
-
-    @add_arg_table s begin
-        "--input", "-i"
-            help = "input file"
-            required = true
-        "--output", "-o"
-            help = "output file"
-            default = "."
-            required = false
-        "--logscale"
-            help = "whether the value are converted to log-scale"
-            arg_type = Bool
-            default = true
-        "--pseudocount", "-p"
-            help = "log10(exp + pseudocount)"
-            arg_type = Float64
-            default = 1.0
-        "--meanlist", "-m"
-            help = "mean vector of each gene"
-            default = ""
-            required = false
-        "--liblist"
-            help = "library size of each cell"
-            default = ""
-            required = false
-        "--cellmasklist"
-            help = "Cells to be remove"
-            default = ""
-            required = false
-        "--dim", "-d"
-            help = "dimention of PCA"
-            arg_type = Int
-            default = 3
-        "--stepsize", "-s"
-            help = "stepsize of PCA"
-            arg_type = Float64
-            default = 0.1
-        "--numepoch", "-e"
-            help = "numepoch of PCA"
-            arg_type = Int
-            default = 5
-        "--scheduling"
-            help = "Learning Rate Scheduling"
-            arg_type = String
-            default = "robbins-monro"
-        "-g"
-            help = "Ratio of non-SGD gradient"
-            arg_type = Float64
-            default = 0.9
-        "--epsilon"
-            help = "a small number for avoiding zero division"
-            arg_type = Float64
-            default = 0.00000001
-        "--logfile", "-l"
-            help = "saving log file"
-            default = false
-    end
-
-    return parse_args(s)
 end

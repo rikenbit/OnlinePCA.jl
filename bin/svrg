@@ -1,5 +1,72 @@
 using OnlinePCA
+using ArgParse:
+    ArgParseSettings, parse_args, @add_arg_table
 
+# options
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--input", "-i"
+            help = "input file"
+            required = true
+        "--output", "-o"
+            help = "output file"
+            default = "."
+            required = false
+        "--logscale"
+            help = "whether the value are converted to log-scale"
+            arg_type = Bool
+            default = true
+        "--pseudocount", "-p"
+            help = "log10(exp + pseudocount)"
+            arg_type = Float64
+            default = 1.0
+        "--rowmeanlist", "-m"
+            help = "mean vector of each row"
+            default = ""
+            required = false
+        "--colliblist"
+            help = "Sum of counts of each column"
+            default = ""
+            required = false
+        "--masklist"
+            help = "Columns to be remove"
+            default = ""
+            required = false
+        "--dim", "-d"
+            help = "dimention of PCA"
+            arg_type = Int
+            default = 3
+        "--stepsize", "-s"
+            help = "stepsize of PCA"
+            arg_type = Float64
+            default = 0.1
+        "--numepoch", "-e"
+            help = "numepoch of PCA"
+            arg_type = Int
+            default = 5
+        "--scheduling"
+            help = "Learning Rate Scheduling"
+            arg_type = String
+            default = "robbins-monro"
+        "-g"
+            help = "Ratio of non-SGD gradient"
+            arg_type = Float64
+            default = 0.9
+        "--epsilon"
+            help = "a small number for avoiding zero division"
+            arg_type = Float64
+            default = 0.00000001
+        "--logfile", "-l"
+            help = "saving log file"
+            default = false
+    end
+
+    return parse_args(s)
+end
+
+# main
 function main()
     parsed_args = parse_commandline()
     println("Parsed args:")
@@ -11,9 +78,9 @@ function main()
         output=parsed_args["output"],
         logscale=parsed_args["logscale"],
         pseudocount=parsed_args["pseudocount"],
-        meanlist=parsed_args["meanlist"],
-        liblist=parsed_args["liblist"],
-        cellmasklist=parsed_args["cellmasklist"],
+        rowmeanlist=parsed_args["rowmeanlist"],
+        colliblist=parsed_args["colliblist"],
+        masklist=parsed_args["masklist"],
         dim=parsed_args["dim"],
         stepsize=parsed_args["stepsize"],
         numepoch=parsed_args["numepoch"],

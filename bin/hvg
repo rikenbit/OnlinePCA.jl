@@ -10,14 +10,19 @@ function parse_commandline()
         "--slfile", "-s"
             help = "input file (serialized)"
             required = true
+        "--rowmeanlist", "-m"
+            help = "mean vector of each row"
+            required = true
+        "--rowvarlist", "-v"
+            help = "var vector of each row"
+            required = true
+        "--rowcv2list", "-c"
+            help = "cv2 vector of each row"
+            required = true
         "--outdir", "-o"
             help = "output directory"
             default = "."
             required = false
-        "--pseudocount", "-p"
-            help = "log10(exp + pseudocount)"
-            arg_type = Float64
-            default = 1.0
     end
 
     return parse_args(s)
@@ -31,7 +36,7 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    sumr(slfile=parsed_args["slfile"], outdir=parsed_args["outdir"], pseudocount=parsed_args["pseudocount"])
+    hvg(slfile=parsed_args["slfile"], rowmeanlist=parsed_args["rowmeanlist"], rowvarlist=parsed_args["rowvarlist"], rowcv2list=parsed_args["rowcv2list"], outdir=parsed_args["outdir"])
 end
 
 main()

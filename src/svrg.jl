@@ -1,5 +1,5 @@
 """
-    svrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", liblist="", cellmasklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=0.00000001, logfile=false)
+    svrg(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=0.00000001, logfile=false)
 
 Online PCA solved by variance-reduced stochastic gradient descent method, also known as VR-PCA.
 
@@ -13,7 +13,7 @@ Reference
 ---------
 - SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 """
-function svrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", liblist="", cellmasklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=0.00000001, logfile=false)
+function svrg(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=0.00000001, logfile=false)
     # Initialization
     N, M = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
@@ -28,14 +28,14 @@ function svrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", 
     meanvec = zeros(Float32, N, 1)
     libvec = zeros(Float32, M, 1)
     cellmaskvec = zeros(Float32, M, 1)
-    if meanlist != ""
-        meanvec = readcsv(meanlist, Float32)
+    if rowmeanlist != ""
+        meanvec = readcsv(rowmeanlist, Float32)
     end
-    if liblist != ""
-        libvec = readcsv(liblist, Float32)
+    if colsumlist != ""
+        libvec = readcsv(colsumlist, Float32)
     end
-    if cellmasklist != ""
-        cellmaskvec = readcsv(cellmasklist, Float32)
+    if masklist != ""
+        cellmaskvec = readcsv(masklist, Float32)
     end
 
     # directory for log file
@@ -59,16 +59,16 @@ function svrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", 
                 if logscale
                     x = log10.(x + pseudocount)
                 end
-                if cellmasklist != ""
+                if masklist != ""
                     x = x[cellmaskvec]
                 end
-                if (meanlist != "") && (liblist != "")
+                if (rowmeanlist != "") && (colsumlist != "")
                     x = (x - meanvec[n, 1]) ./ libvec
                 end
-                if (meanlist != "") && (liblist == "")
+                if (rowmeanlist != "") && (colsumlist == "")
                     x = x - meanvec[n, 1]
                 end
-                if (meanlist == "") && (liblist != "")
+                if (rowmeanlist == "") && (colsumlist != "")
                     x = x ./ libvec
                 end
                 # SVRG × Robbins-Monro

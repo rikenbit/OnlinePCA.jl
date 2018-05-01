@@ -10,14 +10,16 @@ function parse_commandline()
         "--slfile", "-s"
             help = "input file (serialized)"
             required = true
+        "--featurelist", "-g"
+            help = "Feature list for filtering"
+            required = true
+        "--thr", "-t"
+            help = "Threshold for filtering"
+            required = true
         "--outdir", "-o"
             help = "output directory"
             default = "."
             required = false
-        "--pseudocount", "-p"
-            help = "log10(exp + pseudocount)"
-            arg_type = Float64
-            default = 1.0
     end
 
     return parse_args(s)
@@ -31,7 +33,7 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    sumr(slfile=parsed_args["slfile"], outdir=parsed_args["outdir"], pseudocount=parsed_args["pseudocount"])
+    filter(slfile=parsed_args["slfile"], featurelist=parsed_args["featurelist"], thr=parsed_args["thr"], outdir=parsed_args["outdir"])
 end
 
 main()
