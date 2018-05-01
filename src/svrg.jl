@@ -1,3 +1,18 @@
+"""
+    svrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", liblist="", cellmasklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=0.00000001, logfile=false)
+
+Online PCA solved by variance-reduced stochastic gradient descent method, also known as VR-PCA.
+
+Arguments
+---------
+- `W` : Eigen vectors of covariance matrix (No. of columns of the matrix × dim)
+- `λ` : Eigen values (dim × dim)
+- `V` : Loading vectors of covariance matrix (No. of rows of the matrix × dim)
+
+Reference
+---------
+- SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
+"""
 function svrg(;input="", output=".", logscale=true, pseudocount=1, meanlist="", liblist="", cellmasklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=0.00000001, logfile=false)
     # Initialization
     N, M = init(input) # No.gene, No.cell

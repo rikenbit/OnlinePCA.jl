@@ -1,3 +1,14 @@
+"""
+    csv2sl(;csvfile="", slfile="")
+
+Convert a CSV file to Julia Binary file.
+
+`csvfile` and `slfile` are specified such as Data.csv and Data.dat, respectively.
+
+Reference
+---------
+- [Serialization・The Julia Language](https://docs.julialang.org/en/latest/stdlib/Serialization/)
+"""
 function csv2sl(;csvfile="", slfile="")
     open(slfile, "w") do file
         global n_genes = 0

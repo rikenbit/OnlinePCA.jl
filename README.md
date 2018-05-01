@@ -2,7 +2,7 @@
 Online Principal Component Analysis
 
 # Description
-OnlinePCA.jl has some preprocess functions of CSV and PCA functions for extreamly large scale matrix.
+OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, performs some online-PCA functions for extreamly large scale matrix.
 
 # Algorithms
 - SGD-PCA（Oja's method) : [Erkki Oja et. al., 1985](https://www.sciencedirect.com/science/article/pii/0022247X85901313), [Erkki Oja, 1992](https://www.sciencedirect.com/science/article/pii/S0893608005800899)
@@ -17,6 +17,9 @@ OnlinePCA.jl has some preprocess functions of CSV and PCA functions for extreaml
 - Momentum : [Ning Qian, 1999](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.57.5612&rep=rep1&type=pdf)
 - Nesterov's Accelerated Gradient Descent（NAG） : [Nesterov, 1983](https://scholar.google.com/scholar?cluster=9343343034975135646&hl=en&oi=scholarr)
 - ADAGRAD : [John Duchi, et. al., 2011](http://www.jmlr.org/papers/volume12/duchi11a/duchi11a.pdf)
+
+### Identifying Highly Variable Genes
+- [Highly Variable Genes](http://pklab.med.harvard.edu/scw2014/subpop_tutorial.html)
 
 # Installation
 <!-- ```julia
