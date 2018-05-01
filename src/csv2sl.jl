@@ -1,5 +1,3 @@
-include("Utils.jl")
-
 function csv2sl(;csvfile="", slfile="")
     open(slfile, "w") do file
         global n_genes = 0

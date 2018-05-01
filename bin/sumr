@@ -1,16 +1,6 @@
 using OnlinePCA
-using ProgressMeter:
-    Progress, next!
 using ArgParse:
     ArgParseSettings, parse_args, @add_arg_table
-using StatsBase:
-    percentile
-using DataFrames:
-    DataFrame
-using GLM:
-    glm, coef, IdentityLink, @formula
-using Distributions:
-    Gamma, ccdf, Chisq
 
 function main()
     parsed_args = parse_commandline()

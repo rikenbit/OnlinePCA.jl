@@ -1,5 +1,3 @@
-include("Utils.jl")
-
 function nocounts(slfile, N, M)
     nc = zeros(Int64, M)
     progress = Progress(N)

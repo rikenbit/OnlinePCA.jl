@@ -1,5 +1,3 @@
-include("Utils.jl")
-
 function ccipca(;input="", output=".", logscale=true, pseudocount=1, meanlist="", liblist="", cellmasklist="", dim=3, stepsize=0.1, numepoch=5, logfile=false)
     # Initialization
     N, M = init(input) # No.gene, No.cell
