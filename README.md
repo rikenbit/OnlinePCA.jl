@@ -1,10 +1,10 @@
 # OnlinePCA.jl
 Online Principal Component Analysis
 
-# Description
+## Description
 OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, performs some online-PCA functions for extreamly large scale matrix.
 
-# Algorithms
+## Algorithms
 - SGD-PCA（Oja's method) : [Erkki Oja et. al., 1985](https://www.sciencedirect.com/science/article/pii/0022247X85901313), [Erkki Oja, 1992](https://www.sciencedirect.com/science/article/pii/S0893608005800899)
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 - GD-PCA : None (Just for comparision with other methods)
@@ -12,16 +12,16 @@ OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, 
 - SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 - RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
 
-# Learning Parameter Scheduling
+## Learning Parameter Scheduling
 - Robbins-Monro : [Herbert Robbins, et. al., 1951](https://projecteuclid.org/download/pdf_1/euclid.aoms/1177729586)
 - Momentum : [Ning Qian, 1999](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.57.5612&rep=rep1&type=pdf)
 - Nesterov's Accelerated Gradient Descent（NAG） : [Nesterov, 1983](https://scholar.google.com/scholar?cluster=9343343034975135646&hl=en&oi=scholarr)
 - ADAGRAD : [John Duchi, et. al., 2011](http://www.jmlr.org/papers/volume12/duchi11a/duchi11a.pdf)
 
-### Identifying Highly Variable Genes
+## Identifying Highly Variable Genes
 - [Highly Variable Genes](http://pklab.med.harvard.edu/scw2014/subpop_tutorial.html)
 
-# Installation
+## Installation
 <!-- ```julia
 julia> Pkg.add("OnlinePCA")
 ```
@@ -30,9 +30,9 @@ julia> Pkg.add("OnlinePCA")
 Pkg.clone("git://github.com/rikenbit/OnlinePCA.jl.git")
 ```
 
-# Basic API usage
+## Basic API usage
 
-## Preprocess of CSV
+### Preprocess of CSV
 ```julia
 using OnlinePCA
 using Distributions
@@ -52,7 +52,7 @@ csv2sl(csvfile=tmp*"/Data.csv", slfile=tmp*"/Data.dat")
 sumr(slfile=tmp*"/Data.dat", outdir=tmp)
 ```
 
-## Setting for plot
+### Setting for plot
 ```julia
 using PlotlyJS
 using DataFrames
@@ -85,7 +85,7 @@ end
 group=vcat(repeat(["group1"],inner=33), repeat(["group2"],inner=33), repeat(["group3"],inner=33))
 ```
 
-## Oja's method
+### Oja's method
 ```julia
 out_oja1 = oja(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=10, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
 out_oja2 = oja(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.01, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
@@ -99,7 +99,7 @@ subplots(out_oja4, group) # Bottom, Right
 ```
 ![Oja](./docs/src/figure/oja.png)
 
-## CCIPCA
+### CCIPCA
 ```julia
 out_ccipca1 = ccipca(input=tmp*"/Data.dat", dim=3, stepsize=1, numepoch=1, meanlist=tmp*"/Feature_LogMeans.csv")
 
@@ -107,7 +107,7 @@ subplots(out_ccipca1, group)
 ```
 ![CCIPCA](./docs/src/figure/ccipca.png)
 
-## GD-PCA
+### GD-PCA
 ```julia
 out_gd1 = gd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.00001, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
 out_gd2 = gd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000001, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
@@ -121,7 +121,7 @@ subplots(out_gd4, group) # Bottom, Right
 ```
 ![GD-PCA](./docs/src/figure/gd.png)
 
-## RSGD-PCA
+### RSGD-PCA
 ```julia
 out_rsgd1 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=10, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
 out_rsgd2 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.001, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
@@ -135,7 +135,7 @@ subplots(out_rsgd4, group) # Bottom, Right
 ```
 ![RSGD-PCA](./docs/src/figure/rsgd.png)
 
-## SVRG-PCA
+### SVRG-PCA
 ```julia
 out_svrg1 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.00001, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
 out_svrg2 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.00001, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
@@ -149,7 +149,7 @@ subplots(out_svrg4, group) # Bottom, Right
 ```
 ![SVRG-PCA](./docs/src/figure/svrg.png)
 
-## RSVRG-PCA
+### RSVRG-PCA
 ```julia
 out_rsvrg1 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000001, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
 out_rsvrg2 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000001, numepoch=10, meanlist=tmp*"/Feature_LogMeans.csv")
@@ -163,7 +163,7 @@ subplots(out_rsvrg4, group) # Bottom, Right
 ```
 ![RSVRG-PCA](./docs/src/figure/rsvrg.png)
 
-# Command line usage
+## Command line usage
 All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.
 
 ```bash
