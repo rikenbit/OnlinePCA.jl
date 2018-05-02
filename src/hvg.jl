@@ -28,6 +28,9 @@ Reference
 function hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
     # Initialization
     N, M = init(slfile)
+    rowmeanlist = readcsv(rowmeanlist)
+    rowvarlist = readcsv(rowvarlist)
+    rowcv2list = readcsv(rowcv2list)
 
     useForFit = []
     pm = []
