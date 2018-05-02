@@ -64,12 +64,20 @@ eval(parse(sumrcom))
 #
 # Filtering (Julia API)
 #
+filtering(slfile=tmp*"/Data.dat", featurelist=tmp*"/Feature_Means.csv", thr=10, outdir=tmp)
 
-# filtering(slfile=tmp*"/Data.dat", featurelist=tmp*"/Feature_Means.csv", thr=10, outdir=tmp)
+@test eval(parse("isfile(\""*tmp*"/filtered.dat"*"\")")) == true
+
+rm(tmp*"/filtered.dat")
 
 #
 # Filtering (Command line)
 #
+filteringpath = Pkg.dir() * "/OnlinePCA/bin/filtering"
+filteringcom = "run(`julia " * filteringpath * " --slfile " * tmp * "/Data.dat --featurelist " * tmp*"/Feature_Means.csv --thr 10" * " --outdir " * tmp * "`)"
+eval(parse(filteringcom))
+
+@test eval(parse("isfile(\""*tmp*"/Sample_NoCounts.csv"*"\")")) == true
 
 # #
 # # HVG (Julia API)

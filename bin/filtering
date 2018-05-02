@@ -33,7 +33,7 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    filter(slfile=parsed_args["slfile"], featurelist=parsed_args["featurelist"], thr=parsed_args["thr"], outdir=parsed_args["outdir"])
+    filtering(slfile=parsed_args["slfile"], featurelist=parsed_args["featurelist"], thr=parsed_args["thr"], outdir=parsed_args["outdir"])
 end
 
 main()
