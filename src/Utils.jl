@@ -92,16 +92,16 @@ function ∇f(W, input, D, N, M)
 end
 
 # Stochastic Gradient
-function ∇fn(W::Array{Float32,2}, x::SparseVector{Int64,Int64}, D::Array{Float32,2}, M::Array{Float32,2})
+function ∇fn(W::Array{Float32,2}, x, D, M)
     return Float32(2 / M) * x * (x' * W * D)
 end
 
 # sym
-function sym(Y::Array{Float32,2})
+function sym(Y)
     return (Y + Y') / 2
 end
 
 # Riemannian Gradient
-function Pw(Z::Array{Float32,2}, W::Array{Float32,2})
+function Pw(Z, W)
     return Z - W * sym(W' * Z)
 end
