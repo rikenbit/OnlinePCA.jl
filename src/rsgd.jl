@@ -1,5 +1,5 @@
 """
-    rsgd(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logfile=false)
+    rsgd(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
 
 Online PCA solved by Riemannian stochastic gradient descent method.
 
@@ -18,7 +18,7 @@ Input Arguments
 - `scheduling` : Learning parameter scheduling. `robbins-monro`, `momentum`, `nag`, and `adagrad` are available.
 - `g` : The parameter that is used when scheduling is specified as nag.
 - `epsilon` : The parameter that is used when scheduling is specified as adagrad.
-- `logfile` : Whether the intermediate files are saved, in every 1000 iteration.
+- `logdir` : The directory where intermediate files are saved, in every 1000 iteration.
 
 Output Arguments
 ---------
@@ -30,7 +30,7 @@ Reference
 ---------
 - RSGD-PCA : [Silvere Bonnabel, 2013](https://arxiv.org/abs/1111.5280)
 """
-function rsgd(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logfile=true)
+function rsgd(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
@@ -55,9 +55,9 @@ function rsgd(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="
     end
 
     # directory for log file
-    if typeof(logfile) == String
-        if(!isdir(logfile))
-            mkdir(logfile)
+    if typeof(logdir) == String
+        if(!isdir(logdir))
+            mkdir(logdir)
         end
     end
 
@@ -113,12 +113,12 @@ function rsgd(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="
                 # Retraction
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
-                if logfile
+                if typeof(logdir) == String
                      if(mod((N*(s-1)+n), 1000) == 0)
-                        writecsv(logfile * "/W_" * string((N*(s-1)+n)) * ".csv", W)
-                        writecsv(logfile * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
-                        touch(logfile * "/W_" * string((N*(s-1)+n)) * ".csv")
-                        touch(logfile * "/RecError_" * string((N*(s-1)+n)) * ".csv")
+                        writecsv(logdir * "/W_" * string((N*(s-1)+n)) * ".csv", W)
+                        writecsv(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
+                        touch(logdir * "/W_" * string((N*(s-1)+n)) * ".csv")
+                        touch(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv")
                     end
                 end
             end

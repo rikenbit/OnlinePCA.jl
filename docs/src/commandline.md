@@ -56,7 +56,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
 --scheduling "robbins-monro" \
 --g 0.9 \
 --epsilon 1.0e-8 \
---logfile false
+--logdir OUTDIR
 ```
 
 ## CCIPCA
@@ -72,7 +72,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/ccipca \
 --dim 3 \
 --stepsize 0.1 \
 --numepoch 5 \
---logfile false
+--logdir OUTDIR
 ```
 
 ## GD
@@ -91,7 +91,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
 --scheduling "robbins-monro" \
 --g 0.9 \
 --epsilon 1.0e-8 \
---logfile false
+--logdir OUTDIR
 ```
 
 ## RSGD
@@ -110,7 +110,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
 --scheduling "robbins-monro" \
 --g 0.9 \
 --epsilon 1.0e-8 \
---logfile false
+--logdir OUTDIR
 ```
 
 ## SVRG
@@ -129,7 +129,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/svrg \
 --scheduling "robbins-monro" \
 --g 0.9 \
 --epsilon 1.0e-8 \
---logfile false
+--logdir OUTDIR
 ```
 
 ## RSVRG
@@ -148,5 +148,5 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsvrg \
 --scheduling "robbins-monro" \
 --g 0.9 \
 --epsilon 1.0e-8 \
---logfile false
+--logdir OUTDIR
 ```

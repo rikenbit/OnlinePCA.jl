@@ -46,9 +46,9 @@ function parse_commandline()
             help = "numepoch of PCA"
             arg_type = Int
             default = 5
-        "--logfile", "-l"
-            help = "saving log file"
-            default = true
+        "--logdir", "-l"
+            help = "saving log directory"
+            default = nothing
     end
 
     return parse_args(s)
@@ -72,7 +72,7 @@ function main()
         dim=parsed_args["dim"],
         stepsize=parsed_args["stepsize"],
         numepoch=parsed_args["numepoch"],
-        logfile=parsed_args["logfile"])
+        logdir=parsed_args["logdir"])
 
     writecsv(parsed_args["output"]*"/Eigen_vectors.csv", out[1])
     writecsv(parsed_args["output"]*"/Eigen_values.csv", out[2])

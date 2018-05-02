@@ -1,5 +1,5 @@
 """
-    ccipca(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logfile=false)
+    ccipca(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
 
 Online PCA solved by candid covariance-free incremental PCA.
 
@@ -15,7 +15,7 @@ Input Arguments
 - `dim` : The number of dimension of PCA.
 - `stepsize` : The parameter used in every iteration.
 - `numepoch` : The number of epoch.
-- `logfile` : Whether the intermediate files are saved, in every 1000 iteration.
+- `logdir` : The directory where intermediate files are saved, in every 1000 iteration.
 
 Output Arguments
 ---------
@@ -27,7 +27,7 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logfile=true)
+function ccipca(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
@@ -52,9 +52,9 @@ function ccipca(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist
     end
 
     # directory for log file
-    if typeof(logfile) == String
-        if(!isdir(logfile))
-            mkdir(logfile)
+    if typeof(logdir) == String
+        if(!isdir(logdir))
+            mkdir(logdir)
         end
     end
 
@@ -107,12 +107,12 @@ function ccipca(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist
                 end
 
                 # save log file
-                if logfile
+                if typeof(logdir) == String
                      if(mod((N*(s-1)+n), 1000) == 0)
-                        writecsv(logfile * "/W_" * string((N*(s-1)+n)) * ".csv", W)
-                        writecsv(logfile * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
-                        touch(logfile * "/W_" * string((N*(s-1)+n)) * ".csv")
-                        touch(logfile * "/RecError_" * string((N*(s-1)+n)) * ".csv")
+                        writecsv(logdir * "/W_" * string((N*(s-1)+n)) * ".csv", W)
+                        writecsv(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
+                        touch(logdir * "/W_" * string((N*(s-1)+n)) * ".csv")
+                        touch(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv")
                     end
                 end
             end

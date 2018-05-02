@@ -57,10 +57,10 @@ function parse_commandline()
         "--epsilon"
             help = "a small number for avoiding zero division"
             arg_type = Float64
-            default = 0.00000001
-        "--logfile", "-l"
-            help = "saving log file"
-            default = true
+            default = 1.0e-8
+        "--logdir", "-l"
+            help = "saving log directory"
+            default = nothing
     end
 
     return parse_args(s)
@@ -87,7 +87,7 @@ function main()
         scheduling=parsed_args["scheduling"],
         g=parsed_args["g"],
         epsilon=parsed_args["epsilon"],
-        logfile=parsed_args["logfile"])
+        logdir=parsed_args["logdir"])
 
     writecsv(parsed_args["output"]*"/Eigen_vectors.csv", out[1])
     writecsv(parsed_args["output"]*"/Eigen_values.csv", out[2])
