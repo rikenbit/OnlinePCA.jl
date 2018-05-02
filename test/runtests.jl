@@ -61,10 +61,11 @@ eval(parse(sumrcom))
 @test eval(parse("isfile(\""*tmp*"/Feature_NoZeros.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Feature_Vars.csv"*"\")")) == true
 
-
 #
 # Filtering (Julia API)
 #
+
+# filtering(slfile=tmp*"/Data.dat", featurelist=tmp*"/Feature_Means.csv", thr=10, outdir=tmp)
 
 #
 # Filtering (Command line)
@@ -109,10 +110,10 @@ eval(parse(sumrcom))
 #
 # oja (Julia API)
 #
-out_oja1 = oja(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja2 = oja(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja3 = oja(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja4 = oja(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_oja1 = oja(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_oja2 = oja(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_oja3 = oja(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_oja4 = oja(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 @test size(out_oja1[1]) == (99, 3)
 @test size(out_oja1[2]) == (3, )
@@ -194,10 +195,10 @@ rm(tmp*"/Scores.csv")
 #
 # gd (Julia API)
 #
-out_gd1 = gd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd2 = gd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd3 = gd(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd4 = gd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd1 = gd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd2 = gd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd3 = gd(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd4 = gd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 @test size(out_gd1[1]) == (99, 3)
 @test size(out_gd1[2]) == (3, )
@@ -256,10 +257,10 @@ rm(tmp*"/Scores.csv")
 #
 # rsgd (Julia API)
 #
-out_rsgd1 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd2 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd3 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd4 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsgd1 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsgd2 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsgd3 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsgd4 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 @test size(out_rsgd1[1]) == (99, 3)
 @test size(out_rsgd1[2]) == (3, )
@@ -318,10 +319,10 @@ rm(tmp*"/Scores.csv")
 #
 # svrg (Julia API)
 #
-out_svrg1 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg2 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg3 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg4 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_svrg1 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_svrg2 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_svrg3 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_svrg4 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 @test size(out_svrg1[1]) == (99, 3)
 @test size(out_svrg1[2]) == (3, )
@@ -380,10 +381,10 @@ rm(tmp*"/Scores.csv")
 #
 # rsvrg (Julia API)
 #
-out_rsvrg1 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg2 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg3 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg4 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsvrg1 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsvrg2 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsvrg3 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsvrg4 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=0.000000000000001, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 @test size(out_rsvrg1[1]) == (99, 3)
 @test size(out_rsvrg1[2]) == (3, )

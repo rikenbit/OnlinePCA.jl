@@ -21,9 +21,6 @@ function filtering(;slfile="", featurelist="", thr=0, outdir=".")
     # Feature selection
     featurelist = readcsv(featurelist)
 
-    # Threshold
-    thr = parse(Float32, thr)
-
     open(outfile, "w") do file1
         nrow::Int64 = 0
         ncol::Int64 = 0
