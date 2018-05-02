@@ -28,6 +28,13 @@ Reference
 function hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
     # Initialization
     N, M = init(slfile)
+
+    println(typeof(slfile))
+    println(typeof(rowmeanlist))
+    println(typeof(rowvarlist))
+    println(typeof(rowcv2list))
+    println(typeof(outdir))
+
     rowmeanlist = readcsv(rowmeanlist)
     rowvarlist = readcsv(rowvarlist)
     rowcv2list = readcsv(rowcv2list)
