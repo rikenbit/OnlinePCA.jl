@@ -92,7 +92,7 @@ function ∇f(W, input, D, N, M)
 end
 
 # Stochastic Gradient
-function ∇fn(W::Array{Float32,2}, x, D, M)
+function ∇fn(W, x, D, M)
     return Float32(2 / M) * x * (x' * W * D)
 end
 
