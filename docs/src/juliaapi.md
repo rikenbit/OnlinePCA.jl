@@ -17,7 +17,7 @@ filtering(;slfile="", featurelist="", thr=0, outdir=".")
 
 ## Identifying Highly Variable Genes
 ```@docs
-hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
+hvg(;slfile="", rowmeanlist="", rowvarlist="", rowcv2list="", outdir=".")
 ```
 
 ## Oja

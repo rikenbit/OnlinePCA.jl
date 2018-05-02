@@ -1,8 +1,10 @@
 # OnlinePCA.jl (Command line tool)
 
-All functions can be performed as command line tool in shell window.
+All functions can be performed as command line tool in shell window and same options in [OnlinePCA.jl (Julia API)](@ref) are available.
 
 After installation of `OnlinePCA.jl`, command line tools are saved at `YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/`.
+
+The functions can be performed as below.
 
 ## Binarization
 ```bash
@@ -22,11 +24,20 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/sumr \
 ## Filtering
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/filtering \
+--slfile OUTDIR/Data.dat \
+--featurelist OUTDIR/Feature_Means.csv \
+--thr 10 \
+--outdir OUTDIR
 ```
 
 ## Identifying Highly Variable Genes
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/hvg \
+--slfile OUTDIR/Data.dat \
+--rowmeanlist OUTDIR/Feature_Means.csv \
+--rowvarlist OUTDIR/Feature_Means.csv \
+--rowcv2list OUTDIR/Feature_Means.csv \
+--outdir OUTDIR
 ```
 
 ## Oja

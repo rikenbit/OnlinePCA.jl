@@ -1,5 +1,5 @@
 """
-    hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
+    hvg(;slfile="", rowmeanlist="", rowvarlist="", rowcv2list="", outdir=".")
 
 This function perform highly variable genes, which is an feature selection method in scRNA-seq studies.
 
