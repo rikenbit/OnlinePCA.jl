@@ -60,7 +60,7 @@ function parse_commandline()
             default = 0.00000001
         "--logfile", "-l"
             help = "saving log file"
-            default = false
+            default = true
     end
 
     return parse_args(s)

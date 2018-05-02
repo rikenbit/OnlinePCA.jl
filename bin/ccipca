@@ -48,7 +48,7 @@ function parse_commandline()
             default = 5
         "--logfile", "-l"
             help = "saving log file"
-            default = false
+            default = true
     end
 
     return parse_args(s)
