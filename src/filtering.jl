@@ -22,9 +22,9 @@ function filtering(;slfile="", featurelist="", thr=0, outdir=".")
     featurelist = readcsv(featurelist)
 
     # thr
-    if(typeof(thr) == thr){
+    if typeof(thr) == thr
         thr = parse(Float64, thr)
-    }
+    end
 
     open(outfile, "w") do file1
         nrow::Int64 = 0
