@@ -45,7 +45,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
 --numepoch 5 \
 --scheduling "robbins-monro" \
 --g 0.9 \
---epsilon 0.00000001 \
+--epsilon 1.0e-8 \
 --logfile false
 ```
 
@@ -82,7 +82,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
 --numepoch 5 \
 --scheduling "robbins-monro" \
 --g 0.9 \
---epsilon 0.00000001 \
+--epsilon 1.0e-8 \
 --logfile false
 ```
 
@@ -102,7 +102,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
 --numepoch 5 \
 --scheduling "robbins-monro" \
 --g 0.9 \
---epsilon 0.00000001 \
+--epsilon 1.0e-8 \
 --logfile false
 ```
 
@@ -122,7 +122,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/svrg \
 --numepoch 5 \
 --scheduling "robbins-monro" \
 --g 0.9 \
---epsilon 0.00000001 \
+--epsilon 1.0e-8 \
 --logfile false
 ```
 
@@ -142,6 +142,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsvrg \
 --numepoch 5 \
 --scheduling "robbins-monro" \
 --g 0.9 \
---epsilon 0.00000001 \
+--epsilon 1.0e-8 \
 --logfile false
 ```
