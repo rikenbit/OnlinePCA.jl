@@ -25,7 +25,7 @@ Reference
 ---------
 - [Highly Variable Genes](http://pklab.med.harvard.edu/scw2014/subpop_tutorial.html)
 """
-function hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
+function hvg(;slfile="", rowmeanlist="", rowvarlist="", rowcv2list="", outdir=".")
     # Initialization
     N, M = init(slfile)
 
