@@ -107,7 +107,7 @@ function ccipca(;input="", output=".", logscale=true, pseudocount=1, rowmeanlist
                 end
 
                 # save log file
-                if typeof(logfile) == String
+                if logfile
                      if(mod((N*(s-1)+n), 1000) == 0)
                         writecsv(logfile * "/W_" * string((N*(s-1)+n)) * ".csv", W)
                         writecsv(logfile * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
