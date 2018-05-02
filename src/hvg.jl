@@ -48,6 +48,7 @@ function hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
             push!(useForFit, n)
         end
     end
+
     # Fitting
 	println("Highly Variable Genes are calculated...")
     data = DataFrame(Y=rowcv2list[useForFit], X=1./rowmeanlist[useForFit])
@@ -56,6 +57,7 @@ function hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
     afit = a1 ./ rowmeanlist .+ a0
     varFitRatio = rowvarlist ./ (afit .* rowmeanlist .* rowmeanlist)
     df = M - 1
+
     # P-value
     for n = 1:N
         pval[n] = ccdf(Chisq(df), varFitRatio[n]*df)
