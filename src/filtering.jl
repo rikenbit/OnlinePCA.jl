@@ -10,7 +10,7 @@ Input Arguments
 - `thr` : The threshold to reject low-signal feature.
 - `outdir` : The directory specified the directory you want to save the result.
 
-Output files
+Output Files
 ---------
 - `filtered.dat` : Filtered binary file.
 """
