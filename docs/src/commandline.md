@@ -47,7 +47,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
 --outdir OUTDIR \
 --logscale true \
 --pseudocount 1 \
---numepoch 5 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
 --masklist OUTDIR/MASKLIST.csv \
@@ -67,7 +66,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/ccipca \
 --outdir OUTDIR \
 --logscale true \
 --pseudocount 1 \
---numepoch 5 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
 --masklist OUTDIR/MASKLIST.csv \
@@ -84,7 +82,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
 --outdir OUTDIR \
 --logscale true \
 --pseudocount 1 \
---numepoch 5 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
 --masklist OUTDIR/MASKLIST.csv \
@@ -104,7 +101,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
 --outdir OUTDIR \
 --logscale true \
 --pseudocount 1 \
---numepoch 5 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
 --masklist OUTDIR/MASKLIST.csv \
@@ -124,7 +120,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/svrg \
 --outdir OUTDIR \
 --logscale true \
 --pseudocount 1 \
---numepoch 5 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
 --masklist OUTDIR/MASKLIST.csv \
@@ -144,7 +139,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsvrg \
 --outdir OUTDIR \
 --logscale true \
 --pseudocount 1 \
---numepoch 5 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
 --masklist OUTDIR/MASKLIST.csv \
