@@ -10,8 +10,8 @@ function parse_commandline()
         "--input", "-i"
             help = "input file"
             required = true
-        "--output", "-o"
-            help = "output file"
+        "--outdir", "-o"
+            help = "output directory"
             default = "."
             required = false
         "--logscale"
@@ -75,7 +75,7 @@ function main()
     end
 
     out = oja(input=parsed_args["input"],
-        output=parsed_args["output"],
+        outdir=parsed_args["outdir"],
         logscale=parsed_args["logscale"],
         pseudocount=parsed_args["pseudocount"],
         rowmeanlist=parsed_args["rowmeanlist"],
@@ -89,15 +89,15 @@ function main()
         epsilon=parsed_args["epsilon"],
         logdir=parsed_args["logdir"])
 
-    writecsv(parsed_args["output"]*"/Eigen_vectors.csv", out[1])
-    writecsv(parsed_args["output"]*"/Eigen_values.csv", out[2])
-    writecsv(parsed_args["output"]*"/Loadings.csv", out[3])
-    writecsv(parsed_args["output"]*"/Scores.csv", out[4])
+    writecsv(parsed_args["outdir"]*"/Eigen_vectors.csv", out[1])
+    writecsv(parsed_args["outdir"]*"/Eigen_values.csv", out[2])
+    writecsv(parsed_args["outdir"]*"/Loadings.csv", out[3])
+    writecsv(parsed_args["outdir"]*"/Scores.csv", out[4])
 
-    touch(parsed_args["output"]*"/Eigen_vectors.csv")
-    touch(parsed_args["output"]*"/Eigen_values.csv")
-    touch(parsed_args["output"]*"/Loadings.csv")
-    touch(parsed_args["output"]*"/Scores.csv")
+    touch(parsed_args["outdir"]*"/Eigen_vectors.csv")
+    touch(parsed_args["outdir"]*"/Eigen_values.csv")
+    touch(parsed_args["outdir"]*"/Loadings.csv")
+    touch(parsed_args["outdir"]*"/Scores.csv")
 end
 
 main()
