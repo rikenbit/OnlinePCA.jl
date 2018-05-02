@@ -22,7 +22,7 @@ function filtering(;slfile="", featurelist="", thr=0, outdir=".")
     featurelist = readcsv(featurelist)
 
     # thr
-    if typeof(thr) == thr
+    if typeof(thr) == String
         thr = parse(Float64, thr)
     end
 
