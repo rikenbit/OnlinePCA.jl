@@ -1,3 +1,71 @@
+# options
+function common_parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--input", "-i"
+            help = "input file"
+            arg_type = String
+            required = true
+        "--outdir", "-o"
+            help = "output directory"
+            default = "."
+            required = false
+        "--logscale"
+            help = "whether the value are converted to log-scale"
+            arg_type = Bool
+            default = true
+        "--pseudocount", "-p"
+            help = "log10(exp + pseudocount)"
+            arg_type = Float32
+            default = 1.0
+        "--rowmeanlist", "-m"
+            help = "mean vector of each row"
+            arg_type = String
+            default = ""
+            required = false
+        "--colsumlist"
+            help = "Sum of counts of each column"
+            arg_type = String
+            default = ""
+            required = false
+        "--masklist"
+            help = "Columns to be remove"
+            arg_type = String
+            default = ""
+            required = false
+        "--dim", "-d"
+            help = "dimention of PCA"
+            arg_type = Int64
+            default = 3
+        "--stepsize", "-s"
+            help = "stepsize of PCA"
+            arg_type = Float32
+            default = 0.1
+        "--numepoch", "-e"
+            help = "numepoch of PCA"
+            arg_type = Int64
+            default = 5
+        "--scheduling"
+            help = "Learning Rate Scheduling"
+            arg_type = String
+            default = "robbins-monro"
+        "-g"
+            help = "Ratio of non-SGD gradient"
+            arg_type = Float32
+            default = 0.9
+        "--epsilon"
+            help = "a small number for avoiding zero division"
+            arg_type = Float32
+            default = 1.0e-8
+        "--logdir", "-l"
+            help = "saving log directory"
+            default = nothing
+    end
+
+    return parse_args(s)
+end
+
 function init(slfile)
     N = 0
     M = 0
