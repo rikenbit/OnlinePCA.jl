@@ -27,9 +27,9 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
+function ccipca(;input::String="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
     # Initialization
-    const N, M = init(input) # No.gene, No.cell
+    const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
     X = zeros(Float32, M, dim+1) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix

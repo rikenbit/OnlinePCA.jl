@@ -28,9 +28,9 @@ Output Arguments
 - `λ` : Eigen values (dim × dim)
 - `V` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 """
-function gd(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+function gd(;input::String="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
     # Initialization
-    const N, M = init(input) # No.gene, No.cell
+    const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix

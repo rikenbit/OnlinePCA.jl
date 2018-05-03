@@ -30,9 +30,9 @@ Reference
 ---------
 - SGD-PCA（Oja's method) : [Erkki Oja et. al., 1985](https://www.sciencedirect.com/science/article/pii/0022247X85901313), [Erkki Oja, 1992](https://www.sciencedirect.com/science/article/pii/S0893608005800899)
 """
-function oja(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+function oja(;input::String="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
     # Initialization
-    const N, M = init(input) # No.gene, No.cell
+    const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix

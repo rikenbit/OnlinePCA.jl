@@ -30,9 +30,9 @@ Reference
 ---------
 - RSGD-PCA : [Silvere Bonnabel, 2013](https://arxiv.org/abs/1111.5280)
 """
-function rsgd(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+function rsgd(;input::String="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
     # Initialization
-    const N, M = init(input) # No.gene, No.cell
+    const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
