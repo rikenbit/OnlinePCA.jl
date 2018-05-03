@@ -40,13 +40,13 @@ function gd(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="",
 
     # mean (gene), library size (cell), cell mask list
     rowmeanvec = zeros(Float32, N, 1)
-    colsumlist = zeros(Float32, M, 1)
+    colsumvec = zeros(Float32, M, 1)
     cellmaskvec = zeros(Float32, M, 1)
     if rowmeanlist != ""
         rowmeanvec = readcsv(rowmeanlist, Float32)
     end
     if colsumlist != ""
-        colsumlist = readcsv(colsumlist, Float32)
+        colsumvec = readcsv(colsumlist, Float32)
     end
     if masklist != ""
         cellmaskvec = readcsv(masklist, Float32)

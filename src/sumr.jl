@@ -66,8 +66,8 @@ function sumr(;slfile="", outdir=".", pseudocount=1.0)
     # Initialization
     N, M = init(slfile)
 
-    # 1 / 2 : Sum of counts in each column
-    println("1 / 2 : Sum of counts in each column are calculated...")
+    # 1 / 2 : Column-wise statistics
+    println("1 / 2 : Column-wise statistics are calculated...")
     Sample_NoCounts = nocounts(slfile, N, M)
 
     # 2 / 2 : Row-wise statistics
