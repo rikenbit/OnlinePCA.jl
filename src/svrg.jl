@@ -1,5 +1,5 @@
 """
-    svrg(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+    svrg(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
 
 Online PCA solved by variance-reduced stochastic gradient descent method, also known as VR-PCA.
 
@@ -30,7 +30,7 @@ Reference
 ---------
 - SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 """
-function svrg(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+function svrg(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
@@ -128,6 +128,17 @@ function svrg(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="
         end
         next!(progress)
     end
+
     # Return, W, λ, V
-    WλV(W, input, dim)
+    out = WλV(W, input, dim)
+    if typeof(outdir) == String
+        writecsv(outdir * "/Eigen_vectors.csv", out[1])
+        writecsv(outdir *"/Eigen_values.csv", out[2])
+        writecsv(outdir *"/Loadings.csv", out[3])
+        writecsv(outdir *"/Scores.csv", out[4])
+        touch(outdir * "/Eigen_vectors.csv")
+        touch(outdir *"/Eigen_values.csv")
+        touch(outdir *"/Loadings.csv")
+        touch(outdir *"/Scores.csv")
+    end
 end

@@ -75,7 +75,6 @@ function main()
     end
 
     out = rsvrg(input=parsed_args["input"],
-        outdir=parsed_args["outdir"],
         logscale=parsed_args["logscale"],
         pseudocount=parsed_args["pseudocount"],
         rowmeanlist=parsed_args["rowmeanlist"],

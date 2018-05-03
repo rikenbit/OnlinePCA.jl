@@ -17,7 +17,7 @@ writecsv(tmp*"/Data.csv", input)
 println("####### Binarization (Julia API) #######")
 csv2sl(csvfile=tmp*"/Data.csv", slfile=tmp*"/Data.dat")
 
-@test eval(parse("isfile(\""*tmp*"/Data.dat"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Data.dat"*"\")")) != 0
 rm(tmp*"/Data.dat")
 #####################################
 
@@ -27,7 +27,7 @@ println("####### Binarization (Command line) #######")
 csv2slpath = Pkg.dir() * "/OnlinePCA/bin/csv2sl"
 csv2slcom = "run(`julia " * csv2slpath * " --csvfile " * tmp * "/Data.csv --slfile " * tmp * "/Data.dat`)"
 eval(parse(csv2slcom))
-@test eval(parse("isfile(\""*tmp*"/Data.dat"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Data.dat"*"\")")) != 0
 #####################################
 
 
@@ -35,12 +35,12 @@ eval(parse(csv2slcom))
 println("####### Summarization (Julia API) #######")
 sumr(slfile=tmp*"/Data.dat", outdir=tmp)
 
-@test eval(parse("isfile(\""*tmp*"/Sample_NoCounts.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_CV2s.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_LogMeans.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_Means.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_NoZeros.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_Vars.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Sample_NoCounts.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_CV2s.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_LogMeans.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_Means.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_NoZeros.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_Vars.csv"*"\")")) != 0
 
 rm(tmp*"/Sample_NoCounts.csv")
 rm(tmp*"/Feature_CV2s.csv")
@@ -57,12 +57,12 @@ sumrpath = Pkg.dir() * "/OnlinePCA/bin/sumr"
 sumrcom = "run(`julia " * sumrpath * " --slfile " * tmp * "/Data.dat --outdir " * tmp * "`)"
 eval(parse(sumrcom))
 
-@test eval(parse("isfile(\""*tmp*"/Sample_NoCounts.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_CV2s.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_LogMeans.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_Means.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_NoZeros.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Feature_Vars.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Sample_NoCounts.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_CV2s.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_LogMeans.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_Means.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_NoZeros.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Feature_Vars.csv"*"\")")) != 0
 #####################################
 
 
@@ -70,7 +70,7 @@ eval(parse(sumrcom))
 println("####### Filtering (Julia API) #######")
 filtering(slfile=tmp*"/Data.dat", featurelist=tmp*"/Feature_Means.csv", thr=10, outdir=tmp)
 
-@test eval(parse("isfile(\""*tmp*"/filtered.dat"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/filtered.dat"*"\")")) != 0
 
 rm(tmp*"/filtered.dat")
 #####################################
@@ -82,7 +82,7 @@ filteringpath = Pkg.dir() * "/OnlinePCA/bin/filtering"
 filteringcom = "run(`julia " * filteringpath * " --slfile " * tmp * "/Data.dat --featurelist " * tmp*"/Feature_Means.csv --thr 10" * " --outdir " * tmp * "`)"
 eval(parse(filteringcom))
 
-@test eval(parse("isfile(\""*tmp*"/Sample_NoCounts.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Sample_NoCounts.csv"*"\")")) != 0
 #####################################
 
 
@@ -90,13 +90,13 @@ eval(parse(filteringcom))
 println("####### HVG (Julia API) #######")
 hvg(slfile=tmp*"/Data.dat", rowmeanlist=tmp*"/Feature_Means.csv", rowvarlist=tmp*"/Feature_Vars.csv", rowcv2list=tmp*"/Feature_CV2s.csv", outdir=tmp)
 
-@test eval(parse("isfile(\""*tmp*"/HVG_pval.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a0.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a1.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_afit.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_useForFit.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_varFitRatio.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_df.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/HVG_pval.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_a0.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_a1.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_afit.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_useForFit.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_varFitRatio.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_df.csv"*"\")")) != 0
 
 rm(tmp*"/HVG_pval.csv")
 rm(tmp*"/HVG_a0.csv")
@@ -114,13 +114,13 @@ hvgpath = Pkg.dir() * "/OnlinePCA/bin/hvg"
 hvgcom = "run(`julia " * hvgpath * " --slfile " * tmp * "/Data.dat --rowmeanlist " * tmp*"/Feature_Means.csv --rowvarlist " * tmp * "/Feature_Vars.csv --rowcv2list " * tmp * "/Feature_CV2s.csv --outdir " * tmp * "`)"
 eval(parse(hvgcom))
 
-@test eval(parse("isfile(\""*tmp*"/HVG_pval.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a0.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_a1.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_afit.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_useForFit.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_varFitRatio.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/HVG_df.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/HVG_pval.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_a0.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_a1.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_afit.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_useForFit.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_varFitRatio.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/HVG_df.csv"*"\")")) != 0
 #####################################
 
 
@@ -155,33 +155,33 @@ ojacom3 = "run(`julia " * ojapath * " --input " * tmp * "/Data.dat " * " --outdi
 ojacom4 = "run(`julia " * ojapath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 
 eval(parse(ojacom1))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(ojacom2))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(ojacom3))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(ojacom4))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
@@ -204,9 +204,9 @@ ccipcapath = Pkg.dir() * "/OnlinePCA/bin/ccipca"
 ccipcacom1 = "run(`julia " * ccipcapath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 
 eval(parse(ccipcacom1))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
@@ -244,33 +244,33 @@ gdcom3 = "run(`julia " * gdpath * " --input " * tmp * "/Data.dat " * " --outdir 
 gdcom4 = "run(`julia " * gdpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 
 eval(parse(gdcom1))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(gdcom2))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(gdcom3))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(gdcom4))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
@@ -308,33 +308,33 @@ rsgdcom3 = "run(`julia " * rsgdpath * " --input " * tmp * "/Data.dat " * " --out
 rsgdcom4 = "run(`julia " * rsgdpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 
 eval(parse(rsgdcom1))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsgdcom2))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsgdcom3))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsgdcom4))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
@@ -372,33 +372,33 @@ svrgcom3 = "run(`julia " * svrgpath * " --input " * tmp * "/Data.dat " * " --out
 svrgcom4 = "run(`julia " * svrgpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 
 eval(parse(svrgcom1))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(svrgcom2))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(svrgcom3))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(svrgcom4))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
@@ -436,31 +436,31 @@ rsvrgcom3 = "run(`julia " * rsvrgpath * " --input " * tmp * "/Data.dat " * " --o
 rsvrgcom4 = "run(`julia " * rsvrgpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 
 eval(parse(rsvrgcom1))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsvrgcom2))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsvrgcom3))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsvrgcom4))
-@test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
-@test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+@test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 #####################################

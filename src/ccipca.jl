@@ -1,5 +1,5 @@
 """
-    ccipca(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
+    ccipca(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
 
 Online PCA solved by candid covariance-free incremental PCA.
 
@@ -27,7 +27,7 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
+function ccipca(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
@@ -119,6 +119,17 @@ function ccipca(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist
         end
         next!(progress)
     end
+
     # Return, W, λ, V
-    WλV(W, input, dim)
+    out = WλV(W, input, dim)
+    if typeof(outdir) == String
+        writecsv(outdir * "/Eigen_vectors.csv", out[1])
+        writecsv(outdir *"/Eigen_values.csv", out[2])
+        writecsv(outdir *"/Loadings.csv", out[3])
+        writecsv(outdir *"/Scores.csv", out[4])
+        touch(outdir * "/Eigen_vectors.csv")
+        touch(outdir *"/Eigen_values.csv")
+        touch(outdir *"/Loadings.csv")
+        touch(outdir *"/Scores.csv")
+    end
 end
