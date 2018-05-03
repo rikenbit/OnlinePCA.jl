@@ -42,14 +42,14 @@ function rsvrg(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist=
     end
 
     # mean (gene), library size (cell), cell mask list
-    meanvec = zeros(Float32, N, 1)
-    libvec = zeros(Float32, M, 1)
+    rowmeanvec = zeros(Float32, N, 1)
+    colsumvec = zeros(Float32, M, 1)
     cellmaskvec = zeros(Float32, M, 1)
     if rowmeanlist != ""
-        meanvec = readcsv(rowmeanlist, Float32)
+        rowmeanvec = readcsv(rowmeanlist, Float32)
     end
     if colsumlist != ""
-        libvec = readcsv(colsumlist, Float32)
+        colsumvec = readcsv(colsumlist, Float32)
     end
     if masklist != ""
         cellmaskvec = readcsv(masklist, Float32)
@@ -80,13 +80,13 @@ function rsvrg(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist=
                     x = x[cellmaskvec]
                 end
                 if (rowmeanlist != "") && (colsumlist != "")
-                    x = (x - meanvec[n, 1]) ./ libvec
+                    x = (x - rowmeanvec[n, 1]) ./ colsumvec
                 end
                 if (rowmeanlist != "") && (colsumlist == "")
-                    x = x - meanvec[n, 1]
+                    x = x - rowmeanvec[n, 1]
                 end
                 if (rowmeanlist == "") && (colsumlist != "")
-                    x = x ./ libvec
+                    x = x ./ colsumvec
                 end
                 # RSVRG × Robbins-Monro
                 if scheduling == "robbins-monro"

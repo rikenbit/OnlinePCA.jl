@@ -76,7 +76,7 @@ function RecError(W, input)
 end
 
 # Full Gradient
-function ∇f(W, input, D, N, M)
+function ∇f(W, input, D, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
     tmpW = W
     open(input) do file
         N = read(file, Int64) # Number of Features (e.g. Genes)
@@ -84,6 +84,22 @@ function ∇f(W, input, D, N, M)
         for n = 1:N
             # Data Import
             x = deserialize(file)
+            if logscale
+                x = log10.(x + pseudocount)
+            end
+            if masklist != ""
+                x = x[cellmaskvec]
+            end
+            if (rowmeanlist != "") && (colsumlist != "")
+                x = (x - rowmeanvec[n, 1]) ./ colsmvec
+            end
+            if (rowmeanlist != "") && (colsumlist == "")
+                x = x - rowmeanvec[n, 1]
+            end
+            if (rowmeanlist == "") && (colsumlist != "")
+                x = x ./ colsmvec
+            end
+
             # Full Gradient
             tmpW .= tmpW .+ ∇fn(W, x, D, M)
         end

@@ -39,14 +39,14 @@ function gd(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="",
     end
 
     # mean (gene), library size (cell), cell mask list
-    meanvec = zeros(Float32, N, 1)
-    libvec = zeros(Float32, M, 1)
+    rowmeanvec = zeros(Float32, N, 1)
+    colsumlist = zeros(Float32, M, 1)
     cellmaskvec = zeros(Float32, M, 1)
     if rowmeanlist != ""
-        meanvec = readcsv(rowmeanlist, Float32)
+        rowmeanvec = readcsv(rowmeanlist, Float32)
     end
     if colsumlist != ""
-        libvec = readcsv(colsumlist, Float32)
+        colsumlist = readcsv(colsumlist, Float32)
     end
     if masklist != ""
         cellmaskvec = readcsv(masklist, Float32)
@@ -66,37 +66,20 @@ function gd(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="",
             N = read(file, Int64)
             M = read(file, Int64)
             for n = 1:N
-                # Data Import
-                x = deserialize(file)
-                if logscale
-                    x = log10.(x + pseudocount)
-                end
-                if masklist != ""
-                    x = x[cellmaskvec]
-                end
-                if (rowmeanlist != "") && (colsumlist != "")
-                    x = (x - meanvec[n, 1]) ./ libvec
-                end
-                if (rowmeanlist != "") && (colsumlist == "")
-                    x = x - meanvec[n, 1]
-                end
-                if (rowmeanlist == "") && (colsumlist != "")
-                    x = x ./ libvec
-                end
                 # GD × Robbins-Monro
                 if scheduling == "robbins-monro"
-                    W .= W .+ ∇f(W, input, D * Float32(stepsize)/s, N, M)
+                    W .= W .+ ∇f(W, input, D * Float32(stepsize)/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
                 # GD × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇f(W, input, D * Float32(stepsize), N, M)
+                    v .= g .* v .+ ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
                     W .= W .+ v
                 # GD × NAG
                 elseif scheduling == "nag"
-                    v = g .* v + ∇f(W - g .* v, input, D * Float32(stepsize), N, M)
+                    v = g .* v + ∇f(W - g .* v, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
                     W .= W .+ v
                 # GD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇f(W, input, D * Float32(stepsize), N, M)
+                    grad = ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
                     grad = grad / Float32(stepsize)
                     v .= v .+ grad .* grad
                     W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
