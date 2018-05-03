@@ -68,18 +68,18 @@ function gd(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist="",
             for n = 1:N
                 # GD × Robbins-Monro
                 if scheduling == "robbins-monro"
-                    W .= W .+ ∇f(W, input, D * Float32(stepsize)/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
+                    W .= W .+ ∇f(W, input, D * Float32(stepsize)/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
                 # GD × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
+                    v .= g .* v .+ ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
                     W .= W .+ v
                 # GD × NAG
                 elseif scheduling == "nag"
-                    v = g .* v + ∇f(W - g .* v, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
+                    v = g .* v + ∇f(W - g .* v, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
                     W .= W .+ v
                 # GD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsmvec)
+                    grad = ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
                     grad = grad / Float32(stepsize)
                     v .= v .+ grad .* grad
                     W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
