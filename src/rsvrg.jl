@@ -65,7 +65,7 @@ function rsvrg(;input="", outdir=".", logscale=true, pseudocount=1, rowmeanlist=
     # progress
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * Float32(stepsize), N, M)
+        u = ∇f(W, input, D * Float32(stepsize)/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
         Ws = W
         open(input) do file
             N = read(file, Int64)
