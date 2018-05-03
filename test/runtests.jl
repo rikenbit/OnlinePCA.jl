@@ -2,35 +2,37 @@ using OnlinePCA
 using Base.Test
 using Distributions
 
-#
-# CSV
-#
+#####################################
+println("####### CSV #######")
 tmp = mktempdir()
 input = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 300, 99)))
 input[1:50, 1:33] .= 100*input[1:50, 1:33]
 input[51:100, 34:66] .= 100*input[51:100, 34:66]
 input[101:150, 67:99] .= 100*input[101:150, 67:99]
 writecsv(tmp*"/Data.csv", input)
+#####################################
 
-#
-# Binarization (Julia API)
-#
+
+#####################################
+println("####### Binarization (Julia API) #######")
 csv2sl(csvfile=tmp*"/Data.csv", slfile=tmp*"/Data.dat")
 
 @test eval(parse("isfile(\""*tmp*"/Data.dat"*"\")")) == true
 rm(tmp*"/Data.dat")
+#####################################
 
-#
-# Binarization (Command line)
-#
+
+#####################################
+println("####### Binarization (Command line) #######")
 csv2slpath = Pkg.dir() * "/OnlinePCA/bin/csv2sl"
 csv2slcom = "run(`julia " * csv2slpath * " --csvfile " * tmp * "/Data.csv --slfile " * tmp * "/Data.dat`)"
 eval(parse(csv2slcom))
 @test eval(parse("isfile(\""*tmp*"/Data.dat"*"\")")) == true
+#####################################
 
-#
-# Summary of data (Julia API)
-#
+
+#####################################
+println("####### Summarization (Julia API) #######")
 sumr(slfile=tmp*"/Data.dat", outdir=tmp)
 
 @test eval(parse("isfile(\""*tmp*"/Sample_NoCounts.csv"*"\")")) == true
@@ -46,10 +48,11 @@ rm(tmp*"/Feature_LogMeans.csv")
 rm(tmp*"/Feature_Means.csv")
 rm(tmp*"/Feature_NoZeros.csv")
 rm(tmp*"/Feature_Vars.csv")
+#####################################
 
-#
-# Summary of data (Command line)
-#
+
+#####################################
+println("####### Summarization (Command line) #######")
 sumrpath = Pkg.dir() * "/OnlinePCA/bin/sumr"
 sumrcom = "run(`julia " * sumrpath * " --slfile " * tmp * "/Data.dat --outdir " * tmp * "`)"
 eval(parse(sumrcom))
@@ -60,28 +63,31 @@ eval(parse(sumrcom))
 @test eval(parse("isfile(\""*tmp*"/Feature_Means.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Feature_NoZeros.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Feature_Vars.csv"*"\")")) == true
+#####################################
 
-#
-# Filtering (Julia API)
-#
+
+#####################################
+println("####### Filtering (Julia API) #######")
 filtering(slfile=tmp*"/Data.dat", featurelist=tmp*"/Feature_Means.csv", thr=10, outdir=tmp)
 
 @test eval(parse("isfile(\""*tmp*"/filtered.dat"*"\")")) == true
 
 rm(tmp*"/filtered.dat")
+#####################################
 
-#
-# Filtering (Command line)
-#
+
+#####################################
+println("####### Filtering (Command line) #######")
 filteringpath = Pkg.dir() * "/OnlinePCA/bin/filtering"
 filteringcom = "run(`julia " * filteringpath * " --slfile " * tmp * "/Data.dat --featurelist " * tmp*"/Feature_Means.csv --thr 10" * " --outdir " * tmp * "`)"
 eval(parse(filteringcom))
 
 @test eval(parse("isfile(\""*tmp*"/Sample_NoCounts.csv"*"\")")) == true
+#####################################
 
-#
-# HVG (Julia API)
-#
+
+#####################################
+println("####### HVG (Julia API) #######")
 hvg(slfile=tmp*"/Data.dat", rowmeanlist=tmp*"/Feature_Means.csv", rowvarlist=tmp*"/Feature_Vars.csv", rowcv2list=tmp*"/Feature_CV2s.csv", outdir=tmp)
 
 @test eval(parse("isfile(\""*tmp*"/HVG_pval.csv"*"\")")) == true
@@ -99,10 +105,11 @@ rm(tmp*"/HVG_afit.csv")
 rm(tmp*"/HVG_useForFit.csv")
 rm(tmp*"/HVG_varFitRatio.csv")
 rm(tmp*"/HVG_df.csv")
+#####################################
 
-#
-# HVG (Command line)
-#
+
+#####################################
+println("####### HVG (Command line) #######")
 hvgpath = Pkg.dir() * "/OnlinePCA/bin/hvg"
 hvgcom = "run(`julia " * hvgpath * " --slfile " * tmp * "/Data.dat --rowmeanlist " * tmp*"/Feature_Means.csv --rowvarlist " * tmp * "/Feature_Vars.csv --rowcv2list " * tmp * "/Feature_CV2s.csv --outdir " * tmp * "`)"
 eval(parse(hvgcom))
@@ -114,10 +121,11 @@ eval(parse(hvgcom))
 @test eval(parse("isfile(\""*tmp*"/HVG_useForFit.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/HVG_varFitRatio.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/HVG_df.csv"*"\")")) == true
+#####################################
 
-#
-# oja (Julia API)
-#
+
+#####################################
+println("####### Oja (Julia API) #######")
 out_oja1 = oja(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_oja2 = oja(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_oja3 = oja(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
@@ -135,10 +143,11 @@ out_oja4 = oja(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.0e
 @test size(out_oja4[1]) == (99, 3)
 @test size(out_oja4[2]) == (3, )
 @test size(out_oja4[3]) == (300, 3)
+#####################################
 
-#
-# oja (Command line)
-#
+
+#####################################
+println("####### Oja (Command line) #######")
 ojapath = Pkg.dir() * "/OnlinePCA/bin/oja"
 ojacom1 = "run(`julia " * ojapath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 ojacom2 = "run(`julia " * ojapath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
@@ -176,19 +185,21 @@ eval(parse(ojacom4))
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
+#####################################
 
-#
-# ccipca (Julia API)
-#
+
+#####################################
+println("####### CCIPCA (Julia API) #######")
 out_ccipca1 = ccipca(input=tmp*"/Data.dat", dim=3, stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 @test size(out_ccipca1[1]) == (99, 3)
 @test size(out_ccipca1[2]) == (3, )
 @test size(out_ccipca1[3]) == (300, 3)
+#####################################
 
-#
-# ccipca (Command line)
-#
+
+#####################################
+println("####### CCIPCA (Command line) #######")
 ccipcapath = Pkg.dir() * "/OnlinePCA/bin/ccipca"
 ccipcacom1 = "run(`julia " * ccipcapath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 
@@ -199,10 +210,11 @@ eval(parse(ccipcacom1))
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
+#####################################
 
-#
-# gd (Julia API)
-#
+
+#####################################
+println("####### GD (Julia API) #######")
 out_gd1 = gd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_gd2 = gd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_gd3 = gd(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
@@ -220,10 +232,11 @@ out_gd4 = gd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.0e-1
 @test size(out_gd4[1]) == (99, 3)
 @test size(out_gd4[2]) == (3, )
 @test size(out_gd4[3]) == (300, 3)
+#####################################
 
-#
-# gd (Command line)
-#
+
+#####################################
+println("####### GD (Command line) #######")
 gdpath = Pkg.dir() * "/OnlinePCA/bin/gd"
 gdcom1 = "run(`julia " * gdpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 gdcom2 = "run(`julia " * gdpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
@@ -261,10 +274,11 @@ eval(parse(gdcom4))
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
+#####################################
 
-#
-# rsgd (Julia API)
-#
+
+#####################################
+println("####### RSGD (Julia API) #######")
 out_rsgd1 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_rsgd2 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_rsgd3 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
@@ -282,10 +296,11 @@ out_rsgd4 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.
 @test size(out_rsgd4[1]) == (99, 3)
 @test size(out_rsgd4[2]) == (3, )
 @test size(out_rsgd4[3]) == (300, 3)
+#####################################
 
-#
-# rsgd (Command line)
-#
+
+#####################################
+println("####### RSGD (Command line) #######")
 rsgdpath = Pkg.dir() * "/OnlinePCA/bin/rsgd"
 rsgdcom1 = "run(`julia " * rsgdpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 rsgdcom2 = "run(`julia " * rsgdpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
@@ -323,10 +338,11 @@ eval(parse(rsgdcom4))
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
+#####################################
 
-#
-# svrg (Julia API)
-#
+
+#####################################
+println("####### SVRG (Julia API) #######")
 out_svrg1 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_svrg2 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_svrg3 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
@@ -344,10 +360,11 @@ out_svrg4 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.
 @test size(out_svrg4[1]) == (99, 3)
 @test size(out_svrg4[2]) == (3, )
 @test size(out_svrg4[3]) == (300, 3)
+#####################################
 
-#
-# svrg (Command line)
-#
+
+#####################################
+println("####### SVRG (Command line) #######")
 svrgpath = Pkg.dir() * "/OnlinePCA/bin/svrg"
 svrgcom1 = "run(`julia " * svrgpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 svrgcom2 = "run(`julia " * svrgpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
@@ -385,10 +402,11 @@ eval(parse(svrgcom4))
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
 rm(tmp*"/Scores.csv")
+#####################################
 
-#
-# rsvrg (Julia API)
-#
+
+#####################################
+println("####### RSVRG (Julia API) #######")
 out_rsvrg1 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_rsvrg2 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 out_rsvrg3 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
@@ -406,10 +424,11 @@ out_rsvrg4 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=
 @test size(out_rsvrg4[1]) == (99, 3)
 @test size(out_rsvrg4[2]) == (3, )
 @test size(out_rsvrg4[3]) == (300, 3)
+#####################################
 
-#
-# rsvrg (Command line)
-#
+
+#####################################
+println("####### RSVRG (Command line) #######")
 rsvrgpath = Pkg.dir() * "/OnlinePCA/bin/rsvrg"
 rsvrgcom1 = "run(`julia " * rsvrgpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
 rsvrgcom2 = "run(`julia " * rsvrgpath * " --input " * tmp * "/Data.dat " * " --outdir " * tmp * " --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist " * tmp * "/Feature_LogMeans.csv`)"
@@ -444,3 +463,4 @@ eval(parse(rsvrgcom4))
 @test eval(parse("isfile(\""*tmp*"/Eigen_vectors.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Eigen_values.csv"*"\")")) == true
 @test eval(parse("isfile(\""*tmp*"/Scores.csv"*"\")")) == true
+#####################################
