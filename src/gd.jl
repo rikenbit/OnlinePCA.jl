@@ -31,6 +31,10 @@ Output Arguments
 function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
+    peudocount = Float32(peudocount)
+    stepsize = Float32(stepsize)
+    g = Float32(g)
+    epsilon = Float32(epsilon)
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
@@ -68,21 +72,21 @@ function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount:
             for n = 1:N
                 # GD × Robbins-Monro
                 if scheduling == "robbins-monro"
-                    W .= W .+ ∇f(W, input, D * Float32(stepsize)/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
+                    W .= W .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
                 # GD × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
+                    v .= g .* v .+ ∇f(W, input, D * stepsize, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
                     W .= W .+ v
                 # GD × NAG
                 elseif scheduling == "nag"
-                    v = g .* v + ∇f(W - g .* v, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
+                    v = g .* v + ∇f(W - g .* v, input, D * stepsize, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
                     W .= W .+ v
                 # GD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇f(W, input, D * Float32(stepsize), N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
-                    grad = grad / Float32(stepsize)
+                    grad = ∇f(W, input, D * stepsize, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
+                    grad = grad / stepsize
                     v .= v .+ grad .* grad
-                    W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
+                    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
                 else
                     error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
                 end

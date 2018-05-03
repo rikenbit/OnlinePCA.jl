@@ -33,6 +33,10 @@ Reference
 function rsgd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
+    peudocount = Float32(peudocount)
+    stepsize = Float32(stepsize)
+    g = Float32(g)
+    epsilon = Float32(epsilon)
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
@@ -87,21 +91,21 @@ function rsgd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocoun
                 end
                 # RSGD × Robbins-Monro
                 if scheduling == "robbins-monro"
-                    W .= W .+ Pw(∇fn(W, x, D * Float32(stepsize)/(N*(s-1)+n), M), W)
+                    W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W)
                 # RSGD × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ Pw(∇fn(W, x, D * Float32(stepsize), M), W)
+                    v .= g .* v .+ Pw(∇fn(W, x, D * stepsize, M), W)
                     W .= W .+ v
                 # RSGD × NAG
                 elseif scheduling == "nag"
-                    v = g .* v .+ Pw(∇fn(W - g .* v, x, D * Float32(stepsize), M), W)
+                    v = g .* v .+ Pw(∇fn(W - g .* v, x, D * stepsize, M), W)
                     W .= W .+ v
                 # RSGD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = Pw(∇fn(W, x, D * Float32(stepsize), M), W)
-                    grad = grad / Float32(stepsize)
+                    grad = Pw(∇fn(W, x, D * stepsize, M), W)
+                    grad = grad / stepsize
                     v .= v .+ grad .* grad
-                    W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
+                    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
                 else
                     error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
                 end

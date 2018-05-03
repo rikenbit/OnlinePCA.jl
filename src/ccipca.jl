@@ -30,6 +30,8 @@ Reference
 function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
+    peudocount = Float32(peudocount)
+    stepsize = Float32(stepsize)
     W = zeros(Float32, M, dim) # Eigen vectors
     X = zeros(Float32, M, dim+1) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix

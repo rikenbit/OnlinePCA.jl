@@ -33,6 +33,10 @@ Reference
 function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
+    peudocount = Float32(peudocount)
+    stepsize = Float32(stepsize)
+    g = Float32(g)
+    epsilon = Float32(epsilon)
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
@@ -87,21 +91,21 @@ function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount
                 end
                 # SGD × Robbins-Monro
                 if scheduling == "robbins-monro"
-                    W .= W .+ ∇fn(W, x, D * Float32(stepsize)/(N*(s-1)+n), M)
+                    W .= W .+ ∇fn(W, x, D * stepsize/(N*(s-1)+n), M)
                 # SGD × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇fn(W, x, D * Float32(stepsize), M)
+                    v .= g .* v .+ ∇fn(W, x, D * stepsize, M)
                     W .= W .+ v
                 # SGD × NAG
                 elseif scheduling == "nag"
-                    v = g .* v + ∇fn(W - g .* v, x, D * Float32(stepsize), M)
+                    v = g .* v + ∇fn(W - g .* v, x, D * stepsize, M)
                     W .= W .+ v
                 # SGD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇fn(W, x, D * Float32(stepsize), M)
-                    grad = grad / Float32(stepsize)
+                    grad = ∇fn(W, x, D * stepsize, M)
+                    grad = grad / stepsize
                     v .= v .+ grad .* grad
-                    W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
+                    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
                 else
                     error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
                 end

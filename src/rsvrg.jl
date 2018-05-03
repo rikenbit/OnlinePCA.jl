@@ -33,6 +33,10 @@ Reference
 function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
+    peudocount = Float32(peudocount)
+    stepsize = Float32(stepsize)
+    g = Float32(g)
+    epsilon = Float32(epsilon)
     W = zeros(Float32, M, dim) # Eigen vectors
     Ws = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
@@ -65,7 +69,7 @@ function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocou
     # progress
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * Float32(stepsize)/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
+        u = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
         Ws = W
         open(input) do file
             N = read(file, Int64)
@@ -90,20 +94,20 @@ function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocou
                 end
                 # RSVRG × Robbins-Monro
                 if scheduling == "robbins-monro"
-                    W .= W .+ Pw(∇fn(W, x, D * Float32(stepsize)/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * Float32(stepsize)/(N*(s-1)+n), M), Ws) .+ u
+                    W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * stepsize/(N*(s-1)+n), M), Ws) .+ u
                 # RSVRG × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ Pw(∇fn(W, x, D * Float32(stepsize), M), W) .- Pw(∇fn(Ws, x, D * Float32(stepsize), M), Ws) .+ u
+                    v .= g .* v .+ Pw(∇fn(W, x, D * stepsize, M), W) .- Pw(∇fn(Ws, x, D * stepsize, M), Ws) .+ u
                 # RSVRG × NAG
                 elseif scheduling == "nag"
-                    v = g .* v + Pw(∇fn(W - g .* v, x, D * Float32(stepsize), M), W - g .* v) .- Pw(∇fn(Ws, x, D * Float32(stepsize), M), Ws) .+ u
+                    v = g .* v + Pw(∇fn(W - g .* v, x, D * stepsize, M), W - g .* v) .- Pw(∇fn(Ws, x, D * stepsize, M), Ws) .+ u
                     W .= W .+ v
                 # RSVRG × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = Pw(∇fn(W, x, D * Float32(stepsize), M), W) .- Pw(∇fn(Ws, x, D * Float32(stepsize), M), Ws) .+ u
-                    grad = grad / Float32(stepsize)
+                    grad = Pw(∇fn(W, x, D * stepsize, M), W) .- Pw(∇fn(Ws, x, D * stepsize, M), Ws) .+ u
+                    grad = grad / stepsize
                     v .= v .+ grad .* grad
-                    W .= W .+ Float32(stepsize) ./ (sqrt.(v) + epsilon) .* grad
+                    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
                 else
                     error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
                 end
