@@ -1,5 +1,5 @@
 """
-    oja(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+    oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
 
 Online PCA solved by stochastic gradient descent method, also known as Oja's method.
 
@@ -30,7 +30,7 @@ Reference
 ---------
 - SGD-PCA（Oja's method) : [Erkki Oja et. al., 1985](https://www.sciencedirect.com/science/article/pii/0022247X85901313), [Erkki Oja, 1992](https://www.sciencedirect.com/science/article/pii/S0893608005800899)
 """
-function oja(;input::String="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
     # Initialization
     const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors

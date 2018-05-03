@@ -22,30 +22,30 @@ hvg(;slfile="", rowmeanlist="", rowvarlist="", rowcv2list="", outdir=".")
 
 ## Oja
 ```@docs
-oja(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
 ```
 
 ## CCIPCA
 ```@docs
-ccipca(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, logdir=nothing)
+ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, logdir=nothing)
 ```
 
 ## GD
 ```@docs
-gd(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
 ```
 
 ## RSGD
 ```@docs
-rsgd(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+rsgd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
 ```
 
 ## SVRG
 ```@docs
-svrg(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+svrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
 ```
 
 ## RSVRG
 ```@docs
-rsvrg(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
 ```

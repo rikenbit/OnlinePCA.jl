@@ -1,5 +1,5 @@
 """
-    gd(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+    gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
 
 Online PCA solved by gradient descent method.
 
@@ -28,7 +28,7 @@ Output Arguments
 - `λ` : Eigen values (dim × dim)
 - `V` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 """
-function gd(;input::String="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist="", colsumlist="", masklist="", dim=3, stepsize=0.1, numepoch=5, scheduling="robbins-monro", g=0.9, epsilon=1.0e-8, logdir=nothing)
+function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
     # Initialization
     const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
