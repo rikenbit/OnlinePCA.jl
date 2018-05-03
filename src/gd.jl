@@ -86,9 +86,12 @@ function gd(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist
                 else
                     error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
                 end
+
                 # NaN
-                if any(isnan, W)
-                    error("NaN values are generated. Select other stepsize")
+                if mod((N*(s-1)+n), 1000) == 0
+                    if any(isnan, W)
+                        error("NaN values are generated. Select other stepsize")
+                    end
                 end
 
                 # Retraction

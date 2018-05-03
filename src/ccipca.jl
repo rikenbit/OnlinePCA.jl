@@ -102,10 +102,11 @@ function ccipca(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmean
                 end
 
                 # NaN
-                if any(isnan, W)
-                    error("NaN values are generated. Select other stepsize")
+                if mod((N*(s-1)+n), 1000) == 0
+                    if any(isnan, W)
+                        error("NaN values are generated. Select other stepsize")
+                    end
                 end
-
                 # save log file
                 if typeof(logdir) == String
                      if(mod((N*(s-1)+n), 1000) == 0)
