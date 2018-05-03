@@ -1,5 +1,5 @@
 """
-    ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, logdir=nothing)
+    ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=Float32(1.0), rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=Float32(0.1), numepoch::Int64=5, logdir=nothing)
 
 Online PCA solved by candid covariance-free incremental PCA.
 
@@ -27,7 +27,7 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, logdir=nothing)
+function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=Float32(1.0), rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=Float32(0.1), numepoch::Int64=5, logdir=nothing)
     # Initialization
     const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors

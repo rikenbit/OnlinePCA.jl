@@ -1,5 +1,5 @@
 """
-    rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
+    rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=Float32(1), rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=Float32(0.1), numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=Float32(0.9), epsilon::Float32=Float32(1.0e-8), logdir=nothing)
 
 Online PCA solved by Riemannian variance-reduced stochastic gradient descent method.
 
@@ -30,7 +30,7 @@ Reference
 ---------
 - RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
 """
-function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=1, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=0.9, epsilon::Float32=1.0e-8, logdir=nothing)
+function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=Float32(1), rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=Float32(0.1), numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=Float32(0.9), epsilon::Float32=Float32(1.0e-8), logdir=nothing)
     # Initialization
     const N::Int64, M::Int64 = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
