@@ -134,15 +134,19 @@ out_oja4 = oja(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.0e
 @test size(out_oja1[1]) == (99, 3)
 @test size(out_oja1[2]) == (3, )
 @test size(out_oja1[3]) == (300, 3)
+@test size(out_oja1[4]) == (99, 3)
 @test size(out_oja2[1]) == (99, 3)
 @test size(out_oja2[2]) == (3, )
 @test size(out_oja2[3]) == (300, 3)
+@test size(out_oja2[4]) == (99, 3)
 @test size(out_oja3[1]) == (99, 3)
 @test size(out_oja3[2]) == (3, )
 @test size(out_oja3[3]) == (300, 3)
+@test size(out_oja3[4]) == (99, 3)
 @test size(out_oja4[1]) == (99, 3)
 @test size(out_oja4[2]) == (3, )
 @test size(out_oja4[3]) == (300, 3)
+@test size(out_oja4[4]) == (99, 3)
 #####################################
 
 
@@ -157,33 +161,41 @@ ojacom4 = "run(`julia " * ojapath * " --input " * tmp * "/Data.dat " * " --outdi
 eval(parse(ojacom1))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(ojacom2))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(ojacom3))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(ojacom4))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 #####################################
 
@@ -195,6 +207,7 @@ out_ccipca1 = ccipca(input=tmp*"/Data.dat", dim=3, stepsize=1.0e-15, numepoch=1,
 @test size(out_ccipca1[1]) == (99, 3)
 @test size(out_ccipca1[2]) == (3, )
 @test size(out_ccipca1[3]) == (300, 3)
+@test size(out_ccipca1[4]) == (99, 3)
 #####################################
 
 
@@ -206,9 +219,11 @@ ccipcacom1 = "run(`julia " * ccipcapath * " --input " * tmp * "/Data.dat " * " -
 eval(parse(ccipcacom1))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 #####################################
 
@@ -223,15 +238,19 @@ out_gd4 = gd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.0e-1
 @test size(out_gd1[1]) == (99, 3)
 @test size(out_gd1[2]) == (3, )
 @test size(out_gd1[3]) == (300, 3)
+@test size(out_gd1[4]) == (99, 3)
 @test size(out_gd2[1]) == (99, 3)
 @test size(out_gd2[2]) == (3, )
 @test size(out_gd2[3]) == (300, 3)
+@test size(out_gd2[4]) == (99, 3)
 @test size(out_gd3[1]) == (99, 3)
 @test size(out_gd3[2]) == (3, )
 @test size(out_gd3[3]) == (300, 3)
+@test size(out_gd3[4]) == (99, 3)
 @test size(out_gd4[1]) == (99, 3)
 @test size(out_gd4[2]) == (3, )
 @test size(out_gd4[3]) == (300, 3)
+@test size(out_gd4[4]) == (99, 3)
 #####################################
 
 
@@ -246,33 +265,41 @@ gdcom4 = "run(`julia " * gdpath * " --input " * tmp * "/Data.dat " * " --outdir 
 eval(parse(gdcom1))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(gdcom2))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(gdcom3))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(gdcom4))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 #####################################
 
@@ -287,15 +314,19 @@ out_rsgd4 = rsgd(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.
 @test size(out_rsgd1[1]) == (99, 3)
 @test size(out_rsgd1[2]) == (3, )
 @test size(out_rsgd1[3]) == (300, 3)
+@test size(out_rsgd1[4]) == (99, 3)
 @test size(out_rsgd2[1]) == (99, 3)
 @test size(out_rsgd2[2]) == (3, )
 @test size(out_rsgd2[3]) == (300, 3)
+@test size(out_rsgd2[4]) == (99, 3)
 @test size(out_rsgd3[1]) == (99, 3)
 @test size(out_rsgd3[2]) == (3, )
 @test size(out_rsgd3[3]) == (300, 3)
+@test size(out_rsgd3[4]) == (99, 3)
 @test size(out_rsgd4[1]) == (99, 3)
 @test size(out_rsgd4[2]) == (3, )
 @test size(out_rsgd4[3]) == (300, 3)
+@test size(out_rsgd4[4]) == (99, 3)
 #####################################
 
 
@@ -310,33 +341,41 @@ rsgdcom4 = "run(`julia " * rsgdpath * " --input " * tmp * "/Data.dat " * " --out
 eval(parse(rsgdcom1))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsgdcom2))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsgdcom3))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsgdcom4))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 #####################################
 
@@ -351,15 +390,19 @@ out_svrg4 = svrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=1.
 @test size(out_svrg1[1]) == (99, 3)
 @test size(out_svrg1[2]) == (3, )
 @test size(out_svrg1[3]) == (300, 3)
+@test size(out_svrg1[4]) == (99, 3)
 @test size(out_svrg2[1]) == (99, 3)
 @test size(out_svrg2[2]) == (3, )
 @test size(out_svrg2[3]) == (300, 3)
+@test size(out_svrg2[4]) == (99, 3)
 @test size(out_svrg3[1]) == (99, 3)
 @test size(out_svrg3[2]) == (3, )
 @test size(out_svrg3[3]) == (300, 3)
+@test size(out_svrg3[4]) == (99, 3)
 @test size(out_svrg4[1]) == (99, 3)
 @test size(out_svrg4[2]) == (3, )
 @test size(out_svrg4[3]) == (300, 3)
+@test size(out_svrg4[4]) == (99, 3)
 #####################################
 
 
@@ -374,33 +417,41 @@ svrgcom4 = "run(`julia " * svrgpath * " --input " * tmp * "/Data.dat " * " --out
 eval(parse(svrgcom1))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(svrgcom2))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(svrgcom3))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(svrgcom4))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 #####################################
 
@@ -415,15 +466,19 @@ out_rsvrg4 = rsvrg(input=tmp*"/Data.dat", dim=3, scheduling="adagrad", stepsize=
 @test size(out_rsvrg1[1]) == (99, 3)
 @test size(out_rsvrg1[2]) == (3, )
 @test size(out_rsvrg1[3]) == (300, 3)
+@test size(out_rsvrg1[4]) == (99, 3)
 @test size(out_rsvrg2[1]) == (99, 3)
 @test size(out_rsvrg2[2]) == (3, )
 @test size(out_rsvrg2[3]) == (300, 3)
+@test size(out_rsvrg2[4]) == (99, 3)
 @test size(out_rsvrg3[1]) == (99, 3)
 @test size(out_rsvrg3[2]) == (3, )
 @test size(out_rsvrg3[3]) == (300, 3)
+@test size(out_rsvrg3[4]) == (99, 3)
 @test size(out_rsvrg4[1]) == (99, 3)
 @test size(out_rsvrg4[2]) == (3, )
 @test size(out_rsvrg4[3]) == (300, 3)
+@test size(out_rsvrg4[4]) == (99, 3)
 #####################################
 
 
@@ -438,29 +493,36 @@ rsvrgcom4 = "run(`julia " * rsvrgpath * " --input " * tmp * "/Data.dat " * " --o
 eval(parse(rsvrgcom1))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsvrgcom2))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsvrgcom3))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 rm(tmp*"/Eigen_vectors.csv")
 rm(tmp*"/Eigen_values.csv")
+rm(tmp*"/Loadings.csv")
 rm(tmp*"/Scores.csv")
 
 eval(parse(rsvrgcom4))
 @test eval(parse("filesize(\""*tmp*"/Eigen_vectors.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Eigen_values.csv"*"\")")) != 0
+@test eval(parse("filesize(\""*tmp*"/Loadings.csv"*"\")")) != 0
 @test eval(parse("filesize(\""*tmp*"/Scores.csv"*"\")")) != 0
 #####################################

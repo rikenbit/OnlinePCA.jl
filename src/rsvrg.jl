@@ -140,4 +140,5 @@ function rsvrg(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanl
         touch(outdir *"/Loadings.csv")
         touch(outdir *"/Scores.csv")
     end
+    return out
 end

@@ -117,4 +117,5 @@ function gd(;input="", outdir=nothing, logscale=true, pseudocount=1, rowmeanlist
         touch(outdir *"/Loadings.csv")
         touch(outdir *"/Scores.csv")
     end
+    return out
 end
