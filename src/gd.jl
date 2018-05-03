@@ -31,7 +31,7 @@ Output Arguments
 function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initialization
     N, M = init(input) # No.gene, No.cell
-    peudocount = Float32(peudocount)
+    pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
     g = Float32(g)
     epsilon = Float32(epsilon)
