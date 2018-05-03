@@ -17,8 +17,8 @@ function common_parse_commandline()
             default = true
         "--pseudocount", "-p"
             help = "log10(exp + pseudocount)"
-            arg_type = Float32
-            default = Float32(1.0)
+            arg_type = Float64
+            default = 1.0
         "--rowmeanlist", "-m"
             help = "mean vector of each row"
             arg_type = String
@@ -40,8 +40,8 @@ function common_parse_commandline()
             default = 3
         "--stepsize", "-s"
             help = "stepsize of PCA"
-            arg_type = Float32
-            default = Float32(0.1)
+            arg_type = Float64
+            default = 0.1
         "--numepoch", "-e"
             help = "numepoch of PCA"
             arg_type = Int64
@@ -52,12 +52,12 @@ function common_parse_commandline()
             default = "robbins-monro"
         "-g"
             help = "Ratio of non-SGD gradient"
-            arg_type = Float32
-            default = Float32(0.9)
+            arg_type = Float64
+            default = 0.9
         "--epsilon"
             help = "a small number for avoiding zero division"
-            arg_type = Float32
-            default = Float32(1.0e-8)
+            arg_type = Float64
+            default = 1.0e-8
         "--logdir", "-l"
             help = "saving log directory"
             default = nothing

@@ -20,8 +20,8 @@ function parse_commandline()
             default = true
         "--pseudocount", "-p"
             help = "log10(exp + pseudocount)"
-            arg_type = Float32
-            default = Float32(1.0)
+            arg_type = Float64
+            default = 1.0
         "--rowmeanlist", "-m"
             help = "mean vector of each row"
             default = ""
@@ -40,8 +40,8 @@ function parse_commandline()
             default = 3
         "--stepsize", "-s"
             help = "stepsize of PCA"
-            arg_type = Float32
-            default = Float32(0.1)
+            arg_type = Float64
+            default = 0.1
         "--numepoch", "-e"
             help = "numepoch of PCA"
             arg_type = Int

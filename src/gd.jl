@@ -1,5 +1,5 @@
 """
-    gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=Float32(1), rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=Float32(0.1), numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=Float32(0.9), epsilon::Float32=Float32(1.0e-8), logdir=nothing)
+    gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
 
 Online PCA solved by gradient descent method.
 
@@ -28,9 +28,13 @@ Output Arguments
 - `λ` : Eigen values (dim × dim)
 - `V` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 """
-function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float32=Float32(1), rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float32=Float32(0.1), numepoch::Int64=5, scheduling::String="robbins-monro", g::Float32=Float32(0.9), epsilon::Float32=Float32(1.0e-8), logdir=nothing)
+function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initialization
     const N::Int64, M::Int64 = init(input) # No.gene, No.cell
+    const pseudocount = parse(Float32, pseudocount)
+    const stepsize = parse(Float32, stepsize)
+    const g = parse(Float32, g)
+    const epsilon = parse(Float32, epsilon)
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
