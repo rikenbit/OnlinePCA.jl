@@ -16,8 +16,7 @@ module OnlinePCA
 		Gamma, ccdf, Chisq
 
 	# initとか消せるか確認
-
-	export init, WλV, RecError, ∇f, ∇fn, sym, Pw, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
+	export common_parse_commandline, init, WλV, RecError, ∇f, ∇fn, sym, Pw, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
 
 	include("Utils.jl")
 	include("csv2sl.jl")
