@@ -1,4 +1,4 @@
-using OnlinePCA
+{using OnlinePCA
 using Base.Test
 using Distributions
 

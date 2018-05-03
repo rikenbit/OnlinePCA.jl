@@ -32,11 +32,7 @@ Reference
 """
 function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initialization
-    const N::Int64, M::Int64 = init(input) # No.gene, No.cell
-    const pseudocount = Float32(pseudocount)
-    const stepsize = Float32(stepsize)
-    const g = Float32(g)
-    const epsilon = Float32(epsilon)
+    N, M = init(input) # No.gene, No.cell
     W = zeros(Float32, M, dim) # Eigen vectors
     Ws = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
