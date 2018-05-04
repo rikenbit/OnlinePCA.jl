@@ -37,7 +37,7 @@ function svrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocoun
     # progress
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+        u = ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
         Ws = W
         open(input) do file
             N = read(file, Int64)
