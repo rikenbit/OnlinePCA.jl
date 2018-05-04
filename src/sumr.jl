@@ -64,7 +64,7 @@ Output Files
 """
 function sumr(;slfile="", outdir=".", pseudocount=1.0)
     # Initialization
-    N, M = init(slfile)
+    N, M = nm(slfile)
 
     # 1 / 2 : Column-wise statistics
     println("1 / 2 : Column-wise statistics are calculated...")

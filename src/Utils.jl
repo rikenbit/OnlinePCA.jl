@@ -66,23 +66,18 @@ function common_parse_commandline()
     return parse_args(s)
 end
 
-# function init(slfile)
-#     N = 0
-#     M = 0
-#     open(slfile) do file
-#         N = read(file, Int64)
-#         M = read(file, Int64)
-#     end
-#     return N, M
-# end
-
-function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+function nm(input)
     N = 0
     M = 0
     open(input) do file
         N = read(file, Int64)
         M = read(file, Int64)
     end
+    return N, M
+end
+
+function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+    N, M = nm(input)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
     g = Float32(g)
