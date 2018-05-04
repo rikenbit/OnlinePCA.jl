@@ -1,19 +1,3 @@
-function momentum(v, g, W, x, D, M)
-    v .= g .* v .+ ∇fn(W, x, D, M)
-    return v
-end
-
-function nag(v, g, W, x, D, M)
-    v = g .* v + ∇fn(W - g .* v, x, D, M)
-    return v
-end
-
-function adagrad(v, g, stepsize, epsilon, W, x, D, M)
-    grad = ∇fn(W, x, D, M)
-    v .= v .+ grad .* grad
-    return v, stepsize ./ (sqrt.(v) + epsilon) .* grad
-end
-
 function deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
     x = deserialize(file)
     if logscale

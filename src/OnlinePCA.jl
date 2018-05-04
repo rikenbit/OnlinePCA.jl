@@ -15,8 +15,7 @@ module OnlinePCA
 	using Distributions:
 		Gamma, ccdf, Chisq
 
-	# initとか消せるか確認
-	export momentum, nag, adagrad, deserializex, common_parse_commandline, common_init, ccipca_init, nm, WλV, RecError, ∇f, ∇fn, sym, Pw, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
+	export deserializex, common_parse_commandline, common_init, ccipca_init, nm, WλV, RecError, ∇f, ∇fn, sym, Pw, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
 
 	include("Utils.jl")
 	include("csv2sl.jl")
