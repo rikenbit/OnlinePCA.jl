@@ -235,7 +235,7 @@ function RecError(W, input)
 end
 
 # Full Gradient
-function ∇f(W, input, D, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist)
+function ∇f(W, input, D, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
     tmpW = W
     open(input) do file
         N = read(file, Int64) # Number of Features (e.g. Genes)
