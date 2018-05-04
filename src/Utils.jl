@@ -1,3 +1,42 @@
+function gd_checkNaN(W)
+    if any(isnan, W)
+        error("NaN values are generated. Select other stepsize")
+    end
+end
+
+function checkNaN(N, s, n, W)
+    if mod((N*(s-1)+n), 1000) == 0
+        gd_checkNaN(W)
+    end
+end
+
+function gd_outputlog(s, input, logdir, W)
+    writecsv(logdir * "/W_" * string(s) * ".csv", W)
+    writecsv(logdir * "/RecError_" * string(s) * ".csv", RecError(W, input))
+    touch(logdir * "/W_" * string(s) * ".csv")
+    touch(logdir * "/RecError_" * string(s) * ".csv")
+end
+
+function outputlog(N, s, n, input, logdir, W)
+    if(mod((N*(s-1)+n), 1000) == 0)
+    writecsv(logdir * "/W_" * string((N*(s-1)+n)) * ".csv", W)
+    writecsv(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
+    touch(logdir * "/W_" * string((N*(s-1)+n)) * ".csv")
+    touch(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv")
+    end
+end
+
+function output(outdir, out)
+    writecsv(outdir * "/Eigen_vectors.csv", out[1])
+    writecsv(outdir *"/Eigen_values.csv", out[2])
+    writecsv(outdir *"/Loadings.csv", out[3])
+    writecsv(outdir *"/Scores.csv", out[4])
+    touch(outdir * "/Eigen_vectors.csv")
+    touch(outdir *"/Eigen_values.csv")
+    touch(outdir *"/Loadings.csv")
+    touch(outdir *"/Scores.csv")
+end
+
 function deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
     x = deserialize(file)
     if logscale

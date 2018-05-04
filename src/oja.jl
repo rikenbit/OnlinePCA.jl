@@ -59,24 +59,13 @@ function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount
                 else
                     error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
                 end
-
                 # NaN
-                if mod((N*(s-1)+n), 1000) == 0
-                    if any(isnan, W)
-                        error("NaN values are generated. Select other stepsize")
-                    end
-                end
-
+                checkNaN(N, s, n, W)
                 # Retraction
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if typeof(logdir) == String
-                     if(mod((N*(s-1)+n), 1000) == 0)
-                        writecsv(logdir * "/W_" * string((N*(s-1)+n)) * ".csv", W)
-                        writecsv(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
-                        touch(logdir * "/W_" * string((N*(s-1)+n)) * ".csv")
-                        touch(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv")
-                    end
+                    outputlog(N, s, n, input, logdir, W)
                 end
             end
         end
@@ -86,14 +75,7 @@ function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount
     # Return, W, λ, V
     out = WλV(W, input, dim)
     if typeof(outdir) == String
-        writecsv(outdir * "/Eigen_vectors.csv", out[1])
-        writecsv(outdir *"/Eigen_values.csv", out[2])
-        writecsv(outdir *"/Loadings.csv", out[3])
-        writecsv(outdir *"/Scores.csv", out[4])
-        touch(outdir * "/Eigen_vectors.csv")
-        touch(outdir *"/Eigen_values.csv")
-        touch(outdir *"/Loadings.csv")
-        touch(outdir *"/Scores.csv")
+        output(outdir, out)
     end
     return out
 end
