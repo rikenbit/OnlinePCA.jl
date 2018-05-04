@@ -48,18 +48,19 @@ function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount
                     W .= W .+ ∇fn(W, x, D * stepsize/(N*(s-1)+n), M)
                 # SGD × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇fn(W, x, D * stepsize, M)
-                    W .= W .+ v
+                    out = momentum(v, g, W, x, D * stepsize, M)
+                    v .= out
+                    W .= W .+ out
                 # SGD × NAG
                 elseif scheduling == "nag"
-                    v = g .* v + ∇fn(W - g .* v, x, D * stepsize, M)
-                    W .= W .+ v
+                    out = nag(v, g, W, x, D * stepsize, M)
+                    v .= out
+                    W .= W .+ out
                 # SGD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇fn(W, x, D * stepsize, M)
-                    grad = grad / stepsize
-                    v .= v .+ grad .* grad
-                    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
+                    out = adagrad(v, g, W, x, D * stepsize, M)
+                    v .= out[1]
+                    W .= W .+ out[2]
                 else
                     error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
                 end
