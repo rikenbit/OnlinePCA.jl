@@ -8,7 +8,7 @@ function nag(v, g, W, x, D, M)
     return v
 end
 
-function adagrad(v, g, epsilon, W, x, D, M)
+function adagrad(v, g, stepsize, epsilon, W, x, D, M)
     grad = ∇fn(W, x, D, M)
     v .= v .+ grad .* grad
     return v, stepsize ./ (sqrt.(v) + epsilon) .* grad

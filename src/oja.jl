@@ -58,7 +58,7 @@ function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount
                     W .= W .+ out
                 # SGD × Adagrad
                 elseif scheduling == "adagrad"
-                    out = adagrad(v, g, epsilon, W, x, D * stepsize, M)
+                    out = adagrad(v, g, stepsize, epsilon, W, x, D * stepsize, M)
                     v .= out[1]
                     W .= W .+ out[2]
                 else
