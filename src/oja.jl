@@ -32,7 +32,37 @@ Reference
 """
 function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initial Setting
-    N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+    # N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+    N, M = nm(input)
+    pseudocount = Float32(pseudocount)
+    stepsize = Float32(stepsize)
+    g = Float32(g)
+    epsilon = Float32(epsilon)
+    W = zeros(Float32, M, dim) # Eigen vectors
+    v = zeros(Float32, M, dim) # Temporal Vector (Same length
+    D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
+    for i=1:dim
+        W[i,i] = 1
+    end
+    # mean (gene), library size (cell), cell mask list
+    rowmeanvec = zeros(Float32, N, 1)
+    colsumvec = zeros(Float32, M, 1)
+    cellmaskvec = zeros(Float32, M, 1)
+    if rowmeanlist != ""
+        rowmeanvec = readcsv(rowmeanlist, Float32)
+    end
+    if colsumlist != ""
+        colsumvec = readcsv(colsumlist, Float32)
+    end
+    if masklist != ""
+        cellmaskvec = readcsv(masklist, Float32)
+    end
+    # directory for log file
+    if typeof(logdir) == String
+        if(!isdir(logdir))
+            mkdir(logdir)
+        end
+    end
 
     # progress
     progress = Progress(numepoch)
