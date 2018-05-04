@@ -42,7 +42,7 @@ function rsgd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocoun
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+                x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 # RSGD × Robbins-Monro
                 if scheduling == "robbins-monro"
                     W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W)

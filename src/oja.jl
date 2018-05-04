@@ -42,7 +42,7 @@ function oja(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+                x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 # SGD × Robbins-Monro
                 if scheduling == "robbins-monro"
                     W .= W .+ ∇fn(W, x, D * stepsize/(N*(s-1)+n), M)
