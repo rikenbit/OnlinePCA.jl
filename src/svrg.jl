@@ -32,34 +32,19 @@ Reference
 """
 function svrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initial Setting
-    N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
+    N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
 
     # progress
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, rowmeanlist, colsumlist, rowmeanvec, colsumvec)
+        u = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
         Ws = W
         open(input) do file
             N = read(file, Int64)
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                x = deserialize(file)
-                if logscale
-                    x = log10.(x + pseudocount)
-                end
-                if masklist != ""
-                    x = x[cellmaskvec]
-                end
-                if (rowmeanlist != "") && (colsumlist != "")
-                    x = (x - rowmeanvec[n, 1]) ./ colsumvec
-                end
-                if (rowmeanlist != "") && (colsumlist == "")
-                    x = x - rowmeanvec[n, 1]
-                end
-                if (rowmeanlist == "") && (colsumlist != "")
-                    x = x ./ colsumvec
-                end
+                x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
                 # SVRG × Robbins-Monro
                 if scheduling == "robbins-monro"
                     W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * stepsize/(N*(s-1)+n), M), Ws) .+ u

@@ -32,7 +32,7 @@ Reference
 """
 function rsgd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
     # Initial Setting
-    N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
+    N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
 
     # progress
     progress = Progress(numepoch)
@@ -42,22 +42,7 @@ function rsgd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocoun
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                x = deserialize(file)
-                if logscale
-                    x = log10.(x + pseudocount)
-                end
-                if masklist != ""
-                    x = x[cellmaskvec]
-                end
-                if (rowmeanlist != "") && (colsumlist != "")
-                    x = (x - rowmeanvec[n, 1]) ./ colsumvec
-                end
-                if (rowmeanlist != "") && (colsumlist == "")
-                    x = x - rowmeanvec[n, 1]
-                end
-                if (rowmeanlist == "") && (colsumlist != "")
-                    x = x ./ colsumvec
-                end
+                x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
                 # RSGD × Robbins-Monro
                 if scheduling == "robbins-monro"
                     W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W)

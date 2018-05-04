@@ -29,7 +29,7 @@ Reference
 """
 function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, logdir=nothing)
     # Initial Setting
-    N, M, pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, cellmaskvec = ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
+    N, M, pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec = ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
 
     # progress
     progress = Progress(numepoch)
@@ -39,22 +39,7 @@ function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudoco
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                X[:, 1] = deserialize(file)
-                if logscale
-                    X[:, 1] = log10.(X[:, 1] + pseudocount)
-                end
-                if masklist != ""
-                    X[:, 1] = X[:, 1][cellmaskvec]
-                end
-                if (rowmeanlist != "") && (colsumlist != "")
-                    X[:, 1] = (X[:, 1] - rowmeanvec[n, 1]) ./ colsumvec
-                end
-                if (rowmeanlist != "") && (colsumlist == "")
-                    X[:, 1] = X[:, 1] - rowmeanvec[n, 1]
-                end
-                if (rowmeanlist == "") && (colsumlist != "")
-                    X[:, 1] = X[:, 1] ./ colsumvec
-                end
+                X[:, 1] = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
 
                 k = N * (s - 1) + n
                 for i = 1:min(dim, k)
