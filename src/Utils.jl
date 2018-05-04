@@ -166,7 +166,7 @@ function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist,
             mkdir(logdir)
         end
     end
-    return N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec
 end
 
 function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
