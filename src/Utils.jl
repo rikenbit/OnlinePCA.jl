@@ -170,12 +170,7 @@ function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist,
 end
 
 function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
-    N = 0
-    M = 0
-    open(input) do file
-        N = read(file, Int64)
-        M = read(file, Int64)
-    end
+    N, M = nm(input)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
     W = zeros(Float32, M, dim) # Eigen vectors
@@ -203,7 +198,7 @@ function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist,
             mkdir(logdir)
         end
     end
-    return N, M, pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, cellmaskvec
+    return pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, cellmaskvec
 end
 
 # Eigen value, Loading, Scores

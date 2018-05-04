@@ -29,7 +29,7 @@ Reference
 """
 function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, logdir=nothing)
     # Initial Setting
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
+    pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, cellmaskvec = ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
 
     # progress
     progress = Progress(numepoch)
