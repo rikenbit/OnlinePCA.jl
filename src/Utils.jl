@@ -147,10 +147,9 @@ function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist,
     for i=1:dim
         W[i,i] = 1
     end
-    # mean (gene), library size (cell), cell mask list
     rowmeanvec = zeros(Float32, N, 1)
     colsumvec = zeros(Float32, M, 1)
-    cellmaskvec = zeros(Float32, M, 1)
+    maskvec = zeros(Float32, M, 1)
     if rowmeanlist != ""
         rowmeanvec = readcsv(rowmeanlist, Float32)
     end
@@ -158,7 +157,7 @@ function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist,
         colsumvec = readcsv(colsumlist, Float32)
     end
     if masklist != ""
-        cellmaskvec = readcsv(masklist, Float32)
+        maskvec = readcsv(masklist, Float32)
     end
     # directory for log file
     if typeof(logdir) == String
@@ -166,7 +165,7 @@ function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist,
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec
 end
 
 function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
@@ -179,10 +178,9 @@ function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist,
     for i=1:dim
         W[i,i] = 1
     end
-    # mean (gene), library size (cell), cell mask list
     rowmeanvec = zeros(Float32, N, 1)
     colsumvec = zeros(Float32, M, 1)
-    cellmaskvec = zeros(Float32, M, 1)
+    maskvec = zeros(Float32, M, 1)
     if rowmeanlist != ""
         rowmeanvec = readcsv(rowmeanlist, Float32)
     end
@@ -190,7 +188,7 @@ function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist,
         colsumvec = readcsv(colsumlist, Float32)
     end
     if masklist != ""
-        cellmaskvec = readcsv(masklist, Float32)
+        maskvec = readcsv(masklist, Float32)
     end
     # directory for log file
     if typeof(logdir) == String
@@ -198,7 +196,7 @@ function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist,
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, cellmaskvec
+    return pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec
 end
 
 # Eigen value, Loading, Scores
