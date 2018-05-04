@@ -35,47 +35,40 @@ function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount:
     # progress
     progress = Progress(numepoch)
     for s = 1:numepoch
-        open(input) do file
-            N = read(file, Int64)
-            M = read(file, Int64)
-            for n = 1:N
-                # GD × Robbins-Monro
-                if scheduling == "robbins-monro"
-                    W .= W .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-                # GD × Momentum
-                elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-                    W .= W .+ v
-                # GD × NAG
-                elseif scheduling == "nag"
-                    v = g .* v + ∇f(W - g .* v, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-                    W .= W .+ v
-                # GD × Adagrad
-                elseif scheduling == "adagrad"
-                    grad = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-                    grad = grad / stepsize
-                    v .= v .+ grad .* grad
-                    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
-                else
-                    error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
-                end
+            # GD × Robbins-Monro
+            if scheduling == "robbins-monro"
+                W .= W .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+            # GD × Momentum
+            elseif scheduling == "momentum"
+                v .= g .* v .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+                W .= W .+ v
+            # GD × NAG
+            elseif scheduling == "nag"
+                v = g .* v + ∇f(W - g .* v, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+                W .= W .+ v
+            # GD × Adagrad
+            elseif scheduling == "adagrad"
+                grad = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+                grad = grad / stepsize
+                v .= v .+ grad .* grad
+                W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
+            else
+                error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
+            end
 
-                # NaN
-                if mod((N*(s-1)+n), 1000) == 0
-                    if any(isnan, W)
-                        error("NaN values are generated. Select other stepsize")
-                    end
-                end
+            # NaN
+            if any(isnan, W)
+                error("NaN values are generated. Select other stepsize")
+            end
 
-                # Retraction
-                W .= full(qrfact!(W)[:Q], thin=true)
-                # save log file
-                if typeof(logdir) == String
-                    writecsv(logdir * "/W_" * string(s) * ".csv", W)
-                    writecsv(logdir * "/RecError_" * string(s) * ".csv", RecError(W, input))
-                    touch(logdir * "/W_" * string(s) * ".csv")
-                    touch(logdir * "/RecError_" * string(s) * ".csv")
-                end
+            # Retraction
+            W .= full(qrfact!(W)[:Q], thin=true)
+            # save log file
+            if typeof(logdir) == String
+                writecsv(logdir * "/W_" * string(s) * ".csv", W)
+                writecsv(logdir * "/RecError_" * string(s) * ".csv", RecError(W, input))
+                touch(logdir * "/W_" * string(s) * ".csv")
+                touch(logdir * "/RecError_" * string(s) * ".csv")
             end
         end
         next!(progress)
