@@ -76,7 +76,7 @@ end
 #     return N, M
 # end
 
-function init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
     N = 0
     M = 0
     open(input) do file
@@ -113,6 +113,43 @@ function init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumv
         end
     end
     return N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec
+end
+
+function ccipca_init(input, pseudocount, stepsize, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+    N = 0
+    M = 0
+    open(input) do file
+        N = read(file, Int64)
+        M = read(file, Int64)
+    end
+    pseudocount = Float32(pseudocount)
+    stepsize = Float32(stepsize)
+    W = zeros(Float32, M, dim) # Eigen vectors
+    v = zeros(Float32, M, dim) # Temporal Vector (Same length
+    D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
+    for i=1:dim
+        W[i,i] = 1
+    end
+    # mean (gene), library size (cell), cell mask list
+    rowmeanvec = zeros(Float32, N, 1)
+    colsumvec = zeros(Float32, M, 1)
+    cellmaskvec = zeros(Float32, M, 1)
+    if rowmeanlist != ""
+        rowmeanvec = readcsv(rowmeanlist, Float32)
+    end
+    if colsumlist != ""
+        colsumvec = readcsv(colsumlist, Float32)
+    end
+    if masklist != ""
+        cellmaskvec = readcsv(masklist, Float32)
+    end
+    # directory for log file
+    if typeof(logdir) == String
+        if(!isdir(logdir))
+            mkdir(logdir)
+        end
+    end
+    return N, M, pseudocount, stepsize, W, v, D, rowmeanvec, colsumvec, cellmaskvec
 end
 
 # Eigen value, Loading, Scores

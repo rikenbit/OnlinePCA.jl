@@ -31,19 +31,8 @@ Reference
 - RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
 """
 function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
-    # Initialization
-    N, M = init(input) # No.gene, No.cell
-    pseudocount = Float32(pseudocount)
-    stepsize = Float32(stepsize)
-    g = Float32(g)
-    epsilon = Float32(epsilon)
-    W = zeros(Float32, M, dim) # Eigen vectors
-    Ws = zeros(Float32, M, dim) # Eigen vectors
-    v = zeros(Float32, M, dim) # Temporal Vector (Same length as x)
-    D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
-    for i=1:dim
-        W[i,i] = 1
-    end
+    # Initial Setting
+    N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
 
     # mean (gene), library size (cell), cell mask list
     rowmeanvec = zeros(Float32, N, 1)

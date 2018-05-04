@@ -28,37 +28,8 @@ Reference
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
 function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, logdir=nothing)
-    # Initialization
-    N, M = init(input) # No.gene, No.cell
-    pseudocount = Float32(pseudocount)
-    stepsize = Float32(stepsize)
-    W = zeros(Float32, M, dim) # Eigen vectors
-    X = zeros(Float32, M, dim+1) # Temporal Vector (Same length as x)
-    D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
-    for i=1:dim
-        W[i,i] = 1
-    end
-
-    # mean (gene), library size (cell), cell mask list
-    rowmeanvec = zeros(Float32, N, 1)
-    colsumvec = zeros(Float32, M, 1)
-    cellmaskvec = zeros(Float32, M, 1)
-    if rowmeanlist != ""
-        rowmeanvec = readcsv(rowmeanlist, Float32)
-    end
-    if colsumlist != ""
-        colsumvec = readcsv(colsumlist, Float32)
-    end
-    if masklist != ""
-        cellmaskvec = readcsv(masklist, Float32)
-    end
-
-    # directory for log file
-    if typeof(logdir) == String
-        if(!isdir(logdir))
-            mkdir(logdir)
-        end
-    end
+    # Initial Setting
+    N, M, pseudocount, stepsize, W, v, D, rowmeanvec, colsumvec, cellmaskvec = ccipca_init(input, pseudocount, stepsize, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
 
     # progress
     progress = Progress(numepoch)
