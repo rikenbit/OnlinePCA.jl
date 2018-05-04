@@ -41,18 +41,18 @@ function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount:
             for n = 1:N
                 # GD × Robbins-Monro
                 if scheduling == "robbins-monro"
-                    W .= W .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+                    W .= W .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 # GD × Momentum
                 elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+                    v .= g .* v .+ ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                     W .= W .+ v
                 # GD × NAG
                 elseif scheduling == "nag"
-                    v = g .* v + ∇f(W - g .* v, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+                    v = g .* v + ∇f(W - g .* v, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                     W .= W .+ v
                 # GD × Adagrad
                 elseif scheduling == "adagrad"
-                    grad = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+                    grad = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                     grad = grad / stepsize
                     v .= v .+ grad .* grad
                     W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad

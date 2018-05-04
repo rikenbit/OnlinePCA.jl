@@ -39,7 +39,7 @@ function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudoco
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                X[:, 1] = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+                X[:, 1] = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
 
                 k = N * (s - 1) + n
                 for i = 1:min(dim, k)

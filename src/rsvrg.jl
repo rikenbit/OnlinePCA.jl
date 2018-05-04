@@ -37,14 +37,14 @@ function rsvrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocou
     # progress
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+        u = ∇f(W, input, D * stepsize/s, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
         Ws = W
         open(input) do file
             N = read(file, Int64)
             M = read(file, Int64)
             for n = 1:N
                 # Data Import
-                x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+                x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 # RSVRG × Robbins-Monro
                 if scheduling == "robbins-monro"
                     W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * stepsize/(N*(s-1)+n), M), Ws) .+ u

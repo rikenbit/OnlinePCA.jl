@@ -1,4 +1,4 @@
-function deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+function deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
     x = deserialize(file)
     if logscale
         x = log10.(x + pseudocount)
@@ -235,14 +235,14 @@ function RecError(W, input)
 end
 
 # Full Gradient
-function ∇f(W, input, D, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+function ∇f(W, input, D, N, M, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist)
     tmpW = W
     open(input) do file
         N = read(file, Int64) # Number of Features (e.g. Genes)
         M = read(file, Int64) # Number of samples (e.g. Cells)
         for n = 1:N
             # Data Import
-            x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, masklist, maskvec)
+            x = deserializex(file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
             # Full Gradient
             tmpW .= tmpW .+ ∇fn(W, x, D, M)
         end
