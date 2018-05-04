@@ -78,7 +78,7 @@ function nm(input)
     return N, M
 end
 
-function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, cellmasklist, logdir)
     N, M = nm(input)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
@@ -112,7 +112,7 @@ function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanvec, 
     return N, M, pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, cellmaskvec
 end
 
-function ccipca_init(input, pseudocount, stepsize, dim, rowmeanvec, colsumvec, cellmaskvec, logdir)
+function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, cellmasklist, logdir)
     N = 0
     M = 0
     open(input) do file
