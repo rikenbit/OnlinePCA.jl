@@ -122,7 +122,7 @@ function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist,
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
     W = zeros(Float32, M, dim) # Eigen vectors
-    v = zeros(Float32, M, dim) # Temporal Vector (Same length
+    X = zeros(Float32, M, dim+1) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
     for i=1:dim
         W[i,i] = 1
@@ -146,7 +146,7 @@ function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist,
             mkdir(logdir)
         end
     end
-    return N, M, pseudocount, stepsize, W, v, D, rowmeanvec, colsumvec, cellmaskvec
+    return N, M, pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, cellmaskvec
 end
 
 # Eigen value, Loading, Scores
