@@ -1,5 +1,5 @@
 """
-    hvg(;slfile="", rowmeanlist="", rowvarlist="", rowcv2list="", outdir=".")
+    hvg(;slfile::AbstractString="", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", rowcv2list::AbstractString="", outdir::AbstractString=".")
 
 This function perform highly variable genes, which is an feature selection method in scRNA-seq studies.
 
@@ -25,7 +25,7 @@ Reference
 ---------
 - [Highly Variable Genes](http://pklab.med.harvard.edu/scw2014/subpop_tutorial.html)
 """
-function hvg(;slfile="", rowmeanlist="", rowvarlist="", rowcv2list="", outdir=".")
+function hvg(;slfile::AbstractString="", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", rowcv2list::AbstractString="", outdir::AbstractString=".")
     # Initialization
     N, M = nm(slfile)
     rowmeanlist = readcsv(rowmeanlist)

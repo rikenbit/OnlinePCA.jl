@@ -1,5 +1,5 @@
 """
-    gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
+    gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by gradient descent method.
 
@@ -28,40 +28,34 @@ Output Arguments
 - `λ` : Eigen values (dim × dim)
 - `V` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 """
-function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
+function gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
+    pca = GD()
+    if scheduling == "robbins-monro"
+        scheduling = ROBBINS_MONRO()
+    elseif scheduling == "momentum"
+        scheduling = MOMENTUM()
+    elseif scheduling == "nag"
+        scheduling = NAG()
+    elseif scheduling == "adagrad"
+        scheduling = ADAGRAD()
+    else
+        error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
+    end
+    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca)
 
-    # progress
+    # Each epoch s
     progress = Progress(numepoch)
     for s = 1:numepoch
-        # GD × Robbins-Monro
-        if scheduling == "robbins-monro"
-            W .= W .+ ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-        # GD × Momentum
-        elseif scheduling == "momentum"
-            v .= g .* v .+ ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            W .= W .+ v
-        # GD × NAG
-        elseif scheduling == "nag"
-            v = g .* v + ∇f(W - g .* v, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            W .= W .+ v
-        # GD × Adagrad
-        elseif scheduling == "adagrad"
-            grad = ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            grad = grad / stepsize
-            v .= v .+ grad .* grad
-            W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
-        else
-            error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
-        end
+        # Update Eigen vector
+        W, v = gdupdate(scheduling, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
         # NaN
-        gd_checkNaN(W)
+        checkNaN(W, pca)
         # Retraction
         W .= full(qrfact!(W)[:Q], thin=true)
         # save log file
         if typeof(logdir) == String
-            gd_outputlog(s, input, logdir, W)
+            outputlog(s, input, logdir, W, pca)
         end
         next!(progress)
     end
@@ -72,4 +66,34 @@ function gd(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount:
         output(outdir, out)
     end
     return out
+end
+
+# GD × Robbins-Monro
+function gdupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    W .= W .+ ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    v = nothing
+    return W, v
+end
+
+# GD × Momentum
+function gdupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    v .= g .* v .+ ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    W .= W .+ v
+    return W, v
+end
+
+# GD × NAG
+function gdupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    v = g .* v + ∇f(W - g .* v, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    W .= W .+ v
+    return W, v
+end
+
+# GD × Adagrad
+function gdupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    grad = ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    grad = grad / stepsize
+    v .= v .+ grad .* grad
+    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
+    return W, v
 end

@@ -9,18 +9,23 @@ function parse_commandline()
     @add_arg_table s begin
         "--slfile", "-s"
             help = "input file (serialized)"
+            arg_type = AbstractString
             required = true
         "--rowmeanlist", "-m"
             help = "mean vector of each row"
+            arg_type = AbstractString
             required = true
         "--rowvarlist", "-v"
             help = "var vector of each row"
+            arg_type = AbstractString
             required = true
         "--rowcv2list", "-c"
             help = "cv2 vector of each row"
+            arg_type = AbstractString
             required = true
         "--outdir", "-o"
             help = "output directory"
+            arg_type = AbstractString
             default = "."
             required = false
     end

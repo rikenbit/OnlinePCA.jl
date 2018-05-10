@@ -1,5 +1,5 @@
 """
-    svrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
+    svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by variance-reduced stochastic gradient descent method, also known as VR-PCA.
 
@@ -30,11 +30,23 @@ Reference
 ---------
 - SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 """
-function svrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, scheduling::String="robbins-monro", g::Float64=0.9, epsilon::Float64=1.0e-8, logdir=nothing)
+function svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec = common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
+    pca = SVRG()
+    if scheduling == "robbins-monro"
+        scheduling = ROBBINS_MONRO()
+    elseif scheduling == "momentum"
+        scheduling = MOMENTUM()
+    elseif scheduling == "nag"
+        scheduling = NAG()
+    elseif scheduling == "adagrad"
+        scheduling = ADAGRAD()
+    else
+        error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
+    end
+    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca)
 
-    # progress
+    # Each epoch s
     progress = Progress(numepoch)
     for s = 1:numepoch
         u = ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
@@ -42,36 +54,19 @@ function svrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocoun
         open(input) do file
             N = read(file, Int64)
             M = read(file, Int64)
+            # Each step n
             for n = 1:N
-                # Data Import
+                # Row vector of data matrix
                 x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-                # SVRG × Robbins-Monro
-                if scheduling == "robbins-monro"
-                    W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * stepsize/(N*(s-1)+n), M), Ws) .+ u
-                # SVRG × Momentum
-                elseif scheduling == "momentum"
-                    v .= g .* v .+ ∇fn(W, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
-                    W .= W .+ v
-                # SVRG × NAG
-                elseif scheduling == "nag"
-                    v = g .* v + ∇fn(W - g .* v, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
-                    W .= W .+ v
-                # SVRG × Adagrad
-                elseif scheduling == "adagrad"
-                    grad = ∇fn(W, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
-                    grad = grad / stepsize
-                    v .= v .+ grad .* grad
-                    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
-                else
-                    error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
-                end
+                # Update Eigen vector
+                W, v = svrgupdate(scheduling, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
                 # NaN
-                checkNaN(N, s, n, W)
+                checkNaN(N, s, n, W, pca)
                 # Retraction
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if typeof(logdir) == String
-                    outputlog(N, s, n, input, logdir, W)
+                    outputlog(N, s, n, input, logdir, W, pca)
                 end
             end
         end
@@ -84,4 +79,34 @@ function svrg(;input::String="", outdir=nothing, logscale::Bool=true, pseudocoun
         output(outdir, out)
     end
     return out
+end
+
+# SVRG × Robbins-Monro
+function svrgupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
+    W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * stepsize/(N*(s-1)+n), M), Ws) .+ u
+    v = nothing
+    return W, v
+end
+
+# SVRG × Momentum
+function svrgupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
+    v .= g .* v .+ ∇fn(W, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
+    W .= W .+ v
+    return W, v
+end
+
+# SVRG × NAG
+function svrgupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
+    v = g .* v + ∇fn(W - g .* v, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
+    W .= W .+ v
+    return W, v
+end
+
+# SVRG × Adagrad
+function svrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
+    grad = ∇fn(W, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
+    grad = grad / stepsize
+    v .= v .+ grad .* grad
+    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
+    return W, v
 end

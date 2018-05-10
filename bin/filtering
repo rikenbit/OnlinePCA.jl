@@ -9,15 +9,19 @@ function parse_commandline()
     @add_arg_table s begin
         "--slfile", "-s"
             help = "input file (serialized)"
+            arg_type = AbstractString
             required = true
         "--featurelist", "-g"
             help = "Feature list for filtering"
+            arg_type = AbstractString
             required = true
         "--thr", "-t"
             help = "Threshold for filtering"
+            arg_type = AbstractString
             required = true
         "--outdir", "-o"
             help = "output directory"
+            arg_type = AbstractString
             default = "."
             required = false
     end
@@ -33,7 +37,9 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    filtering(slfile=parsed_args["slfile"], featurelist=parsed_args["featurelist"], thr=parsed_args["thr"], outdir=parsed_args["outdir"])
+    thr = parse(Float32, parsed_args["thr"])
+
+    OnlinePCA.filtering(slfile=parsed_args["slfile"], featurelist=parsed_args["featurelist"], thr=thr, outdir=parsed_args["outdir"])
 end
 
 main()

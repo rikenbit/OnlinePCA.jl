@@ -9,9 +9,11 @@ function parse_commandline()
     @add_arg_table s begin
         "--csvfile", "-c"
             help = "input file (csv)"
+            arg_type = AbstractString
             required = true
         "--slfile", "-s"
             help = "output file (serialized)"
+            arg_type = AbstractString
             required = true
     end
 

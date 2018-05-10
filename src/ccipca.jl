@@ -1,5 +1,5 @@
 """
-    ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, logdir=nothing)
+    ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by candid covariance-free incremental PCA.
 
@@ -27,20 +27,22 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudocount::Float64=1.0, rowmeanlist::String="", colsumlist::String="", masklist::String="", dim::Int64=3, stepsize::Float64=0.1, numepoch::Int64=5, logdir=nothing)
+function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
-    pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec = ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
+    pca = CCIPCA()
+    pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M = init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir, pca)
 
-    # progress
+    # Each epoch s
     progress = Progress(numepoch)
     for s = 1:numepoch
         open(input) do file
             N = read(file, Int64)
             M = read(file, Int64)
+            # Each step n
             for n = 1:N
                 # Data Import
                 X[:, 1] = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-
+                # CCIPCA
                 k = N * (s - 1) + n
                 for i = 1:min(dim, k)
                     if i == k
@@ -59,10 +61,10 @@ function ccipca(;input::String="", outdir=nothing, logscale::Bool=true, pseudoco
                     end
                 end
                 # NaN
-                checkNaN(N, s, n, W)
+                checkNaN(N, s, n, W, pca)
                 # save log file
                 if typeof(logdir) == String
-                    outputlog(N, s, n, input, logdir, W)
+                    outputlog(N, s, n, input, logdir, W, pca)
                 end
             end
         end

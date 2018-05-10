@@ -1,5 +1,5 @@
 """
-    csv2sl(;csvfile="", slfile="")
+    csv2sl(;csvfile::AbstractString="", slfile::AbstractString="")
 
 Convert a CSV file to Julia Binary file.
 
@@ -9,7 +9,7 @@ Reference
 ---------
 - [Serialization・The Julia Language](https://docs.julialang.org/en/latest/stdlib/Serialization/)
 """
-function csv2sl(;csvfile="", slfile="")
+function csv2sl(;csvfile::AbstractString="", slfile::AbstractString="")
     open(slfile, "w") do file
         global nrow = 0
         global ncol = 0

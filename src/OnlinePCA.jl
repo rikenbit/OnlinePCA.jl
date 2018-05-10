@@ -15,7 +15,7 @@ module OnlinePCA
 	using Distributions:
 		Gamma, ccdf, Chisq
 
-	export gd_checkNaN, checkNaN, gd_outputlog, outputlog, output, deserializex, common_parse_commandline, common_init, ccipca_init, nm, WλV, RecError, ∇f, ∇fn, sym, Pw, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
+	export output, common_parse_commandline, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
 
 	include("Utils.jl")
 	include("csv2sl.jl")

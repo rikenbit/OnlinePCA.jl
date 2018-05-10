@@ -1,32 +1,52 @@
-function gd_checkNaN(W)
+# Types
+struct OJA end
+struct CCIPCA end
+struct GD end
+struct RSGD end
+struct SVRG end
+struct RSVRG end
+
+struct ROBBINS_MONRO end
+struct MOMENTUM end
+struct NAG end
+struct ADAGRAD end
+
+# Check NaN value (only GD)
+function checkNaN(W::AbstractArray, pca::GD)
     if any(isnan, W)
         error("NaN values are generated. Select other stepsize")
     end
 end
 
-function checkNaN(N, s, n, W)
+# Check NaN value (other PCA)
+function checkNaN(N::Number, s::Number, n::Number, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG})
     if mod((N*(s-1)+n), 1000) == 0
-        gd_checkNaN(W)
+        if any(isnan, W)
+            error("NaN values are generated. Select other stepsize")
+        end
     end
 end
 
-function gd_outputlog(s, input, logdir, W)
-    writecsv(logdir * "/W_" * string(s) * ".csv", W)
-    writecsv(logdir * "/RecError_" * string(s) * ".csv", RecError(W, input))
-    touch(logdir * "/W_" * string(s) * ".csv")
-    touch(logdir * "/RecError_" * string(s) * ".csv")
+# Output log file （only GD）
+function outputlog(s::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::GD)
+    writecsv("$(logdir)/W_$(string(s)).csv", W)
+    writecsv("$(logdir)/RecError_$(string(s)).csv", RecError(W, input))
+    touch("$(logdir)/W_$(string(s)).csv")
+    touch("$(logdir)/RecError_$(string(s)).csv")
 end
 
-function outputlog(N, s, n, input, logdir, W)
+# Output log file (other PCA)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG})
     if(mod((N*(s-1)+n), 1000) == 0)
-    writecsv(logdir * "/W_" * string((N*(s-1)+n)) * ".csv", W)
-    writecsv(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv", RecError(W, input))
-    touch(logdir * "/W_" * string((N*(s-1)+n)) * ".csv")
-    touch(logdir * "/RecError_" * string((N*(s-1)+n)) * ".csv")
+        writecsv("$(logdir)/W_$(string((N*(s-1)+n))).csv", W)
+        writecsv("$(logdir)/RecError_$(string((N*(s-1)+n))).csv", RecError(W, input))
+        touch("$(logdir)/W_$(string((N*(s-1)+n))).csv")
+        touch("$(logdir)/RecError_$(string((N*(s-1)+n))).csv")
     end
 end
 
-function output(outdir, out)
+# Output the result of PCA
+function output(outdir::AbstractString, out::Tuple)
     writecsv(outdir * "/Eigen_vectors.csv", out[1])
     writecsv(outdir *"/Eigen_values.csv", out[2])
     writecsv(outdir *"/Loadings.csv", out[3])
@@ -37,95 +57,136 @@ function output(outdir, out)
     touch(outdir *"/Scores.csv")
 end
 
-function deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-    x = deserialize(file)
-    if logscale
-        x = log10.(x + pseudocount)
-    end
-    if masklist != ""
-        x = x[maskvec]
-    end
-    if (rowmeanlist != "") && (colsumlist != "")
-        x = (x - rowmeanvec[n, 1]) ./ colsumvec
-    end
-    if (rowmeanlist != "") && (colsumlist == "")
-        x = x - rowmeanvec[n, 1]
-    end
-    if (rowmeanlist == "") && (colsumlist != "")
-        x = x ./ colsumvec
-    end
-    return x
-end
-
-# options
-function common_parse_commandline()
+# Parse command line options (only CCIPCA)
+function parse_commandline(pca::CCIPCA)
     s = ArgParseSettings()
 
     @add_arg_table s begin
         "--input", "-i"
             help = "input file"
-            arg_type = String
+            arg_type = AbstractString
             required = true
         "--outdir", "-o"
             help = "output directory"
+            arg_type = AbstractString
             default = "."
             required = false
         "--logscale"
             help = "whether the value are converted to log-scale"
-            arg_type = Bool
+            arg_type = Union{Bool,AbstractString}
             default = true
         "--pseudocount", "-p"
             help = "log10(exp + pseudocount)"
-            arg_type = Float64
+            arg_type = Union{Number,AbstractString}
             default = 1.0
         "--rowmeanlist", "-m"
             help = "mean vector of each row"
-            arg_type = String
+            arg_type = AbstractString
             default = ""
             required = false
         "--colsumlist"
             help = "Sum of counts of each column"
-            arg_type = String
+            arg_type = AbstractString
             default = ""
             required = false
         "--masklist"
             help = "Columns to be remove"
-            arg_type = String
+            arg_type = AbstractString
             default = ""
             required = false
         "--dim", "-d"
             help = "dimention of PCA"
-            arg_type = Int64
+            arg_type = Union{Number,AbstractString}
             default = 3
         "--stepsize", "-s"
             help = "stepsize of PCA"
-            arg_type = Float64
+            arg_type = Union{Number,AbstractString}
             default = 0.1
         "--numepoch", "-e"
             help = "numepoch of PCA"
-            arg_type = Int64
+            arg_type = Union{Number,AbstractString}
             default = 5
-        "--scheduling"
-            help = "Learning Rate Scheduling"
-            arg_type = String
-            default = "robbins-monro"
-        "-g"
-            help = "Ratio of non-SGD gradient"
-            arg_type = Float64
-            default = 0.9
-        "--epsilon"
-            help = "a small number for avoiding zero division"
-            arg_type = Float64
-            default = 1.0e-8
         "--logdir", "-l"
             help = "saving log directory"
+            arg_type = Union{Void,AbstractString}
             default = nothing
     end
 
     return parse_args(s)
 end
 
-function nm(input)
+# Parse command line options (other PCA)
+function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--input", "-i"
+            help = "input file"
+            arg_type = AbstractString
+            required = true
+        "--outdir", "-o"
+            help = "output directory"
+            arg_type = AbstractString
+            default = "."
+            required = false
+        "--logscale"
+            help = "whether the value are converted to log-scale"
+            arg_type = Union{Bool,AbstractString}
+            default = true
+        "--pseudocount", "-p"
+            help = "log10(exp + pseudocount)"
+            arg_type = Union{Number,AbstractString}
+            default = Float32(1)
+        "--rowmeanlist", "-m"
+            help = "mean vector of each row"
+            arg_type = AbstractString
+            default = ""
+            required = false
+        "--colsumlist"
+            help = "Sum of counts of each column"
+            arg_type = AbstractString
+            default = ""
+            required = false
+        "--masklist"
+            help = "Columns to be remove"
+            arg_type = AbstractString
+            default = ""
+            required = false
+        "--dim", "-d"
+            help = "dimention of PCA"
+            arg_type = Union{Number,AbstractString}
+            default = 3
+        "--stepsize", "-s"
+            help = "stepsize of PCA"
+            arg_type = Union{Number,AbstractString}
+            default = Float32(0.1)
+        "--numepoch", "-e"
+            help = "numepoch of PCA"
+            arg_type = Union{Number,AbstractString}
+            default = 5
+        "--scheduling"
+            help = "Learning Rate Scheduling"
+            arg_type = AbstractString
+            default = "robbins-monro"
+        "-g"
+            help = "Ratio of non-SGD gradient"
+            arg_type = Union{Number,AbstractString}
+            default = Float32(0.9)
+        "--epsilon"
+            help = "a small number for avoiding zero division"
+            arg_type = Union{Number,AbstractString}
+            default = Float32(1.0e-8)
+            "--logdir", "-l"
+            help = "saving log directory"
+            arg_type = Union{Void,AbstractString}
+            default = nothing
+    end
+
+    return parse_args(s)
+end
+
+# Return N, M
+function nm(input::AbstractString)
     N = 0
     M = 0
     open(input) do file
@@ -135,7 +196,40 @@ function nm(input)
     return N, M
 end
 
-function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir)
+# Initialization (only CCIPCA)
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA)
+    N, M = nm(input)
+    pseudocount = Float32(pseudocount)
+    stepsize = Float32(stepsize)
+    W = zeros(Float32, M, dim) # Eigen vectors
+    X = zeros(Float32, M, dim+1) # Temporal Vector (Same length
+    D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
+    for i=1:dim
+        W[i,i] = 1
+    end
+    rowmeanvec = zeros(Float32, N, 1)
+    colsumvec = zeros(Float32, M, 1)
+    maskvec = zeros(Float32, M, 1)
+    if rowmeanlist != ""
+        rowmeanvec = readcsv(rowmeanlist, Float32)
+    end
+    if colsumlist != ""
+        colsumvec = readcsv(colsumlist, Float32)
+    end
+    if masklist != ""
+        maskvec = readcsv(masklist, Float32)
+    end
+    # directory for log file
+    if typeof(logdir) == String
+        if(!isdir(logdir))
+            mkdir(logdir)
+        end
+    end
+    return pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M
+end
+
+# Initialization (other PCA)
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
     N, M = nm(input)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
@@ -165,42 +259,11 @@ function common_init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist,
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec
-end
-
-function ccipca_init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir)
-    N, M = nm(input)
-    pseudocount = Float32(pseudocount)
-    stepsize = Float32(stepsize)
-    W = zeros(Float32, M, dim) # Eigen vectors
-    X = zeros(Float32, M, dim+1) # Temporal Vector (Same length
-    D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
-    for i=1:dim
-        W[i,i] = 1
-    end
-    rowmeanvec = zeros(Float32, N, 1)
-    colsumvec = zeros(Float32, M, 1)
-    maskvec = zeros(Float32, M, 1)
-    if rowmeanlist != ""
-        rowmeanvec = readcsv(rowmeanlist, Float32)
-    end
-    if colsumlist != ""
-        colsumvec = readcsv(colsumlist, Float32)
-    end
-    if masklist != ""
-        maskvec = readcsv(masklist, Float32)
-    end
-    # directory for log file
-    if typeof(logdir) == String
-        if(!isdir(logdir))
-            mkdir(logdir)
-        end
-    end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M
 end
 
 # Eigen value, Loading, Scores
-function WλV(W, input, dim)
+function WλV(W::AbstractArray, input::AbstractString, dim::Number)
     V = zeros(Float32, 0)
     Scores = zeros(Float32, 0)
     N = 0
@@ -239,7 +302,7 @@ function WλV(W, input, dim)
 end
 
 # Reconstuction Error
-function RecError(W, input)
+function RecError(W::AbstractArray, input::AbstractString)
     N = 0
     M = 0
     E = 0.0
@@ -266,8 +329,29 @@ function RecError(W, input)
     return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "AllVar"=>AllVar]
 end
 
+# deserialization
+function deserializex(n::Number, file::IOStream, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+    x = deserialize(file)
+    if logscale
+        x = log10.(x + pseudocount)
+    end
+    if masklist != ""
+        x = x[maskvec]
+    end
+    if (rowmeanlist != "") && (colsumlist != "")
+        x = (x - rowmeanvec[n, 1]) ./ colsumvec
+    end
+    if (rowmeanlist != "") && (colsumlist == "")
+        x = x - rowmeanvec[n, 1]
+    end
+    if (rowmeanlist == "") && (colsumlist != "")
+        x = x ./ colsumvec
+    end
+    return x
+end
+
 # Full Gradient
-function ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     tmpW = W
     open(input) do file
         N = read(file, Int64) # Number of Features (e.g. Genes)
@@ -283,16 +367,16 @@ function ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist
 end
 
 # Stochastic Gradient
-function ∇fn(W, x, D, M)
+function ∇fn(W::AbstractArray, x::AbstractArray, D::AbstractArray, M::Number)
     return Float32(2 / M) * x * (x' * W * D)
 end
 
 # sym
-function sym(Y)
+function sym(Y::AbstractArray)
     return (Y + Y') / 2
 end
 
 # Riemannian Gradient
-function Pw(Z, W)
+function Pw(Z::AbstractArray, W::AbstractArray)
     return Z - W * sym(W' * Z)
 end

@@ -1,7 +1,7 @@
 """
-    hvg(slfile, rowmeanlist, rowvarlist, rowcv2list, outdir)
+    filtering(;slfile::AbstractString="", featurelist::AbstractString="", thr::Number=0, outdir::AbstractString=".")
 
-This function perform highly variable genes, which is an feature selection method in scRNA-seq studies.
+This function filters the genes by some standards such as mean or variance of the genes.
 
 Input Arguments
 ---------
@@ -14,7 +14,7 @@ Output Files
 ---------
 - `filtered.dat` : Filtered binary file.
 """
-function filtering(;slfile="", featurelist="", thr=0, outdir=".")
+function filtering(;slfile::AbstractString="", featurelist::AbstractString="", thr::Number=0, outdir::AbstractString=".")
     # File
     outfile = outdir*"/filtered.dat"
 
