@@ -340,7 +340,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
         for n = 1:N
             # Data Import
             x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            preE = (x' * W) * W' .- x'
+            preE = W * (W' * x) .- x
             E = E + dot(preE, preE)
         end
     end
