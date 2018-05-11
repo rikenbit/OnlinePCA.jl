@@ -342,7 +342,7 @@ function deserializex(n::Number, file::IOStream, logscale::Bool, pseudocount::Nu
         x = (x - rowmeanvec[n, 1]) ./ colsumvec
     end
     if (rowmeanlist != "") && (colsumlist == "")
-        x = x - rowmeanvec[n, 1]
+        x .= x .- rowmeanvec[n, 1]
     end
     if (rowmeanlist == "") && (colsumlist != "")
         x = x ./ colsumvec
