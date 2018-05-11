@@ -77,7 +77,12 @@ function stats(slfile::AbstractString, N::Number, M::Number, pseudocount::Number
             lm[n] = log10(mean(x .+ pseudocount))
             v[n] = var(x)
             c[n] = v[n] / m[n]^2
-            nz[n] = M - length(x.nzind)
+            # nz[n] = M - length(x.nzind) # for sparse vector
+            for mm = 1:M
+                if x[mm] != 0
+                    nz[n] = nz[n] + 1
+                end
+            end
             # Progress Bar
             next!(progress)
         end

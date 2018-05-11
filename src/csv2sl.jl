@@ -20,11 +20,12 @@ function csv2sl(;csvfile::AbstractString="", slfile::AbstractString="")
                 xx = readline(f)
                 xx = split(xx, ",")
                 # Assume input data is Integer
-                x = spzeros(Int64, length(xx))
+                # x = spzeros(Int64, length(xx)) # for sparse vector
+                x = zeros(Int64, length(xx))
                 for i=1:length(x)
                     x[i] = Int64(floor(parse(Float32, xx[i])))
                 end
-                x = dropzeros(x)
+                # x = dropzeros(x) # for sparse vector
                 if nrow == 1
                     seek(file, sizeof(Int64) * 2)
                     ncol = length(x)
