@@ -74,7 +74,7 @@ function rsvrg(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, ma
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if typeof(logdir) == String
-                    outputlog(N, s, n, input, logdir, W, pca, AllVar)
+                    outputlog(N, s, n, input, logdir, W, pca, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 end
             end
         end

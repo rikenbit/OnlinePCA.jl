@@ -63,7 +63,7 @@ function gd(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, maskl
         W .= full(qrfact!(W)[:Q], thin=true)
         # save log file
         if typeof(logdir) == String
-            outputlog(s, input, logdir, W, pca, AllVar)
+            outputlog(s, input, logdir, W, pca, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
         end
         next!(progress)
     end

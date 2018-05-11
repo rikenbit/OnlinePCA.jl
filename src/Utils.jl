@@ -307,7 +307,7 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number)
 end
 
 # Output log file （only GD）
-function outputlog(s::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number)
+function outputlog(s::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     REs = RecError(W, input, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
     writecsv("$(logdir)/W_$(string(s)).csv", W)
     writecsv("$(logdir)/RecError_$(string(s)).csv", REs)
@@ -316,7 +316,7 @@ function outputlog(s::Number, input::AbstractString, logdir::AbstractString, W::
 end
 
 # Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     if(mod((N*(s-1)+n), 5000) == 0)
         REs = RecError(W, input, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
         writecsv("$(logdir)/W_$(string((N*(s-1)+n))).csv", W)
