@@ -22,12 +22,12 @@ function csv2sl(;csvfile::AbstractString="", slfile::AbstractString="")
                 # Assume input data is Integer
                 # x = spzeros(Int64, length(xx)) # for sparse vector
                 # x = zeros(Int64, length(xx)) # for Int64
-                x = zeros(UInt16, length(xx))
+                x = zeros(UInt32, length(xx))
                 # for i=1:length(x)
                 #     x[i] = floor(Int64, parse(Float32, xx[i]))
                 # end
                 for i=1:length(x)
-                    x[i] = floor(UInt16, parse(Float32, xx[i]))
+                    x[i] = floor(UInt32, parse(Float32, xx[i]))
                 end
                 # x = dropzeros(x) # for sparse vector
                 if nrow == 1
