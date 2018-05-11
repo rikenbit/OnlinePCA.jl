@@ -44,8 +44,16 @@ function rsgd(;input::AbstractString="", outdir::Union{Void,AbstractString}=noth
     else
         error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
     end
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca)
+    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca, logscale)
+    # Perform PCA
+    out = rsgd(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar)
+    if typeof(outdir) == String
+        output(outdir, out)
+    end
+    return out
+end
 
+function rsgd(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar)
     # Each epoch s
     progress = Progress(numepoch)
     for s = 1:numepoch
@@ -64,7 +72,7 @@ function rsgd(;input::AbstractString="", outdir::Union{Void,AbstractString}=noth
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if typeof(logdir) == String
-                    outputlog(N, s, n, input, logdir, W, pca)
+                    outputlog(N, s, n, input, logdir, W, pca, AllVar)
                 end
             end
         end
@@ -72,11 +80,7 @@ function rsgd(;input::AbstractString="", outdir::Union{Void,AbstractString}=noth
     end
 
     # Return, W, λ, V
-    out = WλV(W, input, dim)
-    if typeof(outdir) == String
-        output(outdir, out)
-    end
-    return out
+    WλV(W, input, dim)
 end
 
 # RSGD × Robbins-Monro

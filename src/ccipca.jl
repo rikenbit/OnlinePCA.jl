@@ -30,7 +30,7 @@ Reference
 function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = CCIPCA()
-    pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M = init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir, pca)
+    pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir, pca, logscale)
 
     # Each epoch s
     progress = Progress(numepoch)
@@ -64,7 +64,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 checkNaN(N, s, n, W, pca)
                 # save log file
                 if typeof(logdir) == String
-                    outputlog(N, s, n, input, logdir, W, pca)
+                    outputlog(N, s, n, input, logdir, W, pca, AllVar)
                 end
             end
         end

@@ -20,28 +20,10 @@ end
 
 # Check NaN value (other PCA)
 function checkNaN(N::Number, s::Number, n::Number, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG})
-    if mod((N*(s-1)+n), 1000) == 0
+    if mod((N*(s-1)+n), 5000) == 0
         if any(isnan, W)
             error("NaN values are generated. Select other stepsize")
         end
-    end
-end
-
-# Output log file （only GD）
-function outputlog(s::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::GD)
-    writecsv("$(logdir)/W_$(string(s)).csv", W)
-    writecsv("$(logdir)/RecError_$(string(s)).csv", RecError(W, input))
-    touch("$(logdir)/W_$(string(s)).csv")
-    touch("$(logdir)/RecError_$(string(s)).csv")
-end
-
-# Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG})
-    if(mod((N*(s-1)+n), 1000) == 0)
-        writecsv("$(logdir)/W_$(string((N*(s-1)+n))).csv", W)
-        writecsv("$(logdir)/RecError_$(string((N*(s-1)+n))).csv", RecError(W, input))
-        touch("$(logdir)/W_$(string((N*(s-1)+n))).csv")
-        touch("$(logdir)/RecError_$(string((N*(s-1)+n))).csv")
     end
 end
 
@@ -189,6 +171,7 @@ end
 function nm(input::AbstractString)
     N = 0
     M = 0
+    AllVar = 0
     open(input) do file
         N = read(file, Int64)
         M = read(file, Int64)
@@ -197,7 +180,7 @@ function nm(input::AbstractString)
 end
 
 # Initialization (only CCIPCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA)
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, logscale::Bool=true)
     N, M = nm(input)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
@@ -219,17 +202,28 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
     if masklist != ""
         maskvec = readcsv(masklist, Float32)
     end
+    # N, M, All Variance
+    AllVar = 0
+    open(input) do file
+        N = read(file, Int64) # Number of Features (e.g. Genes)
+        M = read(file, Int64) # Number of samples (e.g. Cells)
+        for n = 1:N
+            # Data Import
+            x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+            AllVar = AllVar + x' * x
+        end
+    end
     # directory for log file
     if typeof(logdir) == String
         if(!isdir(logdir))
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M
+    return pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar
 end
 
 # Initialization (other PCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, logscale::Bool=true)
     N, M = nm(input)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
@@ -253,13 +247,24 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     if masklist != ""
         maskvec = readcsv(masklist, Float32)
     end
+    # N, M, All Variance
+    AllVar = 0
+    open(input) do file
+        N = read(file, Int64) # Number of Features (e.g. Genes)
+        M = read(file, Int64) # Number of samples (e.g. Cells)
+        for n = 1:N
+            # Data Import
+            x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+            AllVar = AllVar + x' * x
+        end
+    end
     # directory for log file
     if typeof(logdir) == String
         if(!isdir(logdir))
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar
 end
 
 # Eigen value, Loading, Scores
@@ -301,24 +306,42 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number)
     return W, λ, V, Scores
 end
 
+# Output log file （only GD）
+function outputlog(s::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number)
+    REs = RecError(W, input, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    writecsv("$(logdir)/W_$(string(s)).csv", W)
+    writecsv("$(logdir)/RecError_$(string(s)).csv", REs)
+    touch("$(logdir)/W_$(string(s)).csv")
+    touch("$(logdir)/RecError_$(string(s)).csv")
+end
+
+# Output log file (other PCA)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number)
+    if(mod((N*(s-1)+n), 5000) == 0)
+        REs = RecError(W, input, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+        writecsv("$(logdir)/W_$(string((N*(s-1)+n))).csv", W)
+        writecsv("$(logdir)/RecError_$(string((N*(s-1)+n))).csv", REs)
+        touch("$(logdir)/W_$(string((N*(s-1)+n))).csv")
+        touch("$(logdir)/RecError_$(string((N*(s-1)+n))).csv")
+    end
+end
+
 # Reconstuction Error
-function RecError(W::AbstractArray, input::AbstractString)
+function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     N = 0
     M = 0
     E = 0.0
     AE = 0.0
     RMSE = 0.0
-    AllVar = 0.0
     ARE = 0.0
     open(input) do file
         N = read(file, Int64)  # Number of Features (e.g. Genes)
         M = read(file, Int64) # Number of samples (e.g. Cells)
         for n = 1:N
             # Data Import
-            x = deserialize(file)
-            AllVar = AllVar + x' * x
+            x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
             preE = (x' * W) * W' .- x'
-            E = E + sum(preE .* preE)
+            E = E + dot(preE, preE)
         end
     end
     AE = E / M
@@ -362,8 +385,8 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscal
             # Full Gradient
             tmpW .= tmpW .+ ∇fn(W, x, D, M)
         end
-        return tmpW
     end
+    return tmpW
 end
 
 # Stochastic Gradient

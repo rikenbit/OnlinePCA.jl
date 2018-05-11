@@ -40,8 +40,16 @@ function oja(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothi
     else
         error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
     end
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca)
+    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca, logscale)
+    # Perform PCA
+    out = oja(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar)
+    if typeof(outdir) == String
+        output(outdir, out)
+    end
+    return out
+end
 
+function oja(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar)
     # Each epoch s
     progress = Progress(numepoch)
     for s = 1:numepoch
@@ -60,7 +68,7 @@ function oja(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothi
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if typeof(logdir) == String
-                    outputlog(N, s, n, input, logdir, W, pca)
+                    outputlog(N, s, n, input, logdir, W, pca, AllVar)
                 end
             end
         end
@@ -68,11 +76,7 @@ function oja(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothi
     end
 
     # Return, W, λ, V
-    out = WλV(W, input, dim)
-    if typeof(outdir) == String
-        output(outdir, out)
-    end
-    return out
+    WλV(W, input, dim)
 end
 
 # Oja × Robbins-Monro
