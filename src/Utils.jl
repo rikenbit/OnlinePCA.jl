@@ -356,7 +356,7 @@ end
 function deserializex(n::Number, file::IOStream, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     x = deserialize(file)
     if logscale
-        x = log10.(x + pseudocount)
+        @fastmath x = log10.(x + pseudocount)
     end
     if masklist != ""
         x = x[maskvec]
