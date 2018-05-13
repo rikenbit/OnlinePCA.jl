@@ -57,7 +57,7 @@ function svrg(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, mas
     # Each epoch s
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+        u = ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, stepsize/s)
         Ws = W
         open(input) do file
             N = read(file, Int64)
@@ -87,28 +87,28 @@ end
 
 # SVRG × Robbins-Monro
 function svrgupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * stepsize/(N*(s-1)+n), M), Ws) .+ u
+    W .= W .+ Pw(∇fn(W, x, D, M, stepsize/(N*(s-1)+n)), W) .- Pw(∇fn(Ws, x, D, M, stepsize/(N*(s-1)+n)), Ws) .+ u
     v = nothing
     return W, v
 end
 
 # SVRG × Momentum
 function svrgupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    v .= g .* v .+ ∇fn(W, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
+    v .= g .* v .+ ∇fn(W, x, D, M, stepsize) .- ∇fn(Ws, x, D, M, stepsize) .+ u
     W .= W .+ v
     return W, v
 end
 
 # SVRG × NAG
 function svrgupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    v = g .* v + ∇fn(W - g .* v, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
+    v = g .* v + ∇fn(W - g .* v, x, D, M, stepsize) .- ∇fn(Ws, x, D, M, stepsize) .+ u
     W .= W .+ v
     return W, v
 end
 
 # SVRG × Adagrad
 function svrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    grad = ∇fn(W, x, D * stepsize, M) .- ∇fn(Ws, x, D * stepsize, M) .+ u
+    grad = ∇fn(W, x, D, M, stepsize) .- ∇fn(Ws, x, D, M, stepsize) .+ u
     grad = grad / stepsize
     v .= v .+ grad .* grad
     W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad

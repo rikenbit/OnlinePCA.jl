@@ -85,28 +85,28 @@ end
 
 # RSGD × Robbins-Monro
 function rsgdupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W)
+    W .= W .+ Pw(∇fn(W, x, D, M, stepsize/(N*(s-1)+n)), W)
     v = nothing
     return W, v
 end
 
 # RSGD × Momentum
 function rsgdupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    v .= g .* v .+ Pw(∇fn(W, x, D * stepsize, M), W)
+    v .= g .* v .+ Pw(∇fn(W, x, D, M, stepsize), W)
     W .= W .+ v
     return W, v
 end
 
 # RSGD × NAG
 function rsgdupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    v = g .* v .+ Pw(∇fn(W - g .* v, x, D * stepsize, M), W)
+    v = g .* v .+ Pw(∇fn(W - g .* v, x, D, M, stepsize), W)
     W .= W .+ v
     return W, v
 end
 
 # RSGD × Adagrad
 function rsgdupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    grad = Pw(∇fn(W, x, D * stepsize, M), W)
+    grad = Pw(∇fn(W, x, D, M, stepsize), W)
     grad = grad / stepsize
     v .= v .+ grad .* grad
     W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad

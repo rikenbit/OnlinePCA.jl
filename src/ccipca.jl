@@ -30,7 +30,7 @@ Reference
 function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, logscale::Bool=true, pseudocount::Number=1.0, rowmeanlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = CCIPCA()
-    pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir, pca, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    pseudocount, stepsize, W, X, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, dim, rowmeanlist, colsumlist, masklist, logdir, pca, logscale)
 
     # Each epoch s
     progress = Progress(numepoch)
@@ -53,7 +53,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                         Wi = W[:, i]
                         Xi = X[:, i]
                         # Eigen vector update
-                        W[:, i] = w1 * Wi + w2 * Xi * dot(Xi, Wi/norm(Wi))
+                        W[:, i] = w1 * Wi +  Xi * dot(w2 * Xi, Wi/norm(Wi))
                         # Data for calculating i+1 th Eigen vector
                         Wi = W[:, i]
                         Wnorm = Wi / norm(Wi)

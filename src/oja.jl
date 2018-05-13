@@ -81,28 +81,28 @@ end
 
 # Oja × Robbins-Monro
 function ojaupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    W .= W .+ ∇fn(W, x, D * stepsize/(N*(s-1)+n), M)
+    W .= W .+ ∇fn(W, x, D , M, stepsize/(N*(s-1)+n))
     v = nothing
     return W, v
 end
 
 # Oja × Momentum
 function ojaupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    v .= g .* v .+ ∇fn(W, x, D * stepsize, M)
+    v .= g .* v .+ ∇fn(W, x, D, M, stepsize)
     W .= W .+ v
     return W, v
 end
 
 # Oja × NAG
 function ojaupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    v = g .* v + ∇fn(W - g .* v, x, D * stepsize, M)
+    v = g .* v + ∇fn(W - g .* v, x, D, M, stepsize)
     W .= W .+ v
     return W, v
 end
 
 # Oja × Adagrad
 function ojaupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, x, s, n)
-    grad = ∇fn(W, x, D * stepsize, M)
+    grad = ∇fn(W, x, D, M, stepsize)
     grad = grad / stepsize
     v .= v .+ grad .* grad
     W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad

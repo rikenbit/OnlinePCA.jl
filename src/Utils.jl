@@ -356,7 +356,7 @@ end
 function deserializex(n::Number, file::IOStream, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     x = deserialize(file)
     if logscale
-        @fastmath x = log10.(x + pseudocount)
+        x = log10.(x + pseudocount)
     end
     if masklist != ""
         x = x[maskvec]
@@ -374,7 +374,7 @@ function deserializex(n::Number, file::IOStream, logscale::Bool, pseudocount::Nu
 end
 
 # Full Gradient
-function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number)
     tmpW = W
     open(input) do file
         N = read(file, Int64) # Number of Features (e.g. Genes)
@@ -383,15 +383,15 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscal
             # Data Import
             x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
             # Full Gradient
-            tmpW .= tmpW .+ ∇fn(W, x, D, M)
+            tmpW .= tmpW .+ 10e-5 * ∇fn(W, x, D, M, stepsize)
         end
     end
-    return tmpW
+    return 10e+5 * tmpW
 end
 
 # Stochastic Gradient
-function ∇fn(W::AbstractArray, x::AbstractArray, D::AbstractArray, M::Number)
-    return Float32(2 / M) * x * (x' * W * D)
+function ∇fn(W::AbstractArray, x::AbstractArray, D::AbstractArray, M::Number, stepsize::Number)
+    return 10e+5 * stepsize * Float32(2 / M) * x * (10e-5 * x' * W * D)
 end
 
 # sym

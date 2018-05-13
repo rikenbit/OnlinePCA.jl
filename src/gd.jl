@@ -74,28 +74,28 @@ end
 
 # GD × Robbins-Monro
 function gdupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-    W .= W .+ ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    W .= W .+ ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, stepsize/s)
     v = nothing
     return W, v
 end
 
 # GD × Momentum
 function gdupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-    v .= g .* v .+ ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    v .= g .* v .+ ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, stepsize/s)
     W .= W .+ v
     return W, v
 end
 
 # GD × NAG
 function gdupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-    v = g .* v + ∇f(W - g .* v, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    v = g .* v + ∇f(W - g .* v, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, stepsize/s)
     W .= W .+ v
     return W, v
 end
 
 # GD × Adagrad
 function gdupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, s, input, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-    grad = ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+    grad = ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, stepsize/s)
     grad = grad / stepsize
     v .= v .+ grad .* grad
     W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad

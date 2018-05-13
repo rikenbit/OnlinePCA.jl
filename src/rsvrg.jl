@@ -57,7 +57,7 @@ function rsvrg(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, ma
     # Each epoch s
     progress = Progress(numepoch)
     for s = 1:numepoch
-        u = ∇f(W, input, D * stepsize/s, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+        u = ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, stepsize/s)
         Ws = W
         open(input) do file
             N = read(file, Int64)
@@ -87,28 +87,28 @@ end
 
 # RSVRG × Robbins-Monro
 function rsvrgupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    W .= W .+ Pw(∇fn(W, x, D * stepsize/(N*(s-1)+n), M), W) .- Pw(∇fn(Ws, x, D * stepsize/(N*(s-1)+n), M), Ws) .+ u
+    W .= W .+ Pw(∇fn(W, x, D, M, stepsize/(N*(s-1)+n)), W) .- Pw(∇fn(Ws, x, D, M, stepsize/(N*(s-1)+n)), Ws) .+ u
     v = nothing
     return W, v
 end
 
 # RSVRG × Momentum
 function rsvrgupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    v .= g .* v .+ Pw(∇fn(W, x, D * stepsize, M), W) .- Pw(∇fn(Ws, x, D * stepsize, M), Ws) .+ u
+    v .= g .* v .+ Pw(∇fn(W, x, D, M, stepsize), W) .- Pw(∇fn(Ws, x, D, M, stepsize), Ws) .+ u
     W .= W .+ v
     return W, v
 end
 
 # RSVRG × NAG
 function rsvrgupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    v = g .* v + Pw(∇fn(W - g .* v, x, D * stepsize, M), W - g .* v) .- Pw(∇fn(Ws, x, D * stepsize, M), Ws) .+ u
+    v = g .* v + Pw(∇fn(W - g .* v, x, D, M, stepsize), W - g .* v) .- Pw(∇fn(Ws, x, D, M, stepsize), Ws) .+ u
     W .= W .+ v
     return W, v
 end
 
 # RSVRG × Adagrad
 function rsvrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, x, s, n, u, Ws)
-    grad = Pw(∇fn(W, x, D * stepsize, M), W) .- Pw(∇fn(Ws, x, D * stepsize, M), Ws) .+ u
+    grad = Pw(∇fn(W, x, D, M, stepsize), W) .- Pw(∇fn(Ws, x, D, M, stepsize), Ws) .+ u
     grad = grad / stepsize
     v .= v .+ grad .* grad
     W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
