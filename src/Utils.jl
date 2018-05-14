@@ -172,7 +172,7 @@ function nm(input::AbstractString)
     N = zeros(UInt32, 1)
     M = zeros(UInt32, 1)
     open(input) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, N)
         read!(stream, M)
         close(stream)
@@ -209,7 +209,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
     # N, M, All Variance
     AllVar = 0
     open(input) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N
@@ -261,7 +261,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     # N, M, All Variance
     AllVar = 0
     open(input) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N
@@ -290,7 +290,7 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number)
     Scores = zeros(Float32, M, dim)
     x = zeros(UInt32, M)
     open(input) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N
@@ -354,7 +354,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
     RMSE = 0.0
     ARE = 0.0
     open(input) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N
@@ -407,7 +407,7 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscal
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
     open(input) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N

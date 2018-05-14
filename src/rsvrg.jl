@@ -65,7 +65,7 @@ function rsvrg(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, ma
         u = ∇f(W, input, D, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec, stepsize/s)
         Ws = W
         open(input) do file
-            stream = ZstdDecompressorStream(file)
+            stream = LZ4DecompressorStream(file)
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n

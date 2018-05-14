@@ -59,7 +59,7 @@ function oja(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, mask
     progress = Progress(numepoch)
     for s = 1:numepoch
         open(input) do file
-            stream = ZstdDecompressorStream(file)
+            stream = LZ4DecompressorStream(file)
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n

@@ -12,7 +12,7 @@ function csv2bin(;csvfile::AbstractString="", binfile::AbstractString="")
     M[] = UInt32(ncol(csvfile=csvfile))
     counter = 0
     open(binfile, "w") do file
-        stream = ZstdCompressorStream(file)
+        stream = LZ4CompressorStream(file)
         write(stream, N)
         write(stream, M)
         open(csvfile , "r") do f

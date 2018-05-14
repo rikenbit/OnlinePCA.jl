@@ -45,7 +45,7 @@ function nocounts(binfile::AbstractString)
     nc = zeros(UInt32, M)
     progress = Progress(N)
     open(binfile) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N
@@ -74,7 +74,7 @@ function stats(binfile::AbstractString, pseudocount::Number)
     nz = zeros(N)
     progress = Progress(N)
     open(binfile) do file
-        stream = ZstdDecompressorStream(file)
+        stream = LZ4DecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N
