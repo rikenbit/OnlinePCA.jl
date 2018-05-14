@@ -45,7 +45,7 @@ function main()
         logdir = String(parsed_args["logdir"])
     end
 
-    out = OnlinePCA.gd(input=parsed_args["input"],
+    out = OnlinePCA.oja(input=parsed_args["input"],
         logscale=logscale,
         pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
