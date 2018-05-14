@@ -7,7 +7,7 @@ function parse_commandline()
     s = ArgParseSettings()
 
     @add_arg_table s begin
-        "--input", "-s"
+        "--input", "-i"
             help = "input file (serialized)"
             arg_type = AbstractString
             required = true

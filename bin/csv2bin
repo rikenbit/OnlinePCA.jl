@@ -11,7 +11,7 @@ function parse_commandline()
             help = "input file (csv)"
             arg_type = AbstractString
             required = true
-        "--binfile", "-s"
+        "--binfile", "-b"
             help = "output file (serialized)"
             arg_type = AbstractString
             required = true
