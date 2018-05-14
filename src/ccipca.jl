@@ -40,7 +40,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
     progress = Progress(numepoch)
     for s = 1:numepoch
         open(input) do file
-            stream = LZ4DecompressorStream(file)
+            stream = ZstdDecompressorStream(file)
             # Each step n
             for n = 1:N
                 # Row vector of data matrix

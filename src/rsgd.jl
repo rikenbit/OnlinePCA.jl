@@ -63,7 +63,7 @@ function rsgd(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, mas
     progress = Progress(numepoch)
     for s = 1:numepoch
         open(input) do file
-            stream = LZ4DecompressorStream(file)
+            stream = ZstdDecompressorStream(file)
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n

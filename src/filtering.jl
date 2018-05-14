@@ -27,11 +27,11 @@ function filtering(;input::AbstractString="", featurelist::AbstractString="", th
     x = zeros(UInt32, M)
     nr = nrowfilter(input, featurelist, thr)
     open(output, "w") do file1
-        stream1 = LZ4CompressorStream(file1)
+        stream1 = ZstdCompressorStream(file1)
         write(stream1, nr)
         write(stream1, M)
         open(input , "r") do file2
-            stream2 = LZ4DecompressorStream(file2)
+            stream2 = ZstdDecompressorStream(file2)
             read!(stream2, tmpN)
             read!(stream2, tmpM)
             progress = Progress(N)
@@ -56,7 +56,7 @@ function nrowfilter(input, featurelist, thr)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     open(input, "r") do file
-        stream = LZ4DecompressorStream(file)
+        stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N

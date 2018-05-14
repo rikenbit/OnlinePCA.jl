@@ -16,8 +16,6 @@ module OnlinePCA
 		Gamma, ccdf, Chisq
 	using CodecZstd:
 		ZstdCompressorStream, ZstdDecompressorStream
-	using CodecLz4:
-		LZ4CompressorStream, LZ4DecompressorStream
 
 	export output, common_parse_commandline, csv2bin, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
 
