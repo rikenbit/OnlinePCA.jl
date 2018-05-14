@@ -7,19 +7,14 @@ function parse_commandline()
     s = ArgParseSettings()
 
     @add_arg_table s begin
-        "--binfile", "-s"
-            help = "input file (serialized)"
+        "--csvfile", "-c"
+            help = "input file (csv)"
             arg_type = AbstractString
             required = true
-        "--outdir", "-o"
-            help = "output directory"
+        "--binfile", "-s"
+            help = "output file (serialized)"
             arg_type = AbstractString
-            default = "."
-            required = false
-        "--pseudocount", "-p"
-            help = "log10(exp + pseudocount)"
-            arg_type = Union{Number,AbstractString}
-            default = 1.0
+            required = true
     end
 
     return parse_args(s)
@@ -33,9 +28,8 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    pseudocount = Float32(parsed_args["pseudocount"])
-
-    sumr(binfile=parsed_args["binfile"], outdir=parsed_args["outdir"], pseudocount=pseudocount)
+    csv2bin(csvfile=parsed_args["csvfile"],
+        binfile=parsed_args["binfile"])
 end
 
 main()

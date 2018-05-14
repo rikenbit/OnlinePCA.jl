@@ -14,11 +14,13 @@ module OnlinePCA
 		glm, coef, IdentityLink, @formula
 	using Distributions:
 		Gamma, ccdf, Chisq
+	using CodecZstd:
+		ZstdCompressorStream, ZstdDecompressorStream
 
-	export output, common_parse_commandline, csv2sl, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
+	export output, common_parse_commandline, csv2bin, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
 
 	include("Utils.jl")
-	include("csv2sl.jl")
+	include("csv2bin.jl")
 	include("sumr.jl")
 	include("filtering.jl")
 	include("hvg.jl")

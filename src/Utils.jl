@@ -169,24 +169,28 @@ end
 
 # Return N, M
 function nm(input::AbstractString)
-    N = 0
-    M = 0
-    AllVar = 0
+    N = zeros(UInt32, 1)
+    M = zeros(UInt32, 1)
     open(input) do file
-        N = read(file, Int64)
-        M = read(file, Int64)
+        stream = ZstdDecompressorStream(file)
+        read!(stream, N)
+        read!(stream, M)
+        close(stream)
     end
-    return N, M
+    return N[], M[]
 end
 
 # Initialization (only CCIPCA)
 function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, logscale::Bool=true)
     N, M = nm(input)
+    tmpN = zeros(UInt32, 1)
+    tmpM = zeros(UInt32, 1)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
     W = zeros(Float32, M, dim) # Eigen vectors
     X = zeros(Float32, M, dim+1) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
+    x = zeros(UInt32, M)
     for i=1:dim
         W[i,i] = 1
     end
@@ -205,13 +209,16 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
     # N, M, All Variance
     AllVar = 0
     open(input) do file
-        N = read(file, Int64) # Number of Features (e.g. Genes)
-        M = read(file, Int64) # Number of samples (e.g. Cells)
+        stream = ZstdDecompressorStream(file)
+        read!(stream, tmpN)
+        read!(stream, tmpM)
         for n = 1:N
             # Data Import
-            x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            AllVar = AllVar + x' * x
+            read!(stream, x)
+            normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+            AllVar = AllVar + normx' * normx
         end
+        close(stream)
     end
     # directory for log file
     if typeof(logdir) == String
@@ -225,6 +232,8 @@ end
 # Initialization (other PCA)
 function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, logscale::Bool=true)
     N, M = nm(input)
+    tmpN = zeros(UInt32, 1)
+    tmpM = zeros(UInt32, 1)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
     g = Float32(g)
@@ -232,6 +241,8 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
+    x = zeros(UInt32, M)
+    normx = zeros(Float32, M)
     for i=1:dim
         W[i,i] = 1
     end
@@ -250,13 +261,16 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     # N, M, All Variance
     AllVar = 0
     open(input) do file
-        N = read(file, Int64) # Number of Features (e.g. Genes)
-        M = read(file, Int64) # Number of samples (e.g. Cells)
+        stream = ZstdDecompressorStream(file)
+        read!(stream, tmpN)
+        read!(stream, tmpM)
         for n = 1:N
             # Data Import
-            x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            AllVar = AllVar + x' * x
+            read!(stream, x)
+            normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+            AllVar = AllVar + normx' * normx
         end
+        close(stream)
     end
     # directory for log file
     if typeof(logdir) == String
@@ -269,20 +283,22 @@ end
 
 # Eigen value, Loading, Scores
 function WλV(W::AbstractArray, input::AbstractString, dim::Number)
-    V = zeros(Float32, 0)
-    Scores = zeros(Float32, 0)
-    N = 0
-    M = 0
+    N, M = nm(input)
+    tmpN = zeros(UInt32, 1)
+    tmpM = zeros(UInt32, 1)
+    V = zeros(Float32, N, dim)
+    Scores = zeros(Float32, M, dim)
+    x = zeros(UInt32, M)
     open(input) do file
-        N = read(file, Int64)  # Number of Features (e.g. Genes)
-        M = read(file, Int64) # Number of samples (e.g. Cells)
-        V = zeros(Float32, N, dim)
-        Scores = zeros(Float32, M, dim)
+        stream = ZstdDecompressorStream(file)
+        read!(stream, tmpN)
+        read!(stream, tmpM)
         for n = 1:N
             # Data Import
-            x = deserialize(file)
+            read!(stream, x)
             V[n, :] = x' * W
         end
+        close(stream)
     end
     # Eigen value
     λ = Float32[norm(V[:, x]) for x=1:dim]
@@ -328,21 +344,27 @@ end
 
 # Reconstuction Error
 function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
-    N = 0
-    M = 0
+    N, M = nm(input)
+    tmpN = zeros(UInt32, 1)
+    tmpM = zeros(UInt32, 1)
+    x = zeros(UInt32, M)
+    normx = zeros(Float32, M)
     E = 0.0
     AE = 0.0
     RMSE = 0.0
     ARE = 0.0
     open(input) do file
-        N = read(file, Int64)  # Number of Features (e.g. Genes)
-        M = read(file, Int64) # Number of samples (e.g. Cells)
+        stream = ZstdDecompressorStream(file)
+        read!(stream, tmpN)
+        read!(stream, tmpM)
         for n = 1:N
             # Data Import
-            x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            preE = W * (W' * x) .- x
+            read!(stream, x)
+            normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+            preE = W * (W' * normx) .- normx
             E = E + dot(preE, preE)
         end
+        close(stream)
     end
     AE = E / M
     RMSE = sqrt(E / (N * M))
@@ -352,39 +374,50 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
     return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "AllVar"=>AllVar]
 end
 
-# deserialization
-function deserializex(n::Number, file::IOStream, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
-    x = deserialize(file)
+# Row vector
+function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+    # Input
     if logscale
-        x = log10.(x + pseudocount)
+        xx = zeros(Float32, length(x))
+        xx = log10.(x + pseudocount)
+    else
+        xx = x
     end
     if masklist != ""
-        x = x[maskvec]
+        xx = xx[maskvec]
     end
     if (rowmeanlist != "") && (colsumlist != "")
-        x = (x - rowmeanvec[n, 1]) ./ colsumvec
+        xx = (xx - rowmeanvec[n, 1]) ./ colsumvec
     end
     if (rowmeanlist != "") && (colsumlist == "")
-        x .= x .- rowmeanvec[n, 1]
+        xx .= xx .- rowmeanvec[n, 1]
     end
     if (rowmeanlist == "") && (colsumlist != "")
-        x = x ./ colsumvec
+        xx = xx ./ colsumvec
     end
-    return x
+    return xx
 end
 
 # Full Gradient
 function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number)
+    N, M = nm(input)
+    tmpN = zeros(UInt32, 1)
+    tmpM = zeros(UInt32, 1)
     tmpW = W
+    x = zeros(UInt32, M)
+    normx = zeros(Float32, M)
     open(input) do file
-        N = read(file, Int64) # Number of Features (e.g. Genes)
-        M = read(file, Int64) # Number of samples (e.g. Cells)
+        stream = ZstdDecompressorStream(file)
+        read!(stream, tmpN)
+        read!(stream, tmpM)
         for n = 1:N
             # Data Import
-            x = deserializex(n, file, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
+            read!(stream, x)
+            normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
             # Full Gradient
-            tmpW .= tmpW .+ 10e-5 * ∇fn(W, x, D, M, stepsize)
+            tmpW .= tmpW .+ 10e-5 * ∇fn(W, normx, D, M, stepsize)
         end
+        close(stream)
     end
     return 10e+5 * tmpW
 end

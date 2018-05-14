@@ -8,15 +8,15 @@ The functions can be performed as below.
 
 ## Binarization
 ```bash
-shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/csv2sl \
+shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/csv2bin \
 --csvfile Data.csv \
---slfile OUTDIR/Data.dat
+--binfile OUTDIR/Data.dat
 ```
 
 ## Summarization
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/sumr \
---slfile OUTDIR/Data.dat \
+--binfile OUTDIR/Data.dat \
 --outdir OUTDIR \
 --pseudocount 1
 ```
@@ -24,7 +24,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/sumr \
 ## Filtering
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/filtering \
---slfile OUTDIR/Data.dat \
+--binfile OUTDIR/Data.dat \
 --featurelist OUTDIR/Feature_Means.csv \
 --thr 10 \
 --outdir OUTDIR
@@ -33,7 +33,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/filtering \
 ## Identifying Highly Variable Genes
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/hvg \
---slfile OUTDIR/Data.dat \
+--binfile OUTDIR/Data.dat \
 --rowmeanlist OUTDIR/Feature_Means.csv \
 --rowvarlist OUTDIR/Feature_Means.csv \
 --rowcv2list OUTDIR/Feature_Means.csv \

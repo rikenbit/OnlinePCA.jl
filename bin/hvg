@@ -7,7 +7,7 @@ function parse_commandline()
     s = ArgParseSettings()
 
     @add_arg_table s begin
-        "--slfile", "-s"
+        "--binfile", "-s"
             help = "input file (serialized)"
             arg_type = AbstractString
             required = true
@@ -41,7 +41,7 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    hvg(slfile=parsed_args["slfile"], rowmeanlist=parsed_args["rowmeanlist"], rowvarlist=parsed_args["rowvarlist"], rowcv2list=parsed_args["rowcv2list"], outdir=parsed_args["outdir"])
+    hvg(binfile=parsed_args["binfile"], rowmeanlist=parsed_args["rowmeanlist"], rowvarlist=parsed_args["rowvarlist"], rowcv2list=parsed_args["rowcv2list"], outdir=parsed_args["outdir"])
 end
 
 main()

@@ -2,22 +2,22 @@
 
 ## Binarization
 ```@docs
-csv2sl(;csvfile::AbstractString="", slfile::AbstractString="")
+csv2bin(;csvfile::AbstractString="", binfile::AbstractString="")
 ```
 
 ## Summarization
 ```@docs
-sumr(;slfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0)
+sumr(;binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0)
 ```
 
 ## Filtering
 ```@docs
-filtering(;slfile::AbstractString="", featurelist::AbstractString="", thr::Number=0, outdir::AbstractString=".")
+filtering(;binfile::AbstractString="", featurelist::AbstractString="", thr::Number=0, outdir::AbstractString=".")
 ```
 
 ## Identifying Highly Variable Genes
 ```@docs
-hvg(;slfile::AbstractString="", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", rowcv2list::AbstractString="", outdir::AbstractString=".")
+hvg(;binfile::AbstractString="", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", rowcv2list::AbstractString="", outdir::AbstractString=".")
 ```
 
 ## Oja

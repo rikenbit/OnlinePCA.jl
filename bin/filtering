@@ -7,7 +7,7 @@ function parse_commandline()
     s = ArgParseSettings()
 
     @add_arg_table s begin
-        "--slfile", "-s"
+        "--input", "-s"
             help = "input file (serialized)"
             arg_type = AbstractString
             required = true
@@ -19,7 +19,7 @@ function parse_commandline()
             help = "Threshold for filtering"
             arg_type = AbstractString
             required = true
-        "--outdir", "-o"
+        "--output", "-o"
             help = "output directory"
             arg_type = AbstractString
             default = "."
@@ -39,7 +39,7 @@ function main()
 
     thr = parse(Float32, parsed_args["thr"])
 
-    OnlinePCA.filtering(slfile=parsed_args["slfile"], featurelist=parsed_args["featurelist"], thr=thr, outdir=parsed_args["outdir"])
+    OnlinePCA.filtering(input=parsed_args["input"], featurelist=parsed_args["featurelist"], thr=thr, output=parsed_args["output"])
 end
 
 main()
