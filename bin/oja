@@ -28,7 +28,7 @@ function main()
     if parsed_args["stepsize"] == Float32(0.1)
         stepsize = Float32(0.1)
     else
-        stepsize=parse(Float32,parsed_args["stepsize"])
+        stepsize=parse(Float32, parsed_args["stepsize"])
     end
 
     numepoch=parse(Int64, parsed_args["numepoch"])
@@ -36,13 +36,13 @@ function main()
     if parsed_args["g"] == Float32(0.9)
         g = Float32(0.9)
     else
-        g=parse(Float32,parsed_args["g"])
+        g=parse(Float32, parsed_args["g"])
     end
 
     if parsed_args["epsilon"] == Float32(1.0e-8)
         epsilon = Float32(1.0e-8)
     else
-        epsilon=parse(Float32,parsed_args["epsilon"])
+        epsilon=parse(Float32, parsed_args["epsilon"])
     end
 
     if parsed_args["logdir"] == nothing
