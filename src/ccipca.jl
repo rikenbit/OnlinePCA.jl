@@ -67,6 +67,8 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 end
                 # NaN
                 checkNaN(N, s, n, W, pca)
+                # Check Float32
+                @assert typeof(W[1,1]) == Float32
                 # save log file
                 if typeof(logdir) == String
                     outputlog(N, s, n, input, logdir, W, pca, AllVar)
