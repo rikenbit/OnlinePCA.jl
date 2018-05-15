@@ -82,10 +82,10 @@ testfilesize(false, "$(tmp)/HVG_pval.csv", "$(tmp)/HVG_a0.csv", "$(tmp)/HVG_a1.c
 
 #####################################
 println("####### Oja (Julia API) #######")
-out_oja1 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_oja2 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_oja3 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_oja4 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
+out_oja1 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_oja2 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_oja3 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_oja4 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
 @test size(out_oja1[1]) == (99, 3)
 @test size(out_oja1[2]) == (3, )
 @test size(out_oja1[3]) == (300, 3)
@@ -107,23 +107,23 @@ out_oja4 = oja(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.
 
 #####################################
 println("####### Oja (Command line) #######")
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/oja --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 #####################################
 
 
 #####################################
 println("####### CCIPCA (Julia API) #######")
-out_ccipca1 = ccipca(input="$(tmp)/Data.zst", dim=3, stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
+out_ccipca1 = ccipca(input="$(tmp)/Data.zst", dim=3, stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
 @test size(out_ccipca1[1]) == (99, 3)
 @test size(out_ccipca1[2]) == (3, )
 @test size(out_ccipca1[3]) == (300, 3)
@@ -133,17 +133,17 @@ out_ccipca1 = ccipca(input="$(tmp)/Data.zst", dim=3, stepsize=1.0e-15, numepoch=
 
 #####################################
 println("####### CCIPCA (Command line) #######")
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/ccipca --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/ccipca --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 #####################################
 
 
 #####################################
 println("####### GD (Julia API) #######")
-out_gd1 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_gd2 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_gd3 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_gd4 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
+out_gd1 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_gd2 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_gd3 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_gd4 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
 @test size(out_gd1[1]) == (99, 3)
 @test size(out_gd1[2]) == (3, )
 @test size(out_gd1[3]) == (300, 3)
@@ -165,26 +165,26 @@ out_gd4 = gd(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e
 
 #####################################
 println("####### GD (Command line) #######")
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/gd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 #####################################
 
 
 #####################################
 println("####### RSGD (Julia API) #######")
-out_rsgd1 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_rsgd2 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_rsgd3 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_rsgd4 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
+out_rsgd1 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_rsgd2 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_rsgd3 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_rsgd4 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
 
 @test size(out_rsgd1[1]) == (99, 3)
 @test size(out_rsgd1[2]) == (3, )
@@ -207,26 +207,26 @@ out_rsgd4 = rsgd(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=
 
 #####################################
 println("####### RSGD (Command line) #######")
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsgd --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 #####################################
 
 
 #####################################
 println("####### SVRG (Julia API) #######")
-out_svrg1 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_svrg2 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_svrg3 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_svrg4 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
+out_svrg1 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_svrg2 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_svrg3 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_svrg4 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
 @test size(out_svrg1[1]) == (99, 3)
 @test size(out_svrg1[2]) == (3, )
 @test size(out_svrg1[3]) == (300, 3)
@@ -248,26 +248,26 @@ out_svrg4 = svrg(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=
 
 #####################################
 println("####### SVRG (Command line) #######")
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/svrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 #####################################
 
 
 #####################################
 println("####### RSVRG (Julia API) #######")
-out_rsvrg1 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_rsvrg2 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_rsvrg3 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
-out_rsvrg4 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv")
+out_rsvrg1 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_rsvrg2 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="momentum", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_rsvrg3 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="nag", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
+out_rsvrg4 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsize=1.0e-15, numepoch=1, rowmeanlist="$(tmp)/Feature_LogMeans.csv", logdir=tmp)
 @test size(out_rsvrg1[1]) == (99, 3)
 @test size(out_rsvrg1[2]) == (3, )
 @test size(out_rsvrg1[3]) == (300, 3)
@@ -289,15 +289,15 @@ out_rsvrg4 = rsvrg(input="$(tmp)/Data.zst", dim=3, scheduling="adagrad", stepsiz
 
 #####################################
 println("####### RSVRG (Command line) #######")
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst --outdir $(tmp) --dim 3 --scheduling robbins-monro --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling momentum --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling nag --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv`)
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/rsvrg --input $(tmp)/Data.zst  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(tmp)/Feature_LogMeans.csv --logdir $(tmp)`)
 testfilesize(true, "$(tmp)/Eigen_vectors.csv", "$(tmp)/Eigen_values.csv", "$(tmp)/Loadings.csv", "$(tmp)/Scores.csv")
 #####################################

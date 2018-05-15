@@ -349,10 +349,10 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
-    E = 0.0
-    AE = 0.0
-    RMSE = 0.0
-    ARE = 0.0
+    E = Float32(0.0)
+    AE = Float32(0.0)
+    RMSE = Float32(0.0)
+    ARE = Float32(0.0)
     open(input) do file
         stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
@@ -370,6 +370,10 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
     RMSE = sqrt(E / (N * M))
     AllVar = sqrt(AllVar)
     ARE = sqrt(E) / AllVar
+    @assert typeof(E) == Float32
+    @assert typeof(AE) == Float32
+    @assert typeof(RMSE) == Float32
+    @assert typeof(ARE) == Float32
     # Return
     return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "AllVar"=>AllVar]
 end

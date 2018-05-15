@@ -71,7 +71,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 @assert typeof(W[1,1]) == Float32
                 # save log file
                 if typeof(logdir) == String
-                    outputlog(N, s, n, input, logdir, W, pca, AllVar)
+                    outputlog(N, s, n, input, logdir, W, pca, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 end
             end
             close(stream)
