@@ -383,7 +383,10 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseud
     # Input
     if logscale
         xx = Vector{Float32}(length(x))
-        xx .= log10.(x + pseudocount)
+        # xx .= log10.(x .+ pseudocount)
+        for i in 1:length(x)
+            xx[i] = log10(x[i] + pseudocount)
+        end
     else
         xx = convert(Vector{Float32}, x)
     end
@@ -391,13 +394,13 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseud
         xx = xx[maskvec]
     end
     if (rowmeanlist != "") && (colsumlist != "")
-        xx = (xx - rowmeanvec[n, 1]) ./ colsumvec
+        xx .= (xx .- rowmeanvec[n, 1]) ./ colsumvec
     end
     if (rowmeanlist != "") && (colsumlist == "")
         xx .= xx .- rowmeanvec[n, 1]
     end
     if (rowmeanlist == "") && (colsumlist != "")
-        xx = xx ./ colsumvec
+        xx .= xx ./ colsumvec
     end
     return xx
 end
