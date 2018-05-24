@@ -390,29 +390,15 @@ function simdlog(x, pseudocount)
     return y
 end
 
-function simdlog10!(y::Vector{Float32}, x::Vector{UInt32}, c::Float32)
-    @assert length(y) == length(x)
-    copy!(y, x)
-    @inbounds for i in 1:4:length(y)-3
-        yv = vload(Vec{4,Float32}, y, i)
-        vstore(log10(yv + c), y, i)
-    end
-    for i in length(y)-rem(length(y), 4)+1:length(y)
-        y[i] = log10(y[i] + c)
-    end
-    return y
-end
-
 # Row vector
 function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     # Input
     if logscale
         pc = UInt32(pseudocount)
         xx = Vector{Float32}(length(x))
-        simdlog10!(xx, x, pseudocount)
-        # @inbounds for i in 1:length(x)
-        #     xx[i] = log10(x[i] + pc)
-        # end
+        @inbounds for i in 1:length(x)
+            xx[i] = log10(x[i] + pc)
+        end
     else
         xx = convert(Vector{Float32}, x)
     end
