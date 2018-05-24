@@ -16,6 +16,8 @@ module OnlinePCA
 		Gamma, ccdf, Chisq
 	using CodecZstd:
 		ZstdCompressorStream, ZstdDecompressorStream
+	using SIMD:
+		vload, vstore, Vec
 
 	export output, common_parse_commandline, csv2bin, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
 
