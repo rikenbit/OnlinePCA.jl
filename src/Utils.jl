@@ -361,8 +361,10 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            preE = W * (W' * normx) .- normx
-            E = E + dot(preE, preE)
+            pc = W' * normx
+            E = E + dot(normx, normx) - dot(pc, pc)
+            # preE = W * (W' * normx) .- normx
+            # E = E + dot(preE, preE)
         end
         close(stream)
     end
@@ -384,7 +386,6 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseud
     if logscale
         pc = UInt32(pseudocount)
         xx = Vector{Float32}(length(x))
-        # xx .= log10.(x .+ pseudocount)
         @inbounds for i in 1:length(x)
             xx[i] = log10(x[i] + pc)
         end
@@ -395,13 +396,19 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseud
         xx = xx[maskvec]
     end
     if (rowmeanlist != "") && (colsumlist != "")
-        xx .= (xx .- rowmeanvec[n, 1]) ./ colsumvec
+        @inbounds for i in 1:length(xx)
+            xx[i] = (xx[i] - rowmeanvec[n, 1]) / colsumvec
+        end
     end
     if (rowmeanlist != "") && (colsumlist == "")
-        xx .= xx .- rowmeanvec[n, 1]
+        @inbounds for i in 1:length(xx)
+            xx[i] = xx[i] - rowmeanvec[n, 1]
+        end
     end
     if (rowmeanlist == "") && (colsumlist != "")
-        xx .= xx ./ colsumvec
+        @inbounds for i in 1:length(xx)
+            xx[i] = xx[i] / colsumvec
+        end
     end
     return xx
 end
