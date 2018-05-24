@@ -382,10 +382,11 @@ end
 function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     # Input
     if logscale
+        pc = UInt32(pseudocount)
         xx = Vector{Float32}(length(x))
         # xx .= log10.(x .+ pseudocount)
-        for i in 1:length(x)
-            xx[i] = log10(x[i] + pseudocount)
+        @inbounds for i in 1:length(x)
+            xx[i] = log10(x[i] + pc)
         end
     else
         xx = convert(Vector{Float32}, x)
