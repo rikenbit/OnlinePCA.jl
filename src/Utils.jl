@@ -386,7 +386,6 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, logscale::Bool, pseud
         xx .= log10.(x + pseudocount)
     else
         xx = convert(Vector{Float32}, x)
-        xx .= x
     end
     if masklist != ""
         xx = xx[maskvec]
