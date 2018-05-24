@@ -17,30 +17,30 @@ function main()
         logscale=parse(Bool, parsed_args["logscale"])
     end
 
-    if parsed_args["pseudocount"] == Float32(1)
-        pseudocount = Float32(1)
+    if parsed_args["pseudocount"] == 1.0f0
+        pseudocount = 1.0f0
     else
         pseudocount=Float32(parsed_args["pseudocount"])
     end
 
     dim=parse(Int64, parsed_args["dim"])
 
-    if parsed_args["stepsize"] == Float32(0.1)
-        stepsize = Float32(0.1)
+    if parsed_args["stepsize"] == 0.1f0
+        stepsize = 0.1f0
     else
         stepsize=parse(Float32, parsed_args["stepsize"])
     end
 
     numepoch=parse(Int64, parsed_args["numepoch"])
 
-    if parsed_args["g"] == Float32(0.9)
-        g = Float32(0.9)
+    if parsed_args["g"] == 0.9f0
+        g = 0.9f0
     else
         g=parse(Float32, parsed_args["g"])
     end
 
-    if parsed_args["epsilon"] == Float32(1.0e-8)
-        epsilon = Float32(1.0e-8)
+    if parsed_args["epsilon"] == 1.0f-8
+        epsilon = 1.0f-8
     else
         epsilon=parse(Float32, parsed_args["epsilon"])
     end

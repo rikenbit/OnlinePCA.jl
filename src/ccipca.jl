@@ -68,9 +68,9 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 # NaN
                 checkNaN(N, s, n, W, pca)
                 # Check Float32
-                @assert typeof(W[1,1]) == Float32
+                @assert W[1,1] isa Float32
                 # save log file
-                if typeof(logdir) == String
+                if logdir isa String
                     outputlog(N, s, n, input, logdir, W, pca, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 end
             end
@@ -81,7 +81,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
 
     # Return, W, λ, V
     out = WλV(W, input, dim)
-    if typeof(outdir) == String
+    if outdir isa String
         output(outdir, out)
     end
     return out

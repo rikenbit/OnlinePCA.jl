@@ -45,7 +45,7 @@ function gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothin
     pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca, logscale)
     # Perform PCA
     out = gd(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar)
-    if typeof(outdir) == String
+    if outdir isa String
         output(outdir, out)
     end
     return out
@@ -62,7 +62,7 @@ function gd(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, maskl
         # Retraction
         W .= full(qrfact!(W)[:Q], thin=true)
         # save log file
-        if typeof(logdir) == String
+        if logdir isa String
             outputlog(s, input, logdir, W, pca, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
         end
         next!(progress)

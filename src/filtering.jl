@@ -18,7 +18,7 @@ function filtering(;input::AbstractString="", featurelist::AbstractString="", th
     # Feature selection
     featurelist = readcsv(featurelist)
     # Setting
-    if typeof(thr) == String
+    if thr isa String
         thr = parse(Float64, thr)
     end
     N, M = nm(input)

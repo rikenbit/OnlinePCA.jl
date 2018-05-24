@@ -47,7 +47,7 @@ function rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=not
     pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, colsumlist, masklist, logdir, pca, logscale)
     # Perform PCA
     out = rsvrg(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, colsumvec, maskvec, N, M, AllVar)
-    if typeof(outdir) == String
+    if outdir isa String
         output(outdir, out)
     end
     return out
@@ -80,7 +80,7 @@ function rsvrg(input, outdir, logscale, pseudocount, rowmeanlist, colsumlist, ma
                 # Retraction
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
-                if typeof(logdir) == String
+                if logdir isa String
                     outputlog(N, s, n, input, logdir, W, pca, AllVar, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 end
             end

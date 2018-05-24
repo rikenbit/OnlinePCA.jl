@@ -29,14 +29,14 @@ end
 
 # Output the result of PCA
 function output(outdir::AbstractString, out::Tuple)
-    writecsv(outdir * "/Eigen_vectors.csv", out[1])
-    writecsv(outdir *"/Eigen_values.csv", out[2])
-    writecsv(outdir *"/Loadings.csv", out[3])
-    writecsv(outdir *"/Scores.csv", out[4])
-    touch(outdir * "/Eigen_vectors.csv")
-    touch(outdir *"/Eigen_values.csv")
-    touch(outdir *"/Loadings.csv")
-    touch(outdir *"/Scores.csv")
+    writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
+    writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
+    writecsv(joinpath(outdir, "Loadings.csv"), out[3])
+    writecsv(joinpath(outdir, "Scores.csv"), out[4])
+    touch(joinpath(outdir, "Eigen_vectors.csv"))
+    touch(joinpath(outdir, "Eigen_values.csv"))
+    touch(joinpath(outdir, "Loadings.csv"))
+    touch(joinpath(outdir, "Scores.csv"))
 end
 
 # Parse command line options (only CCIPCA)
@@ -118,7 +118,7 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
         "--pseudocount", "-p"
             help = "log10(exp + pseudocount)"
             arg_type = Union{Number,AbstractString}
-            default = Float32(1)
+            default = 1.0f0
         "--rowmeanlist", "-m"
             help = "mean vector of each row"
             arg_type = AbstractString
@@ -141,7 +141,7 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
         "--stepsize", "-s"
             help = "stepsize of PCA"
             arg_type = Union{Number,AbstractString}
-            default = Float32(0.1)
+            default = 0.1f0
         "--numepoch", "-e"
             help = "numepoch of PCA"
             arg_type = Union{Number,AbstractString}
@@ -153,11 +153,11 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
         "-g"
             help = "Ratio of non-SGD gradient"
             arg_type = Union{Number,AbstractString}
-            default = Float32(0.9)
+            default = 0.9f0
         "--epsilon"
             help = "a small number for avoiding zero division"
             arg_type = Union{Number,AbstractString}
-            default = Float32(1.0e-8)
+            default = 1.0f-8
             "--logdir", "-l"
             help = "saving log directory"
             arg_type = Union{Void,AbstractString}
@@ -216,12 +216,12 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            AllVar = AllVar + normx' * normx
+            AllVar = AllVar + normx'normx
         end
         close(stream)
     end
     # directory for log file
-    if typeof(logdir) == String
+    if logdir isa String
         if(!isdir(logdir))
             mkdir(logdir)
         end
@@ -268,12 +268,12 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            AllVar = AllVar + normx' * normx
+            AllVar = AllVar + normx'normx
         end
         close(stream)
     end
     # directory for log file
-    if typeof(logdir) == String
+    if logdir isa String
         if(!isdir(logdir))
             mkdir(logdir)
         end
@@ -296,14 +296,14 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number)
         for n = 1:N
             # Data Import
             read!(stream, x)
-            V[n, :] = x' * W
+            V[n, :] = x'W
         end
         close(stream)
     end
     # Eigen value
     λ = Float32[norm(V[:, x]) for x=1:dim]
     for n = 1:dim
-        V[:, n] .= V[:, n] ./ λ[n]
+        V[:, n] ./= λ[n]
     end
 
     # λ .= λ .* λ ./ N
@@ -349,10 +349,10 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
-    E = Float32(0.0)
-    AE = Float32(0.0)
-    RMSE = Float32(0.0)
-    ARE = Float32(0.0)
+    E = 0.0f0
+    AE = 0.0f0
+    RMSE = 0.0f0
+    ARE = 0.0f0
     open(input) do file
         stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
@@ -361,7 +361,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            pc = W' * normx
+            pc = W'normx
             E = E + dot(normx, normx) - dot(pc, pc)
         end
         close(stream)
@@ -370,24 +370,12 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
     RMSE = sqrt(E / (N * M))
     AllVar = sqrt(AllVar)
     ARE = sqrt(E) / AllVar
-    @assert typeof(E) == Float32
-    @assert typeof(AE) == Float32
-    @assert typeof(RMSE) == Float32
-    @assert typeof(ARE) == Float32
+    @assert E isa Float32
+    @assert AE isa Float32
+    @assert RMSE isa Float32
+    @assert ARE isa Float32
     # Return
     return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "AllVar"=>AllVar]
-end
-
-function simdlog(x, pseudocount)
-    y = convert(Vector{Float32}, x)
-    @inbounds for i in 1:4:length(y)
-        yv = vload(Vec{4,Float32}, y, i)
-        yv = log10(yv + pseudocount)
-        vstore(yv, y, i)
-    end
-
-
-    return y
 end
 
 # Row vector
@@ -428,7 +416,7 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscal
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
-    tmpW = W
+    tmpW = zeros(Float32, size(W)[1], size(W)[2])
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
     open(input) do file
@@ -440,16 +428,16 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, logscal
             read!(stream, x)
             normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
             # Full Gradient
-            tmpW .= tmpW .+ Float32(10e-20) * ∇fn(W, normx, D, M, stepsize)
+            tmpW .+= 1.0f-20 * ∇fn(W, normx, D, M, stepsize)
         end
         close(stream)
     end
-    return Float32(10e+20) * tmpW
+    return 1.0f+20 * tmpW
 end
 
 # Stochastic Gradient
 function ∇fn(W::AbstractArray, x::Array{Float32,1}, D::AbstractArray, M::Number, stepsize::Number)
-    return Float32(10e+5) * stepsize * Float32(2 / M) * x * (Float32(10e-5) * x' * W * D)
+    return 10f+5 * stepsize * Float32(2 / M) * x * (10f-5 * x'W * D)
 end
 
 # sym
@@ -459,5 +447,5 @@ end
 
 # Riemannian Gradient
 function Pw(Z::AbstractArray, W::AbstractArray)
-    return Z - W * sym(W' * Z)
+    return Z - W * sym(W'Z)
 end

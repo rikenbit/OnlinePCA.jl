@@ -17,14 +17,14 @@ function main()
         logscale=parse(Bool, parsed_args["logscale"])
     end
 
-    if parsed_args["pseudocount"] == Float32(1)
-        pseudocount = Float32(1)
+    if parsed_args["pseudocount"] == 1.0f0
+        pseudocount = 1.0f0
     else
         pseudocount=Float32(parsed_args["pseudocount"])
     end
     dim=parse(Int64, parsed_args["dim"])
-    if parsed_args["stepsize"] == Float32(0.1)
-        stepsize = Float32(0.1)
+    if parsed_args["stepsize"] == 0.1f0
+        stepsize = 0.1f0
     else
         stepsize=parse(Float32, parsed_args["stepsize"])
     end
