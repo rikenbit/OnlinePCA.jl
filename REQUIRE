@@ -5,4 +5,4 @@ StatsBase 0.21.0
 DataFrames 0.11.6
 GLM 0.10.1
 Distributions 0.15.0
-CodecZstd 0.4.0
+CodecZstd 0.4.1
