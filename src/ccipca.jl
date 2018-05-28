@@ -49,8 +49,8 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 read!(stream, x)
                 normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
                 if norm(normx) == 0
-                    tmp_normx = rand(M)
-                    X[:, 1] = tmp_normx / norm(tmp_normx)
+                    tmp_normx = rand(Float32, M)
+                    X[:, 1] = tmp_normx / Float32(norm(tmp_normx))
                 else
                     X[:, 1] = normx
                 end
