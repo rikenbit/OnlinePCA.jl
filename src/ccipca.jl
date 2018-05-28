@@ -58,11 +58,11 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                         Wi = W[:, i]
                         Xi = X[:, i]
                         # Eigen vector update
-                        W[:, i] = w1 * Wi + Float32(1e+20) * Xi * dot(Float32(1e-20) * w2 * Xi, Wi/norm(Wi))
+                        W[:, i] = w1 * Wi + Float32(1e+30) * Xi * dot(Float32(1e-30) * w2 * Xi, Wi/norm(Wi))
                         # Data for calculating i+1 th Eigen vector
                         Wi = W[:, i]
                         Wnorm = Wi / norm(Wi)
-                        X[:, i+1] = Xi - Float32(1e+20) * dot(Float32(1e-20) * Xi, Wnorm) * Wnorm
+                        X[:, i+1] = Xi - Float32(1e+30) * dot(Float32(1e-30) * Xi, Wnorm) * Wnorm
                     end
                 end
                 # NaN
