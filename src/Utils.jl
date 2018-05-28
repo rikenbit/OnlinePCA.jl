@@ -361,8 +361,10 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, logsc
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-            pc = W'normx
-            E = E + dot(normx, normx) - dot(pc, pc)
+            preE = W * (W' * x) .- x
+            E = E + dot(preE, preE)
+            # pc = W'normx
+            # E = E + dot(normx, normx) - dot(pc, pc)
         end
         close(stream)
     end

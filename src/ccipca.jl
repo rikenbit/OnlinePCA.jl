@@ -41,12 +41,19 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
     for s = 1:numepoch
         open(input) do file
             stream = ZstdDecompressorStream(file)
+            read!(stream, tmpN)
+            read!(stream, tmpM)
             # Each step n
             for n = 1:N
                 # Row vector of data matrix
                 read!(stream, x)
                 normx = normalizex(x, n, stream, logscale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, colsumlist, colsumvec)
-                X[:, 1] = normx
+                if norm(normx) == 0
+                    tmp_normx = rand(M)
+                    X[:, 1] = tmp_normx / norm(tmp_normx)
+                else
+                    X[:, 1] = normx
+                end
                 # CCIPCA
                 k = N * (s - 1) + n
                 for i = 1:min(dim, k)
@@ -57,12 +64,11 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                         w2 = (1 + stepsize) / k
                         Wi = W[:, i]
                         Xi = X[:, i]
-                        # Eigen vector update
-                        W[:, i] = w1 * Wi + Float32(1e+30) * Xi * dot(Float32(1e-30) * w2 * Xi, Wi/norm(Wi))
+                        W[:, i] = w1 * Wi + Xi * dot(w2 * Xi, Wi/norm(Wi))
                         # Data for calculating i+1 th Eigen vector
                         Wi = W[:, i]
                         Wnorm = Wi / norm(Wi)
-                        X[:, i+1] = Xi - Float32(1e+30) * dot(Float32(1e-30) * Xi, Wnorm) * Wnorm
+                        X[:, i+1] = Xi - dot(Xi, Wnorm) * Wnorm
                     end
                 end
                 # NaN
