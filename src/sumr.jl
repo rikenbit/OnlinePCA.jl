@@ -82,7 +82,7 @@ function stats(binfile::AbstractString, pseudocount::Number)
             read!(stream, x)
             # Update
             m[n] = mean(x)
-            lm[n] = log10.(mean(x .+ pseudocount))
+            lm[n] = mean(log10.(x .+ pseudocount))
             v[n] = var(x)
             c[n] = v[n] / m[n]^2
             for mm = 1:M
