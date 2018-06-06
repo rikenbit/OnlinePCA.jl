@@ -35,8 +35,8 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/filtering \
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/hvg \
 --binfile OUTDIR/Data.dat \
 --rowmeanlist OUTDIR/Feature_Means.csv \
---rowvarlist OUTDIR/Feature_Means.csv \
---rowcv2list OUTDIR/Feature_Means.csv \
+--rowvarlist OUTDIR/Feature_Vars.csv \
+--rowcv2list OUTDIR/Feature_CV2s.csv \
 --outdir OUTDIR
 ```
 
@@ -45,7 +45,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/hvg \
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
 --input OUTDIR/Data.dat \
 --outdir OUTDIR \
---logscale true \
+--scale ftt \
 --pseudocount 1 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
@@ -64,7 +64,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/ccipca \
 --input OUTDIR/Data.dat \
 --outdir OUTDIR \
---logscale true \
+--scale ftt \
 --pseudocount 1 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
@@ -80,7 +80,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/ccipca \
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
 --input OUTDIR/Data.dat \
 --outdir OUTDIR \
---logscale true \
+--scale ftt \
 --pseudocount 1 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
@@ -99,7 +99,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
 --input OUTDIR/Data.dat \
 --outdir OUTDIR \
---logscale true \
+--scale ftt \
 --pseudocount 1 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
@@ -118,7 +118,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/svrg \
 --input OUTDIR/Data.dat \
 --outdir OUTDIR \
---logscale true \
+--scale ftt \
 --pseudocount 1 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \
@@ -137,7 +137,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/svrg \
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsvrg \
 --input OUTDIR/Data.dat \
 --outdir OUTDIR \
---logscale true \
+--scale ftt \
 --pseudocount 1 \
 --rowmeanlist OUTDIR/Feature_LogMeans.csv \
 --colsumlist OUTDIR/Sample_NoCounts.csv \

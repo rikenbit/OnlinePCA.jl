@@ -25,13 +25,16 @@ function sumr(;binfile::AbstractString="", outdir::AbstractString=".", pseudocou
 
     # 2 / 2 : Row-wise statistics
     println("2 / 2 : Row-wise statistics are calculated...")
-    Feature_Means, Feature_LogMeans, Feature_Vars, Feature_CV2s, Feature_NoZeros = stats(binfile, pseudocount)
+    Feature_Means, Feature_LogMeans, Feature_FTTMeans, Feature_Vars, Feature_LogVars, Feature_FTTVars, Feature_CV2s, Feature_NoZeros = stats(binfile, pseudocount)
 
     # Save
     writecsv(outdir*"/Sample_NoCounts.csv", Sample_NoCounts)
     writecsv(outdir*"/Feature_Means.csv", Feature_Means)
     writecsv(outdir*"/Feature_LogMeans.csv", Feature_LogMeans)
+    writecsv(outdir*"/Feature_FTTMeans.csv", Feature_FTTMeans)
     writecsv(outdir*"/Feature_Vars.csv", Feature_Vars)
+    writecsv(outdir*"/Feature_LogVars.csv", Feature_LogVars)
+    writecsv(outdir*"/Feature_FTTVars.csv", Feature_FTTVars)
     writecsv(outdir*"/Feature_CV2s.csv", Feature_CV2s)
     writecsv(outdir*"/Feature_NoZeros.csv", Feature_NoZeros)
 end
@@ -69,7 +72,10 @@ function stats(binfile::AbstractString, pseudocount::Number)
     x = zeros(UInt32, M)
     m = zeros(N)
     lm = zeros(N)
+    fttm = zeros(N)
     v = zeros(N)
+    lv = zeros(N)
+    fttv = zeros(N)
     c = zeros(N)
     nz = zeros(N)
     progress = Progress(N)
@@ -83,7 +89,10 @@ function stats(binfile::AbstractString, pseudocount::Number)
             # Update
             m[n] = mean(x)
             lm[n] = mean(log10.(x .+ pseudocount))
+            fttm[n] = mean(sqrt.(x) .+ sqrt.(x .+ 1))
             v[n] = var(x)
+            lv[n] = var(log10.(x .+ pseudocount))
+            fttv[n] = var(sqrt.(x) .+ sqrt.(x .+ 1))
             c[n] = v[n] / m[n]^2
             for mm = 1:M
                 if x[mm] != 0
@@ -95,5 +104,5 @@ function stats(binfile::AbstractString, pseudocount::Number)
         end
         close(stream)
     end
-    return m, lm, v, c, nz
+    return m, lm, fttm, v, lv, fttv, c, nz
 end

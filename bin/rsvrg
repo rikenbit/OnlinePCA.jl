@@ -11,12 +11,6 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    if parsed_args["logscale"]
-        logscale=true
-    else
-        logscale=parse(Bool, parsed_args["logscale"])
-    end
-
     if parsed_args["pseudocount"] == 1.0f0
         pseudocount = 1.0f0
     else
@@ -52,9 +46,10 @@ function main()
     end
 
     out = OnlinePCA.rsvrg(input=parsed_args["input"],
-        logscale=logscale,
+        scale=parsed_args["scale"],
         pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
+        rowvarlist=parsed_args["rowvarlist"],
         colsumlist=parsed_args["colsumlist"],
         masklist=parsed_args["masklist"],
         dim=dim,
