@@ -479,6 +479,7 @@ end
 
 # Stochastic Gradient
 function ∇fn(W::AbstractArray, x::Array{Float32,1}, D::AbstractArray, M::Number, stepsize::Number)
+    # 1f-6をかけていた箇所（Brainだとオーバーフローする？）
     return stepsize * Float32(2 / M) * x * (x'W * D)
 end
 

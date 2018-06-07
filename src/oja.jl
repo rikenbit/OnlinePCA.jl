@@ -68,7 +68,6 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
                 # Row vector of data matrix
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-                @show normx[1:3]
                 # Update Eigen vector
                 if n == 10
                     break
