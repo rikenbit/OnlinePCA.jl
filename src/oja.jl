@@ -69,7 +69,7 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
                 # Update Eigen vector
-                @show scheduling, stepsize, g, epsilon, D, N, M, W[1:2,1:2], v[1], normx[1:2], s, n
+                @show scheduling, stepsize, g, epsilon, D, N, M, W[1,1], v[1], normx[1], s, n
                 if n == 10
                     break
                 end
