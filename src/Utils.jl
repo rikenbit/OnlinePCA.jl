@@ -470,15 +470,16 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             # Full Gradient
-            tmpW .+= 1.0f-20 * ∇fn(W, normx, D, M, stepsize)
+            tmpW .+= 1f-20 * ∇fn(W, normx, D, M, stepsize)
         end
         close(stream)
     end
-    return 1.0f+20 * tmpW
+    return 1f+20 * tmpW
 end
 
 # Stochastic Gradient
 function ∇fn(W::AbstractArray, x::Array{Float32,1}, D::AbstractArray, M::Number, stepsize::Number)
+    @show (10f-5 * x'W * D)
     return 10f+5 * stepsize * Float32(2 / M) * x * (10f-5 * x'W * D)
 end
 
