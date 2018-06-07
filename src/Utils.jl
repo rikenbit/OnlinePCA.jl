@@ -479,8 +479,8 @@ end
 
 # Stochastic Gradient
 function ∇fn(W::AbstractArray, x::Array{Float32,1}, D::AbstractArray, M::Number, stepsize::Number)
-    @show (x' * 10f-5 * W)
-    return 10f+5 * stepsize * Float32(2 / M) * x * (10f-5 * x'W * D)
+    @show (1f-10 * x'W * D)
+    return 1f+10 * stepsize * Float32(2 / M) * x * (1f-10 * x'W * D)
 end
 
 # sym
