@@ -438,6 +438,7 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
         @inbounds for i in 1:length(xx)
             xx[i] = (xx[i] - rowmeanvec[n, 1]) / rowvarvec[n, 1]
         end
+        @show xx
     end
     if (rowmeanlist != "") && (rowvarlist == "") && (colsumlist != "")
         @inbounds for i in 1:length(xx)
