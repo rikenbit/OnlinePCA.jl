@@ -351,6 +351,7 @@ end
 
 # Output log file (other PCA)
 function outputlog(N::Number, s::Number, n::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+    @show mod((N*(s-1)+n), 5000)
     if(mod((N*(s-1)+n), 5000) == 0)
         REs = RecError(W, input, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         writecsv("$(logdir)/W_$(string((N*(s-1)+n))).csv", W)
@@ -479,8 +480,7 @@ end
 
 # Stochastic Gradient
 function ∇fn(W::AbstractArray, x::Array{Float32,1}, D::AbstractArray, M::Number, stepsize::Number)
-    # 1f-6をかけていた箇所（Brainだとオーバーフローする？）
-    return stepsize * Float32(2 / M) * x * (x'W * D)
+    return 1f+6 * stepsize * Float32(2 / M) * x * (1f-6 * x'W * D)
 end
 
 # sym
