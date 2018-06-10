@@ -68,10 +68,6 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
                 # Row vector of data matrix
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-                # Update Eigen vector
-                if n == 10
-                    break
-                end
                 W, v = ojaupdate(scheduling, stepsize, g, epsilon, D, N, M, W, v, normx, s, n)
                 # NaN
                 checkNaN(N, s, n, W, pca)
