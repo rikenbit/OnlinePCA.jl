@@ -379,8 +379,6 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-            # preE = W * (W' * x) .- x
-            # E = E + dot(preE, preE)
             pc = W'normx
             E = E + dot(normx, normx) - dot(pc, pc)
         end
@@ -388,8 +386,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
     end
     AE = E / M
     RMSE = sqrt(E / (N * M))
-    AllVar = sqrt(AllVar)
-    ARE = sqrt(E) / AllVar
+    ARE = sqrt(E / AllVar)
     @assert E isa Float32
     @assert AE isa Float32
     @assert RMSE isa Float32

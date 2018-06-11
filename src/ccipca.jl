@@ -31,8 +31,8 @@ Reference
 function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = CCIPCA()
-    pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, scale)
     N, M = nm(input)
+    pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, scale)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
@@ -76,12 +76,20 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 checkNaN(N, s, n, W, pca)
                 # Check Float32
                 @assert W[1,1] isa Float32
+                # Normalization
+                for i=1:dim
+                    W[:, i] = W[:, i] / norm(W[:, i])
+                end
                 # save log file
                 if logdir isa String
                     outputlog(N, s, n, input, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
                 end
             end
             close(stream)
+        end
+        # save log file
+        if logdir isa String
+            outputlog(s, input, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         end
         next!(progress)
     end

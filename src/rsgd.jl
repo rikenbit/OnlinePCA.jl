@@ -85,6 +85,10 @@ function rsgd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
             end
             close(stream)
         end
+        # save log file
+        if logdir isa String
+            outputlog(s, input, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+        end
         next!(progress)
     end
 
