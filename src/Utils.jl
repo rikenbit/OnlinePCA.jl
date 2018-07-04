@@ -324,8 +324,9 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number)
         V[:, n] ./= λ[n]
     end
 
-    λ .= λ .* λ ./ N
+    # λ .= λ .* λ ./ N
     # λ .= 1 ./ (M .* λ)
+    λ .= λ .* λ ./ M
 
     # Sort by Eigen value
     idx = sortperm(λ, rev=true)
