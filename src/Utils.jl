@@ -300,7 +300,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
 end
 
 # Eigen value, Loading, Scores
-function WλV(W::AbstractArray, input::AbstractString, dim::Number)
+function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -314,7 +314,8 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number)
         for n = 1:N
             # Data Import
             read!(stream, x)
-            V[n, :] = x'W
+            normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            V[n, :] = normx'W
         end
         close(stream)
     end

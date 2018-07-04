@@ -95,7 +95,7 @@ function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
     end
 
     # Return, W, λ, V
-    WλV(W, input, dim)
+    WλV(W, input, dim, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
 end
 
 # SVRG × Robbins-Monro

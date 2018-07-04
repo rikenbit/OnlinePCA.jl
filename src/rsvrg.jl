@@ -95,7 +95,7 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     end
 
     # Return, W, λ, V
-    WλV(W, input, dim)
+    WλV(W, input, dim, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
 end
 
 # RSVRG × Robbins-Monro

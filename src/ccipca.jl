@@ -95,7 +95,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
     end
 
     # Return, W, λ, V
-    out = WλV(W, input, dim)
+    out = WλV(W, input, dim, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
     if outdir isa String
         output(outdir, out)
     end
