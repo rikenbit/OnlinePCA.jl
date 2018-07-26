@@ -69,11 +69,11 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                         w2 = (1 + stepsize) / k
                         Wi = W[:, i]
                         Xi = X[:, i]
-                        W[:, i] = w1 * Wi + Xi * dot(w2 * Xi, Wi/norm(Wi))
+                        W[:, i] = w1 * Wi + Xi * dot(w2 * Xi * offsetStoch, Wi/norm(Wi)) / offsetStoch
                         # Data for calculating i+1 th Eigen vector
                         Wi = W[:, i]
                         Wnorm = Wi / norm(Wi)
-                        X[:, i+1] = Xi - dot(Xi, Wnorm) * Wnorm
+                        X[:, i+1] = Xi - dot(Xi * offsetStoch, Wnorm) * Wnorm / offsetStoch
                     end
                 end
                 # NaN
