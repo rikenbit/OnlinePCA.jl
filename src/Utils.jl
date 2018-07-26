@@ -20,7 +20,7 @@ end
 
 # Check NaN value (other PCA)
 function checkNaN(N::Number, s::Number, n::Number, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG})
-    if mod((N*(s-1)+n), 5000) == 0
+    if mod((N*(s-1)+n), 49) == 0
         if any(isnan, W)
             error("NaN values are generated. Select other stepsize")
         end
@@ -93,6 +93,10 @@ function parse_commandline(pca::CCIPCA)
             help = "numepoch of PCA"
             arg_type = Union{Number,AbstractString}
             default = 5
+        "--stop"
+            help = "Stopping Criteria (Relative Change of Error)"
+            arg_type = Union{Number,AbstractString}
+            default = 1.0f-3
         "--logdir", "-l"
             help = "saving log directory"
             arg_type = Union{Void,AbstractString}
@@ -168,7 +172,11 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             help = "a small number for avoiding zero division"
             arg_type = Union{Number,AbstractString}
             default = 1.0f-8
-            "--logdir", "-l"
+        "--stop"
+            help = "Stopping Criteria (Relative Change of Error)"
+            arg_type = Union{Number,AbstractString}
+            default = 1.0f-3
+        "--logdir", "-l"
             help = "saving log directory"
             arg_type = Union{Void,AbstractString}
             default = nothing
@@ -191,12 +199,13 @@ function nm(input::AbstractString)
 end
 
 # Initialization (only CCIPCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, stop::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
+    stop = Float32(stop)
     W = zeros(Float32, M, dim) # Eigen vectors
     X = zeros(Float32, M, dim+1) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
@@ -240,11 +249,11 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar
+    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop
 end
 
 # Initialization (other PCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, stop::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -252,6 +261,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     stepsize = Float32(stepsize)
     g = Float32(g)
     epsilon = Float32(epsilon)
+    stop = Float32(stop)
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
@@ -296,7 +306,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop
 end
 
 # Eigen value, Loading, Scores
@@ -343,23 +353,43 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
 end
 
 # Output log file （only GD）
-function outputlog(s::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool)
     REs = RecError(W, input, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+    if s != 1
+        old_E = readcsv("$(logdir)/RecError_$(string(s-1)).csv")
+        relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
+        if relChange < stop
+            println("The calculation is converged")
+            conv = true
+            return conv
+        end
+    end
     writecsv("$(logdir)/W_$(string(s)).csv", W)
     writecsv("$(logdir)/RecError_$(string(s)).csv", REs)
     touch("$(logdir)/W_$(string(s)).csv")
     touch("$(logdir)/RecError_$(string(s)).csv")
+    return conv
 end
 
 # Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
-    if(mod((N*(s-1)+n), 5000) == 0)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool)
+    if(mod((N*(s-1)+n), 49) == 0)
         REs = RecError(W, input, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+        if n != 49
+            old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-49)))).csv")
+            relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
+            if relChange < stop
+                println("The calculation is converged")
+                conv = true
+                return conv
+            end
+        end
         writecsv("$(logdir)/W_$(string((N*(s-1)+n))).csv", W)
         writecsv("$(logdir)/RecError_$(string((N*(s-1)+n))).csv", REs)
         touch("$(logdir)/W_$(string((N*(s-1)+n))).csv")
         touch("$(logdir)/RecError_$(string((N*(s-1)+n))).csv")
     end
+    return conv
 end
 
 # Reconstuction Error

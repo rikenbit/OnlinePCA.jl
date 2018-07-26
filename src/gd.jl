@@ -1,5 +1,5 @@
 """
-    gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
+    gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by gradient descent method.
 
@@ -29,7 +29,7 @@ Output Arguments
 - `λ` : Eigen values (dim × dim)
 - `V` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 """
-function gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
+function gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = GD()
     if scheduling == "robbins-monro"
@@ -43,19 +43,23 @@ function gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothin
     else
         error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
     end
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, scale)
+    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, stop, scale)
     # Perform PCA
-    out = gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar)
+    out = gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop)
     if outdir isa String
         output(outdir, out)
     end
     return out
 end
 
-function gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar)
+function gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop)
+    # If true the calculation is converged
+    conv = false
+    s = 1
+    n = 1
     # Each epoch s
     progress = Progress(numepoch)
-    for s = 1:numepoch
+    while(!conv && s <= numepoch)
         # Update Eigen vector
         W, v = gdupdate(scheduling, stepsize, g, epsilon, D, N, M, W, v, s, input, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         # NaN
@@ -64,9 +68,10 @@ function gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumli
         W .= full(qrfact!(W)[:Q], thin=true)
         # save log file
         if logdir isa String
-            outputlog(s, input, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            conv = outputlog(s, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
         end
         next!(progress)
+        s = s + 1
     end
 
     # Return, W, λ, V

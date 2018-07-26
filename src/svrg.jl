@@ -1,5 +1,5 @@
 """
-    svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
+    svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by variance-reduced stochastic gradient descent method, also known as VR-PCA.
 
@@ -31,7 +31,7 @@ Reference
 ---------
 - SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 """
-function svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, logdir::Union{Void,AbstractString}=nothing)
+function svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = SVRG()
     if scheduling == "robbins-monro"
@@ -45,24 +45,28 @@ function svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=noth
     else
         error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
     end
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, scale)
+    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, stop, scale)
     # Perform PCA
-    out = svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar)
+    out = svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop)
     if outdir isa String
         output(outdir, out)
     end
     return out
 end
 
-function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar)
+function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
+    # If true the calculation is converged
+    conv = false
+    s = 1
+    n = 1
     # Each epoch s
     progress = Progress(numepoch)
-    for s = 1:numepoch
+    while(!conv && s <= numepoch)
         u = ∇f(W, input, D, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stepsize/s)
         Ws = W
         open(input) do file
@@ -70,7 +74,7 @@ function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n
-            for n = 1:N
+            while(!conv && n <= N)
                 # Row vector of data matrix
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
@@ -82,16 +86,18 @@ function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if logdir isa String
-                    outputlog(N, s, n, input, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+                    conv = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
                 end
+                n = n + 1
             end
             close(stream)
         end
         # save log file
         if logdir isa String
-            outputlog(s, input, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            conv = outputlog(s, input, dim, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
         end
         next!(progress)
+        s = s + 1
     end
 
     # Return, W, λ, V

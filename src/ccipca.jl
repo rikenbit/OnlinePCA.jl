@@ -1,5 +1,5 @@
 """
-    ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, logdir::Union{Void,AbstractString}=nothing)
+    ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by candid covariance-free incremental PCA.
 
@@ -28,24 +28,28 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=5, logdir::Union{Void,AbstractString}=nothing)
+function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = CCIPCA()
     N, M = nm(input)
-    pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar = init(input, pseudocount, stepsize, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, scale)
+    pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop = init(input, pseudocount, stepsize, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, stop, scale)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
+    # If true the calculation is converged
+    conv = false
+    s = 1
+    n = 1
     # Each epoch s
     progress = Progress(numepoch)
-    for s = 1:numepoch
+    while(!conv && s <= numepoch)
         open(input) do file
             stream = ZstdDecompressorStream(file)
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n
-            for n = 1:N
+            while(!conv && n <= N)
                 # Row vector of data matrix
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
@@ -82,16 +86,18 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 end
                 # save log file
                 if logdir isa String
-                    outputlog(N, s, n, input, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+                    conv = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
                 end
+                n = n + 1
             end
             close(stream)
         end
         # save log file
         if logdir isa String
-            outputlog(s, input, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            conv = outputlog(s, input, dim, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
         end
         next!(progress)
+        s = s + 1
     end
 
     # Return, W, λ, V

@@ -39,6 +39,12 @@ function main()
         epsilon=parse(Float32, parsed_args["epsilon"])
     end
 
+    if parsed_args["stop"] == 1.0f-3
+        stop = 1.0f-3
+    else
+        stop=parse(Float32, parsed_args["stop"])
+    end
+
     if parsed_args["logdir"] == nothing
         logdir = parsed_args["logdir"]
     else
@@ -58,6 +64,7 @@ function main()
         scheduling=parsed_args["scheduling"],
         g=g,
         epsilon=epsilon,
+        stop=stop,
         logdir=logdir)
     OnlinePCA.output(parsed_args["outdir"], out)
 end

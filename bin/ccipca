@@ -16,13 +16,23 @@ function main()
     else
         pseudocount=Float32(parsed_args["pseudocount"])
     end
+
     dim=parse(Int64, parsed_args["dim"])
+
     if parsed_args["stepsize"] == 0.1f0
         stepsize = 0.1f0
     else
         stepsize=parse(Float32, parsed_args["stepsize"])
     end
+
     numepoch=parse(Int64, parsed_args["numepoch"])
+
+    if parsed_args["stop"] == 1.0f-3
+        stop = 1.0f-3
+    else
+        stop=parse(Float32, parsed_args["stop"])
+    end
+
     if parsed_args["logdir"] == nothing
         logdir = parsed_args["logdir"]
     else
@@ -39,6 +49,7 @@ function main()
         dim=dim,
         stepsize=stepsize,
         numepoch=numepoch,
+        stop=stop,
         logdir=logdir)
     OnlinePCA.output(parsed_args["outdir"], out)
 end
