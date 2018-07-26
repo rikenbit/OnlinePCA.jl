@@ -83,9 +83,6 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
                     conv = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv, evalfreq)
                 end
                 n = n + 1
-                if n == N+1
-                    n = 1
-                end
                 next!(progress)
             end
             close(stream)
@@ -95,6 +92,9 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
             conv = outputlog(s, input, dim, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
         end
         s = s + 1
+        if n == N + 1
+            n = 1
+        end
     end
 
     # Return, W, λ, V
