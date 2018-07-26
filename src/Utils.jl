@@ -404,6 +404,7 @@ function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::
         if n != evalfreq
             old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-evalfreq)))).csv")
             relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
+            @show relChange
             if relChange < stop
                 println("The calculation is converged")
                 conv = true
