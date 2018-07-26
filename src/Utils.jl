@@ -384,6 +384,10 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
     if s != 1
         old_E = readcsv("$(logdir)/RecError_$(string(s-1)).csv")
         relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
+        println("new Error: ", REs[1][2])
+        println("old Error:", old_E[1,2])
+        println("abs: ", abs(REs[1][2] - old_E[1,2]))
+        println("relChange: ", relChange)
         if relChange < stop
             println("The calculation is converged")
             conv = true
