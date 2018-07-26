@@ -71,7 +71,7 @@ function gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumli
         if logdir isa String
             conv = outputlog(s, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
         end
-        next!(progress)
+        # next!(progress)
         s = s + 1
     end
 
