@@ -19,8 +19,8 @@ function checkNaN(W::AbstractArray, pca::GD)
 end
 
 # Check NaN value (other PCA)
-function checkNaN(N::Number, s::Number, n::Number, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG})
-    if mod((N*(s-1)+n), 49) == 0
+function checkNaN(N::Number, s::Number, n::Number, W::AbstractArray, evalfreq::Number, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG})
+    if mod((N*(s-1)+n), evalfreq) == 0
         if any(isnan, W)
             error("NaN values are generated. Select other stepsize")
         end
@@ -97,6 +97,14 @@ function parse_commandline(pca::CCIPCA)
             help = "Stopping Criteria (Relative Change of Error)"
             arg_type = Union{Number,AbstractString}
             default = 1.0f-3
+        "--evalfreq"
+            help = "Evaluation Frequency of Reconstruction Error"
+            arg_type = Union{Number,AbstractString}
+            default = 5000
+        "--offsetStoch"
+            help = "Off set value for avoding overflow when calculating stochastic gradient"
+            arg_type = Union{Number,AbstractString}
+            default = 1.0f-6
         "--logdir", "-l"
             help = "saving log directory"
             arg_type = Union{Void,AbstractString}
@@ -176,6 +184,18 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             help = "Stopping Criteria (Relative Change of Error)"
             arg_type = Union{Number,AbstractString}
             default = 1.0f-3
+        "--evalfreq"
+            help = "Evaluation Frequency of Reconstruction Error"
+            arg_type = Union{Number,AbstractString}
+            default = 5000
+        "--offsetFull"
+            help = "Off set value for avoding overflow when calculating full gradient"
+            arg_type = Union{Number,AbstractString}
+            default = 1.0f-20
+        "--offsetStoch"
+            help = "Off set value for avoding overflow when calculating stochastic gradient"
+            arg_type = Union{Number,AbstractString}
+            default = 1.0f-6
         "--logdir", "-l"
             help = "saving log directory"
             arg_type = Union{Void,AbstractString}
@@ -199,13 +219,16 @@ function nm(input::AbstractString)
 end
 
 # Initialization (only CCIPCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, stop::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
     stop = Float32(stop)
+    evalfreq = Int64(evalfreq)
+    offsetFull = Float32(offsetFull)
+    offsetStoch = Float32(offsetStoch)
     W = zeros(Float32, M, dim) # Eigen vectors
     X = zeros(Float32, M, dim+1) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
@@ -249,11 +272,11 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop
+    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
 end
 
 # Initialization (other PCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, stop::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -262,6 +285,9 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     g = Float32(g)
     epsilon = Float32(epsilon)
     stop = Float32(stop)
+    evalfreq = Int64(evalfreq)
+    offsetFull = Float32(offsetFull)
+    offsetStoch = Float32(offsetStoch)
     W = zeros(Float32, M, dim) # Eigen vectors
     v = zeros(Float32, M, dim) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
@@ -306,7 +332,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
 end
 
 # Eigen value, Loading, Scores
@@ -372,11 +398,11 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
 end
 
 # Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool)
-    if(mod((N*(s-1)+n), 49) == 0)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool, evalfreq::Number)
+    if(mod((N*(s-1)+n), evalfreq) == 0)
         REs = RecError(W, input, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-        if n != 49
-            old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-49)))).csv")
+        if n != evalfreq
+            old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-evalfreq)))).csv")
             relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
             if relChange < stop
                 println("The calculation is converged")
@@ -483,7 +509,7 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
 end
 
 # Full Gradient
-function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number)
+function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number, offsetFull::Number, offsetStoch::Number)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -499,16 +525,16 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             # Full Gradient
-            tmpW .+= 1f-20 * ∇fn(W, normx, D, M, stepsize)
+            tmpW .+= offsetFull * ∇fn(W, normx, D, M, stepsize, offsetStoch)
         end
         close(stream)
     end
-    return 1f+20 * tmpW
+    return tmpW / offsetFull
 end
 
 # Stochastic Gradient
-function ∇fn(W::AbstractArray, x::Array{Float32,1}, D::AbstractArray, M::Number, stepsize::Number)
-    return 1f+6 * stepsize * Float32(2 / M) * x * (1f-6 * x'W * D)
+function ∇fn(W::AbstractArray, x::Array{Float32,1}, D::AbstractArray, M::Number, stepsize::Number, offsetStoch::Number)
+    return 1/offsetStoch * stepsize * Float32(2 / M) * x * (offsetStoch * x'W * D)
 end
 
 # sym

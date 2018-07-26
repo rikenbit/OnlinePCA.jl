@@ -45,6 +45,24 @@ function main()
         stop=parse(Float32, parsed_args["stop"])
     end
 
+    if parsed_args["evalfreq"] == 5000
+        evalfreq = 5000
+    else
+        evalfreq=parse(Int64, parsed_args["evalfreq"])
+    end
+
+    if parsed_args["offsetFull"] == 1.0f-20
+        offsetFull = 1.0f-20
+    else
+        offsetFull=parse(Int64, parsed_args["offsetFull"])
+    end
+
+    if parsed_args["offsetStoch"] == 1.0f-6
+        offsetStoch = 1.0f-6
+    else
+        offsetStoch=parse(Int64, parsed_args["offsetStoch"])
+    end
+
     if parsed_args["logdir"] == nothing
         logdir = parsed_args["logdir"]
     else
@@ -65,6 +83,9 @@ function main()
         g=g,
         epsilon=epsilon,
         stop=stop,
+        evalfreq=evalfreq,
+        offsetFull=offsetFull,
+        offsetStoch=offsetStoch,
         logdir=logdir)
     OnlinePCA.output(parsed_args["outdir"], out)
 end

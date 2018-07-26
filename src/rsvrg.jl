@@ -1,5 +1,5 @@
 """
-    rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
+    rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by Riemannian variance-reduced stochastic gradient descent method.
 
@@ -31,7 +31,7 @@ Reference
 ---------
 - RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
 """
-function rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, logdir::Union{Void,AbstractString}=nothing)
+function rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", masklist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, stop::Number=1.0e-3, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = RSVRG()
     if scheduling == "robbins-monro"
@@ -45,16 +45,16 @@ function rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=not
     else
         error("Specify the scheduling as robbins-monro, momentum, nag or adagrad")
     end
-    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, stop, scale)
+    pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, rowvarlist, colsumlist, masklist, logdir, pca, stop, evalfreq, offsetFull, offsetStoch, scale)
     # Perform PCA
-    out = rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop)
+    out = rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch)
     if outdir isa String
         output(outdir, out)
     end
     return out
 end
 
-function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop)
+function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, masklist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -65,9 +65,9 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     s = 1
     n = 1
     # Each epoch s
-    progress = Progress(numepoch)
+    progress = Progress(numepoch*N)
     while(!conv && s <= numepoch)
-        u = ∇f(W, input, D, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stepsize/s)
+        u = ∇f(W, input, D, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stepsize/s, offsetFull, offsetStoch)
         Ws = W
         open(input) do file
             stream = ZstdDecompressorStream(file)
@@ -79,16 +79,17 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
                 # Update Eigen vector
-                W, v = rsvrgupdate(scheduling, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws)
+                W, v = rsvrgupdate(scheduling, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws, offsetStoch)
                 # NaN
-                checkNaN(N, s, n, W, pca)
+                checkNaN(N, s, n, W, evalfreq, pca)
                 # Retraction
                 W .= full(qrfact!(W)[:Q], thin=true)
                 # save log file
                 if logdir isa String
-                    conv = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
+                    conv = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv, evalfreq)
                 end
                 n = n + 1
+                next!(progress)
             end
             close(stream)
         end
@@ -96,7 +97,6 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
         if logdir isa String
             conv = outputlog(s, input, dim, logdir, W, GD(), AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
         end
-        next!(progress)
         s = s + 1
     end
 
@@ -105,29 +105,29 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
 end
 
 # RSVRG × Robbins-Monro
-function rsvrgupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws)
-    W .= W .+ Pw(∇fn(W, normx, D, M, stepsize/(N*(s-1)+n)), W) .- Pw(∇fn(Ws, normx, D, M, stepsize/(N*(s-1)+n)), Ws) .+ u
+function rsvrgupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws, offsetStoch)
+    W .= W .+ Pw(∇fn(W, normx, D, M, stepsize/(N*(s-1)+n), offsetStoch), W) .- Pw(∇fn(Ws, normx, D, M, stepsize/(N*(s-1)+n), offsetStoch), Ws) .+ u
     v = nothing
     return W, v
 end
 
 # RSVRG × Momentum
-function rsvrgupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws)
-    v .= g .* v .+ Pw(∇fn(W, normx, D, M, stepsize), W) .- Pw(∇fn(Ws, normx, D, M, stepsize), Ws) .+ u
+function rsvrgupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws, offsetStoch)
+    v .= g .* v .+ Pw(∇fn(W, normx, D, M, stepsize, offsetStoch), W) .- Pw(∇fn(Ws, normx, D, M, stepsize, offsetStoch), Ws) .+ u
     W .= W .+ v
     return W, v
 end
 
 # RSVRG × NAG
-function rsvrgupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws)
-    v = g .* v + Pw(∇fn(W - g .* v, normx, D, M, stepsize), W - g .* v) .- Pw(∇fn(Ws, normx, D, M, stepsize), Ws) .+ u
+function rsvrgupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws, offsetStoch)
+    v = g .* v + Pw(∇fn(W - g .* v, normx, D, M, stepsize, offsetStoch), W - g .* v) .- Pw(∇fn(Ws, normx, D, M, stepsize, offsetStoch), Ws) .+ u
     W .= W .+ v
     return W, v
 end
 
 # RSVRG × Adagrad
-function rsvrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws)
-    grad = Pw(∇fn(W, normx, D, M, stepsize), W) .- Pw(∇fn(Ws, normx, D, M, stepsize), Ws) .+ u
+function rsvrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, normx, s, n, u, Ws, offsetStoch)
+    grad = Pw(∇fn(W, normx, D, M, stepsize, offsetStoch), W) .- Pw(∇fn(Ws, normx, D, M, stepsize, offsetStoch), Ws) .+ u
     grad = grad / stepsize
     v .= v .+ grad .* grad
     W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
