@@ -62,7 +62,7 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
     s = 1
     n = 1
     # Each epoch s
-    # progress = Progress(numepoch*N)
+    progress = Progress(numepoch*N)
     while(!conv && s <= numepoch)
         open(input) do file
             stream = ZstdDecompressorStream(file)
@@ -83,7 +83,7 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
                     conv = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv, evalfreq)
                 end
                 n = n + 1
-                # next!(progress)
+                next!(progress)
             end
             close(stream)
         end
