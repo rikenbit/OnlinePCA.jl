@@ -57,7 +57,6 @@ function main()
         rowmeanlist=parsed_args["rowmeanlist"],
         rowvarlist=parsed_args["rowvarlist"],
         colsumlist=parsed_args["colsumlist"],
-        masklist=parsed_args["masklist"],
         dim=dim,
         stepsize=stepsize,
         numepoch=numepoch,

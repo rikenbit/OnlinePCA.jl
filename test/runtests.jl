@@ -53,20 +53,6 @@ testfilesize(false, "$(tmp)/Sample_NoCounts.csv", "$(tmp)/Feature_CV2s.csv", "$(
 
 
 #####################################
-println("####### Filtering (Julia API) #######")
-filtering(input="$(tmp)/Data.zst", featurelist="$(tmp)/Feature_Means.csv", thr=0, output="$(tmp)/filtered.zst")
-testfilesize(true, "$(tmp)/filtered.zst")
-#####################################
-
-
-#####################################
-println("####### Filtering (Command line) #######")
-run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/filtering --input $(tmp)/Data.zst --featurelist $(tmp)/Feature_Means.csv --thr 0 --output "$(tmp)/filtered.zst"`)
-testfilesize(false, "$(tmp)/filtered.zst")
-#####################################
-
-
-#####################################
 println("####### HVG (Julia API) #######")
 hvg(binfile="$(tmp)/Data.zst", rowmeanlist="$(tmp)/Feature_Means.csv", rowvarlist="$(tmp)/Feature_Vars.csv", rowcv2list="$(tmp)/Feature_CV2s.csv", outdir=tmp)
 testfilesize(true, "$(tmp)/HVG_pval.csv", "$(tmp)/HVG_a0.csv", "$(tmp)/HVG_a1.csv", "$(tmp)/HVG_afit.csv", "$(tmp)/HVG_useForFit.csv", "$(tmp)/HVG_varFitRatio.csv", "$(tmp)/HVG_df.csv")
@@ -77,6 +63,20 @@ testfilesize(true, "$(tmp)/HVG_pval.csv", "$(tmp)/HVG_a0.csv", "$(tmp)/HVG_a1.cs
 println("####### HVG (Command line) #######")
 run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/hvg --binfile $(tmp)/Data.zst --rowmeanlist $(tmp)/Feature_Means.csv --rowvarlist $(tmp)/Feature_Vars.csv --rowcv2list $(tmp)/Feature_CV2s.csv --outdir $(tmp)`)
 testfilesize(false, "$(tmp)/HVG_pval.csv", "$(tmp)/HVG_a0.csv", "$(tmp)/HVG_a1.csv", "$(tmp)/HVG_afit.csv", "$(tmp)/HVG_useForFit.csv", "$(tmp)/HVG_varFitRatio.csv", "$(tmp)/HVG_df.csv")
+#####################################
+
+
+#####################################
+println("####### Filtering (Julia API) #######")
+filtering(input="$(tmp)/Data.zst", featurelist="$(tmp)/Feature_Means.csv", samplelist="$(tmp)/Sample_NoCounts.csv", thr1=10, thr2=10, direct1="+", direct2="+", output="$(tmp)/filtered.zst")
+testfilesize(true, "$(tmp)/filtered.zst")
+#####################################
+
+
+#####################################
+println("####### Filtering (Command line) #######")
+run(`$(julia) $(Pkg.dir())/OnlinePCA/bin/filtering --input $(tmp)/Data.zst --featurelist $(tmp)/Feature_Means.csv --samplelist $(tmp)/Sample_NoCounts.csv --thr1 10 --thr2 10 --output "$(tmp)/filtered.zst"`)
+testfilesize(false, "$(tmp)/filtered.zst")
 #####################################
 
 

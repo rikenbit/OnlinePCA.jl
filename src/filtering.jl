@@ -1,5 +1,5 @@
 """
-    filtering(;input::AbstractString="", featurelist::AbstractString="", thr::Number=0, output::AbstractString=".")
+    filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0, thr2::Number=0, direct1::AbstractString="+", direct2::AbstractString="+", output::AbstractString=".")
 
 This function filters the genes by some standards such as mean or variance of the genes.
 
@@ -14,33 +14,38 @@ Output Files
 ---------
 - `filtered.zst` : Filtered binary file.
 """
-function filtering(;input::AbstractString="", featurelist::AbstractString="", thr::Number=0, output::AbstractString=".")
+function filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0, thr2::Number=0, direct1::AbstractString="+", direct2::AbstractString="+", output::AbstractString=".")
     # Feature selection
-    featurelist = readcsv(featurelist)
+    featurevec = readcsv(featurelist) # e.g., HVG_pval.csv
+    samplevec = readcsv(samplelist) # e.g., Sample_NoCounts.csv
+
     # Setting
-    if thr isa String
-        thr = parse(Float64, thr)
+    if thr1 isa String
+        thr1 = parse(Float64, thr1)
+    end
+    if thr2 isa String
+        thr2 = parse(Float64, thr2)
     end
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
-    nr = nrowfilter(input, featurelist, thr)
+    nr, nc, ix1, ix2 = rcfilter(input, featurevec, samplevec, thr1, thr2, direct1, direct2)
     open(output, "w") do file1
         stream1 = ZstdCompressorStream(file1)
-        write(stream1, nr)
-        write(stream1, M)
+        write(stream1, nr) # by rcfilter
+        write(stream1, nc) # by rcfilter
         open(input , "r") do file2
             stream2 = ZstdDecompressorStream(file2)
             read!(stream2, tmpN)
             read!(stream2, tmpM)
             progress = Progress(N)
             for n = 1:N
-                read!(stream2, x)
-                if featurelist[n, 1] > thr
-                    write(stream1, x)
-                end
                 next!(progress)
+                read!(stream2, x)
+                    if ix1[n] == 1
+                        write(stream1, x[ix2])
+                    end
             end
             close(stream2)
         end
@@ -49,22 +54,47 @@ function filtering(;input::AbstractString="", featurelist::AbstractString="", th
     print("\n")
 end
 
-function nrowfilter(input, featurelist, thr)
+function rcfilter(input, featurevec, samplevec, thr1, thr2, direct1, direct2)
     ncol = 0
+    nrow = 0
     N, M = nm(input)
+    idx1 = zeros(UInt32, N)
+    idx2 = Int64[]
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
-    x = zeros(UInt32, M)
+    # Row-wise filter
     open(input, "r") do file
         stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)
         for n = 1:N
-            if featurelist[n, 1] > thr
-                ncol += 1
+            if direct1 == "+"
+                if featurevec[n] > thr1
+                    nrow += 1
+                    idx1[n] = 1
+                end
+            elseif direct1 == "-"
+                if featurevec[n] < thr1
+                    nrow += 1
+                    idx1[n] = 1
+                end
             end
         end
         close(stream)
     end
-    ncol
+    # Column-wise filter
+    for m=1:M
+        if direct2 == "+"
+            if(samplevec[m] > thr2)
+                ncol += 1
+                push!(idx2, m)
+            end
+        elseif direct2 == "-"
+            if(samplevec[m] < thr2)
+                ncol += 1
+                push!(idx2, m)
+            end
+        end
+    end
+    nrow, ncol, idx1, idx2
 end

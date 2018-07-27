@@ -11,14 +11,30 @@ function parse_commandline()
             help = "input file (serialized)"
             arg_type = AbstractString
             required = true
-        "--featurelist", "-g"
+        "--featurelist"
             help = "Feature list for filtering"
             arg_type = AbstractString
             required = true
-        "--thr", "-t"
-            help = "Threshold for filtering"
+        "--samplelist"
+            help = "Sample list for filtering"
             arg_type = AbstractString
             required = true
+        "--thr1"
+            help = "Threshold for filtering"
+            arg_type = Union{Number,AbstractString}
+            default = 0.0
+        "--thr2"
+            help = "Threshold for filtering"
+            arg_type = Union{Number,AbstractString}
+            default = 0.0
+        "--direct1"
+            help = "Direction of filtering (+ or -)"
+            arg_type = AbstractString
+            default = "+"
+        "--direct2"
+            help = "Direction of filtering (+ or -)"
+            arg_type = AbstractString
+            default = "+"
         "--output", "-o"
             help = "output directory"
             arg_type = AbstractString
@@ -37,9 +53,10 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    thr = parse(Float32, parsed_args["thr"])
+    thr1 = parse(Float32, parsed_args["thr1"])
+    thr2 = parse(Float32, parsed_args["thr2"])
 
-    OnlinePCA.filtering(input=parsed_args["input"], featurelist=parsed_args["featurelist"], thr=thr, output=parsed_args["output"])
+    OnlinePCA.filtering(input=parsed_args["input"], featurelist=parsed_args["featurelist"], samplelist=parsed_args["samplelist"], thr1=thr1, thr2=thr2, direct1=parsed_args["direct1"], direct2=parsed_args["direct2"], output=parsed_args["output"])
 end
 
 main()

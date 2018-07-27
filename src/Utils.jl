@@ -76,11 +76,6 @@ function parse_commandline(pca::CCIPCA)
             arg_type = AbstractString
             default = ""
             required = false
-        "--masklist"
-            help = "Columns to be remove"
-            arg_type = AbstractString
-            default = ""
-            required = false
         "--dim", "-d"
             help = "dimention of PCA"
             arg_type = Union{Number,AbstractString}
@@ -151,11 +146,6 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             arg_type = AbstractString
             default = ""
             required = false
-        "--masklist"
-            help = "Columns to be remove"
-            arg_type = AbstractString
-            default = ""
-            required = false
         "--dim", "-d"
             help = "dimention of PCA"
             arg_type = Union{Number,AbstractString}
@@ -219,7 +209,7 @@ function nm(input::AbstractString)
 end
 
 # Initialization (only CCIPCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -239,7 +229,6 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
     rowmeanvec = zeros(Float32, N, 1)
     rowvarvec = zeros(Float32, N, 1)
     colsumvec = zeros(Float32, M, 1)
-    maskvec = zeros(Float32, M, 1)
     if rowmeanlist != ""
         rowmeanvec = readcsv(rowmeanlist, Float32)
     end
@@ -248,9 +237,6 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
     end
     if colsumlist != ""
         colsumvec = readcsv(colsumlist, Float32)
-    end
-    if masklist != ""
-        maskvec = readcsv(masklist, Float32)
     end
     # N, M, All Variance
     AllVar = 0
@@ -261,7 +247,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
         for n = 1:N
             # Data Import
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             AllVar = AllVar + normx'normx
         end
         close(stream)
@@ -272,11 +258,11 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
+    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
 end
 
 # Initialization (other PCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, masklist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -299,7 +285,6 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     rowmeanvec = zeros(Float32, N, 1)
     rowvarvec = zeros(Float32, N, 1)
     colsumvec = zeros(Float32, M, 1)
-    maskvec = zeros(Float32, M, 1)
     if rowmeanlist != ""
         rowmeanvec = readcsv(rowmeanlist, Float32)
     end
@@ -308,9 +293,6 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     end
     if colsumlist != ""
         colsumvec = readcsv(colsumlist, Float32)
-    end
-    if masklist != ""
-        maskvec = readcsv(masklist, Float32)
     end
     # N, M, All Variance
     AllVar = 0
@@ -321,7 +303,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
         for n = 1:N
             # Data Import
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             AllVar = AllVar + normx'normx
         end
         close(stream)
@@ -332,11 +314,11 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, maskvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
 end
 
 # Eigen value, Loading, Scores
-function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -350,7 +332,7 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
         for n = 1:N
             # Data Import
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             V[n, :] = normx'W
         end
         close(stream)
@@ -379,8 +361,8 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
 end
 
 # Output log file （only GD）
-function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool)
-    REs = RecError(W, input, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool)
+    REs = RecError(W, input, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
     if s != 1
         old_E = readcsv("$(logdir)/RecError_$(string(s-1)).csv")
         relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
@@ -398,9 +380,9 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
 end
 
 # Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool, evalfreq::Number)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool, evalfreq::Number)
     if(mod((N*(s-1)+n), evalfreq) == 0)
-        REs = RecError(W, input, AllVar, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+        REs = RecError(W, input, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         if n != evalfreq
             old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-evalfreq)))).csv")
             relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
@@ -423,7 +405,7 @@ function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::
 end
 
 # Reconstuction Error
-function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -440,7 +422,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
         for n = 1:N
             # Data Import
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             pc = W'normx
             E = E + dot(normx, normx) - dot(pc, pc)
         end
@@ -458,7 +440,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
 end
 
 # Row vector
-function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     # Input
     if !(scale in ["log", "ftt", "raw"])
         error("scale must be specified as log, ftt, or raw")
@@ -480,11 +462,6 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
     end
     if scale == "raw"
         xx = convert(Vector{Float32}, x)
-    end
-
-    # Masking
-    if masklist != ""
-        xx = xx[maskvec]
     end
 
     # Centering, Normalization
@@ -513,7 +490,7 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
 end
 
 # Full Gradient
-function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::AbstractString, pseudocount::Number, masklist::AbstractString, maskvec::AbstractArray, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number, offsetFull::Number, offsetStoch::Number)
+function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number, offsetFull::Number, offsetStoch::Number)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -527,7 +504,7 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::
         for n = 1:N
             # Data Import
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, masklist, maskvec, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             # Full Gradient
             tmpW .+= offsetFull * ∇fn(W, normx, D, M, stepsize, offsetStoch)
         end
