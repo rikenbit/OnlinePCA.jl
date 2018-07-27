@@ -19,8 +19,8 @@ function main()
 
     dim=parse(Int64, parsed_args["dim"])
 
-    if parsed_args["stepsize"] == 0.1f0
-        stepsize = 0.1f0
+    if parsed_args["stepsize"] == 1.0f3
+        stepsize = 1.0f3
     else
         stepsize=parse(Float32, parsed_args["stepsize"])
     end
@@ -39,10 +39,16 @@ function main()
         epsilon=parse(Float32, parsed_args["epsilon"])
     end
 
-    if parsed_args["stop"] == 1.0f-3
-        stop = 1.0f-3
+    if parsed_args["lower"] == 0
+        lower = 0
     else
-        stop=parse(Float32, parsed_args["stop"])
+        lower=parse(Float32, parsed_args["lower"])
+    end
+
+    if parsed_args["upper"] == 1.0f+38
+        upper = 1.0f+38
+    else
+        upper=parse(Float32, parsed_args["upper"])
     end
 
     if parsed_args["evalfreq"] == 5000
@@ -75,7 +81,8 @@ function main()
         scheduling=parsed_args["scheduling"],
         g=g,
         epsilon=epsilon,
-        stop=stop,
+        lower=lower,
+        upper=upper,
         evalfreq=evalfreq,
         offsetStoch=offsetStoch,
         logdir=logdir)

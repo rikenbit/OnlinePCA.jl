@@ -15,7 +15,6 @@ function testfilesize(remove::Bool, x...)
 end
 
 #####################################
-println("####### CSV #######")
 input = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 300, 99)))
 input[1:50, 1:33] .= 100*input[1:50, 1:33]
 input[51:100, 34:66] .= 100*input[51:100, 34:66]

@@ -1,5 +1,5 @@
 """
-    ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, stop::Number=1.0e-3, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
+    ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, lower::Number=0, upper::Number=1.0f+38, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
 
 Online PCA solved by candid covariance-free incremental PCA.
 
@@ -27,28 +27,28 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, stop::Number=1.0e-3, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
+function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, lower::Number=0, upper::Number=1.0f+38, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
     # Initial Setting
     pca = CCIPCA()
     N, M = nm(input)
-    pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch = init(input, pseudocount, stepsize, dim, rowmeanlist, rowvarlist, colsumlist, logdir, pca, stop, evalfreq, offsetFull, offsetStoch, scale)
+    pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, lower, upper, evalfreq, offsetFull, offsetStoch = init(input, pseudocount, stepsize, dim, rowmeanlist, rowvarlist, colsumlist, logdir, pca, lower, upper, evalfreq, offsetFull, offsetStoch, scale)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
     # If true the calculation is converged
-    conv = false
+    stop = false
     s = 1
     n = 1
     # Each epoch s
     progress = Progress(numepoch*N)
-    while(!conv && s <= numepoch)
+    while(!stop && s <= numepoch)
         open(input) do file
             stream = ZstdDecompressorStream(file)
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n
-            while(!conv && n <= N)
+            while(!stop && n <= N)
                 next!(progress)
                 # Row vector of data matrix
                 read!(stream, x)
@@ -86,7 +86,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 end
                 # save log file
                 if logdir isa String
-                    conv = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv, evalfreq)
+                    stop = outputlog(N, s, n, input, dim, logdir, W, pca, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop, evalfreq)
                 end
                 n += 1
             end
@@ -94,7 +94,7 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
         end
         # save log file
         if logdir isa String
-            conv = outputlog(s, input, dim, logdir, W, GD(), AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stop, conv)
+            stop = outputlog(s, input, dim, logdir, W, GD(), AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop)
         end
         s += 1
         if n == N + 1

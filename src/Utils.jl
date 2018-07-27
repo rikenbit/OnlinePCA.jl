@@ -33,10 +33,6 @@ function output(outdir::AbstractString, out::Tuple)
     writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
     writecsv(joinpath(outdir, "Loadings.csv"), out[3])
     writecsv(joinpath(outdir, "Scores.csv"), out[4])
-    touch(joinpath(outdir, "Eigen_vectors.csv"))
-    touch(joinpath(outdir, "Eigen_values.csv"))
-    touch(joinpath(outdir, "Loadings.csv"))
-    touch(joinpath(outdir, "Scores.csv"))
 end
 
 # Parse command line options (only CCIPCA)
@@ -83,15 +79,19 @@ function parse_commandline(pca::CCIPCA)
         "--stepsize", "-s"
             help = "stepsize of PCA"
             arg_type = Union{Number,AbstractString}
-            default = 0.1
+            default = 1.0f3
         "--numepoch", "-e"
             help = "numepoch of PCA"
             arg_type = Union{Number,AbstractString}
             default = 5
-        "--stop"
-            help = "Stopping Criteria (Relative Change of Error)"
+        "--lower"
+            help = "Stopping Criteria (When the relative change of error is below this value, the calculation is terminated)"
             arg_type = Union{Number,AbstractString}
-            default = 1.0f-3
+            default = 0
+        "--upper"
+            help = "Stopping Criteria (When the relative change of error is above this value, the calculation is terminated)"
+            arg_type = Union{Number,AbstractString}
+            default = 1.0f+38
         "--evalfreq"
             help = "Evaluation Frequency of Reconstruction Error"
             arg_type = Union{Number,AbstractString}
@@ -153,7 +153,7 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
         "--stepsize", "-s"
             help = "stepsize of PCA"
             arg_type = Union{Number,AbstractString}
-            default = 0.1f0
+            default = 1.0f3
         "--numepoch", "-e"
             help = "numepoch of PCA"
             arg_type = Union{Number,AbstractString}
@@ -170,10 +170,14 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             help = "a small number for avoiding zero division"
             arg_type = Union{Number,AbstractString}
             default = 1.0f-8
-        "--stop"
-            help = "Stopping Criteria (Relative Change of Error)"
+        "--lower"
+            help = "Stopping Criteria (When the relative change of error is below this value, the calculation is terminated)"
             arg_type = Union{Number,AbstractString}
-            default = 1.0f-3
+            default = 0
+        "--upper"
+            help = "Stopping Criteria (When the relative change of error is above this value, the calculation is terminated)"
+            arg_type = Union{Number,AbstractString}
+            default = 1.0f+38
         "--evalfreq"
             help = "Evaluation Frequency of Reconstruction Error"
             arg_type = Union{Number,AbstractString}
@@ -209,13 +213,14 @@ function nm(input::AbstractString)
 end
 
 # Initialization (only CCIPCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     pseudocount = Float32(pseudocount)
     stepsize = Float32(stepsize)
-    stop = Float32(stop)
+    lower = Float32(lower)
+    upper = Float32(upper)
     evalfreq = Int64(evalfreq)
     offsetFull = Float32(offsetFull)
     offsetStoch = Float32(offsetStoch)
@@ -224,7 +229,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
     x = zeros(UInt32, M)
     for i=1:dim
-        W[i,i] = 1
+        W[i, i] = 1
     end
     rowmeanvec = zeros(Float32, N, 1)
     rowvarvec = zeros(Float32, N, 1)
@@ -258,11 +263,11 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
+    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, lower, upper, evalfreq, offsetFull, offsetStoch
 end
 
 # Initialization (other PCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, stop::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -270,7 +275,8 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     stepsize = Float32(stepsize)
     g = Float32(g)
     epsilon = Float32(epsilon)
-    stop = Float32(stop)
+    lower = Float32(lower)
+    upper = Float32(upper)
     evalfreq = Int64(evalfreq)
     offsetFull = Float32(offsetFull)
     offsetStoch = Float32(offsetStoch)
@@ -280,7 +286,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
     for i=1:dim
-        W[i,i] = 1
+        W[i, i] = 1
     end
     rowmeanvec = zeros(Float32, N, 1)
     rowvarvec = zeros(Float32, N, 1)
@@ -310,11 +316,11 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     end
     # directory for log file
     if logdir isa String
-        if(!isdir(logdir))
+        if !isdir(logdir)
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, stop, evalfreq, offsetFull, offsetStoch
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, lower, upper, evalfreq, offsetFull, offsetStoch
 end
 
 # Eigen value, Loading, Scores
@@ -361,47 +367,47 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
 end
 
 # Output log file （only GD）
-function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool)
+function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool)
     REs = RecError(W, input, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
     if s != 1
         old_E = readcsv("$(logdir)/RecError_$(string(s-1)).csv")
-        relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
-        if relChange < stop
-            println("The calculation is converged")
-            conv = true
-            return conv
+        RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
+        REs = [REs[1], REs[2], REs[3], REs[4], "RelChange"=> RelChange]
+        if RelChange < lower
+            println("Relative change of reconstruction error is below the lower value")
+            stop = true
+        end
+        if RelChange > upper
+            println("Relative change of reconstruction error is above the upper value")
+            stop = true
         end
     end
-    writecsv("$(logdir)/W_$(string(s)).csv", W)
     writecsv("$(logdir)/RecError_$(string(s)).csv", REs)
-    touch("$(logdir)/W_$(string(s)).csv")
-    touch("$(logdir)/RecError_$(string(s)).csv")
-    return conv
+    writecsv("$(logdir)/W_$(string(s)).csv", W)
+    return stop
 end
 
 # Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stop::Number, conv::Bool, evalfreq::Number)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool, evalfreq::Number)
     if(mod((N*(s-1)+n), evalfreq) == 0)
         REs = RecError(W, input, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         if n != evalfreq
             old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-evalfreq)))).csv")
-            relChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
-            # println("new Error: ", REs[1][2])
-            # println("old Error:", old_E[1,2])
-            # println("abs: ", abs(REs[1][2] - old_E[1,2]))
-            # println("relChange: ", relChange)
-            if relChange < stop
-                println("The calculation is converged")
-                conv = true
-                return conv
+            RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
+            REs = [REs[1], REs[2], REs[3], REs[4], "RelChange"=> RelChange]
+            if RelChange < lower
+                println("Relative change of reconstruction error is below the lower value")
+                stop = true
+            end
+            if RelChange > upper
+                println("Relative change of reconstruction error is above the upper value")
+                stop = true
             end
         end
         writecsv("$(logdir)/W_$(string((N*(s-1)+n))).csv", W)
         writecsv("$(logdir)/RecError_$(string((N*(s-1)+n))).csv", REs)
-        touch("$(logdir)/W_$(string((N*(s-1)+n))).csv")
-        touch("$(logdir)/RecError_$(string((N*(s-1)+n))).csv")
     end
-    return conv
+    return stop
 end
 
 # Reconstuction Error
