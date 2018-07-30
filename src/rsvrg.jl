@@ -18,7 +18,12 @@ Input Arguments
 - `scheduling` : Learning parameter scheduling. `robbins-monro`, `momentum`, `nag`, and `adagrad` are available.
 - `g` : The parameter that is used when scheduling is specified as nag.
 - `epsilon` : The parameter that is used when scheduling is specified as adagrad.
-- `logdir` : The directory where intermediate files are saved, in every 1000 iteration.
+- `lower` : Stopping Criteria (When the relative change of error is below this value, the calculation is terminated)
+- `upper` : Stopping Criteria (When the relative change of error is above this value, the calculation is terminated)
+- `evalfreq` : Evaluation Frequency of Reconstruction Error
+- `offsetFull` : Off set value for avoding overflow when calculating full gradient
+- `offsetStoch` : Off set value for avoding overflow when calculating stochastic gradient
+- `logdir` : The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration.
 
 Output Arguments
 ---------

@@ -199,8 +199,8 @@ julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
     --numepoch 10 --rowmeanlist Feature_LogMeans.csv
 ```
 
-## Distributed Computing with Multi-Start Initialization
-The online PCA algorithms are performed until the reconstruction error is converged. In the default stopping criteria, the calculation is stopped when the relative change is bellow 1E-3 (the value can be set as different value with -stop option).
+## Distributed Computing with Multiple Stepsize Setting
+The online PCA algorithms are performed until the reconstruction error is converged. In the default stopping criteria, the calculation is stopped when the relative change is bellow 1E-3 or above 0.03. These values can be changed by *lower* and *upper* options, respectively.
 
 The convergence is depend on the step size parameter and default value is set as 1000. This value is tuned for single-cell RNA-Seq dataset, but the appropriate level may change according to the size and dynamic range of data matrix.
 
