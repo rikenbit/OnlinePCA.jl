@@ -352,6 +352,7 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
     V = zeros(Float32, N, dim)
     Scores = zeros(Float32, M, dim)
     x = zeros(UInt32, M)
+    normx = zeros(UInt32, M)
     open(input) do file
         stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
@@ -359,10 +360,7 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
         for n = 1:N
             # Data Import
             read!(stream, x)
-            # normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-            @inbounds for i in 1:length(x)
-                normx[i] = log10(x[i] + 1.0)
-            end
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             V[n, :] = normx'W
         end
         close(stream)
