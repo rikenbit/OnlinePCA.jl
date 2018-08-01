@@ -60,19 +60,27 @@ function main()
     if parsed_args["offsetFull"] == 1.0f-20
         offsetFull = 1.0f-20
     else
-        offsetFull=parse(Int64, parsed_args["offsetFull"])
+        offsetFull=parse(Float32, parsed_args["offsetFull"])
     end
 
     if parsed_args["offsetStoch"] == 1.0f-6
         offsetStoch = 1.0f-6
     else
-        offsetStoch=parse(Int64, parsed_args["offsetStoch"])
+        offsetStoch=parse(Float32, parsed_args["offsetStoch"])
     end
 
     if parsed_args["logdir"] == nothing
         logdir = parsed_args["logdir"]
     else
         logdir = String(parsed_args["logdir"])
+    end
+
+    if parsed_args["perm"] == false
+        perm = false
+    elseif parsed_args["perm"] == "true"
+        perm = true
+    else
+        error("Please specify the perm option as true or false")
     end
 
     out = OnlinePCA.svrg(input=parsed_args["input"],
@@ -92,7 +100,8 @@ function main()
         evalfreq=evalfreq,
         offsetFull=offsetFull,
         offsetStoch=offsetStoch,
-        logdir=logdir)
+        logdir=logdir,
+        perm=perm)
     OnlinePCA.output(parsed_args["outdir"], out)
 end
 

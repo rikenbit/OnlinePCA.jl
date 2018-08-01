@@ -1,5 +1,5 @@
 """
-    ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, lower::Number=0, upper::Number=1.0f+38, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
+    ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, lower::Number=0, upper::Number=1.0f+38, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-15, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
 
 Online PCA solved by candid covariance-free incremental PCA.
 
@@ -21,6 +21,7 @@ Input Arguments
 - `offsetFull` : Off set value for avoding overflow when calculating full gradient
 - `offsetStoch` : Off set value for avoding overflow when calculating stochastic gradient
 - `logdir` : The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration.
+- `perm` : Whether the data matrix is shuffled at random.
 
 Output Arguments
 ---------
@@ -32,7 +33,7 @@ Reference
 ---------
 - CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
 """
-function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, lower::Number=0, upper::Number=1.0f+38, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing)
+function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, lower::Number=0, upper::Number=1.0f+38, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-15, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
     pca = CCIPCA()
     N, M = nm(input)
@@ -58,6 +59,9 @@ function ccipca(;input::AbstractString="", outdir::Union{Void,AbstractString}=no
                 # Row vector of data matrix
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+                if perm
+                    normx .= normx[randperm(length(normx))]
+                end
                 if norm(normx) == 0
                     tmp_normx = rand(Float32, M)
                     X[:, 1] = tmp_normx / Float32(norm(tmp_normx))

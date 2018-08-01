@@ -45,16 +45,24 @@ function main()
         evalfreq=parse(Int64, parsed_args["evalfreq"])
     end
 
-    if parsed_args["offsetStoch"] == 1.0f-6
-        offsetStoch = 1.0f-6
+    if parsed_args["offsetStoch"] == 1f-15
+        offsetStoch = 1f-15
     else
-        offsetStoch=parse(Int64, parsed_args["offsetStoch"])
+        offsetStoch=parse(Float32, parsed_args["offsetStoch"])
     end
 
     if parsed_args["logdir"] == nothing
         logdir = parsed_args["logdir"]
     else
         logdir = String(parsed_args["logdir"])
+    end
+
+    if parsed_args["perm"] == false
+        perm = false
+    elseif parsed_args["perm"] == "true"
+        perm = true
+    else
+        error("Please specify the perm option as true or false")
     end
 
     out = OnlinePCA.ccipca(input=parsed_args["input"],
@@ -70,7 +78,8 @@ function main()
         upper=upper,
         evalfreq=evalfreq,
         offsetStoch=offsetStoch,
-        logdir=logdir)
+        logdir=logdir,
+        perm=perm)
     OnlinePCA.output(parsed_args["outdir"], out)
 end
 

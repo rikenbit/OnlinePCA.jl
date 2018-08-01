@@ -69,6 +69,14 @@ function main()
         logdir = String(parsed_args["logdir"])
     end
 
+    if parsed_args["perm"] == false
+        perm = false
+    elseif parsed_args["perm"] == "true"
+        perm = true
+    else
+        error("Please specify the perm option as true or false")
+    end
+
     out = OnlinePCA.oja(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
@@ -85,7 +93,8 @@ function main()
         upper=upper,
         evalfreq=evalfreq,
         offsetStoch=offsetStoch,
-        logdir=logdir)
+        logdir=logdir,
+        perm=perm)
     OnlinePCA.output(parsed_args["outdir"], out)
 end
 

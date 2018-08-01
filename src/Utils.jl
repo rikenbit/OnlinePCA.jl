@@ -99,11 +99,15 @@ function parse_commandline(pca::CCIPCA)
         "--offsetStoch"
             help = "Off set value for avoding overflow when calculating stochastic gradient"
             arg_type = Union{Number,AbstractString}
-            default = 1.0f-6
+            default = 1f-15
         "--logdir", "-l"
             help = "The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration."
             arg_type = Union{Void,AbstractString}
             default = nothing
+        "--perm"
+            help = "Whether the data matrix is shuffled at random"
+            arg_type = Union{Bool,AbstractString}
+            default = false
     end
 
     return parse_args(s)
@@ -194,6 +198,10 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             help = "The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration."
             arg_type = Union{Void,AbstractString}
             default = nothing
+        "--perm"
+            help = "Whether the data matrix is shuffled at random"
+            arg_type = Union{Bool,AbstractString}
+            default = false
     end
 
     return parse_args(s)
@@ -494,7 +502,7 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
 end
 
 # Full Gradient
-function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number, offsetFull::Number, offsetStoch::Number)
+function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, stepsize::Number, offsetFull::Number, offsetStoch::Number, perm::Bool)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -509,6 +517,9 @@ function ∇f(W::AbstractArray, input::AbstractString, D::AbstractArray, scale::
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            if perm
+                normx .= normx[randperm(length(normx))]
+            end
             # Full Gradient
             tmpW .+= offsetFull * ∇fn(W, normx, D, M, stepsize, offsetStoch)
         end
