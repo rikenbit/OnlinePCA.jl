@@ -83,6 +83,12 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
+    if parsed_args["capvar"] == 0.1f0
+        capvar = 0.1f0
+    else
+        capvar = parse(Float32, parsed_args["capvar"])
+    end
+
     out = OnlinePCA.gd(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
@@ -102,7 +108,7 @@ function main()
         offsetStoch=offsetStoch,
         logdir=logdir,
         perm=perm)
-    OnlinePCA.output(parsed_args["outdir"], out)
+    OnlinePCA.output(parsed_args["outdir"], out, capvar)
 end
 
 main()

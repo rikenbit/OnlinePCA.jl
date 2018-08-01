@@ -28,11 +28,14 @@ function checkNaN(N::Number, s::Number, n::Number, W::AbstractArray, evalfreq::N
 end
 
 # Output the result of PCA
-function output(outdir::AbstractString, out::Tuple)
+function output(outdir::AbstractString, out::Tuple, capvar::Number)
     writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
     writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
     writecsv(joinpath(outdir, "Loadings.csv"), out[3])
     writecsv(joinpath(outdir, "Scores.csv"), out[4])
+    if out[5] > capvar
+        touch(joinpath(outdir, "Converged"))
+    end
 end
 
 # Parse command line options (only CCIPCA)
@@ -108,6 +111,10 @@ function parse_commandline(pca::CCIPCA)
             help = "Whether the data matrix is shuffled at random"
             arg_type = Union{Bool,AbstractString}
             default = false
+        "--capvar"
+            help = "The calculation is determined as converged when captured variance is larger than this value (0 - 1)"
+            arg_type = Union{Number,AbstractString}
+            default = 0.1f0
     end
 
     return parse_args(s)
@@ -202,6 +209,10 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             help = "Whether the data matrix is shuffled at random"
             arg_type = Union{Bool,AbstractString}
             default = false
+        "--capvar"
+            help = "The calculation is determined as converged when captured variance is larger than this value (0 - 1)"
+            arg_type = Union{Number,AbstractString}
+            default = 0.1f0
     end
 
     return parse_args(s)
@@ -323,6 +334,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
         end
         close(stream)
     end
+    AllVar = AllVar / M
     # directory for log file
     if logdir isa String
         if !isdir(logdir)
@@ -333,7 +345,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
 end
 
 # Eigen value, Loading, Scores
-function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, AllVar::Number)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -347,7 +359,10 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
         for n = 1:N
             # Data Import
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            # normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            @inbounds for i in 1:length(x)
+                normx[i] = log10(x[i] + 1.0)
+            end
             V[n, :] = normx'W
         end
         close(stream)
@@ -367,8 +382,9 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
     for n = 1:dim
         Scores[:, n] .= λ[n] .* W[:, n]
     end
+    CapVar = sum(λ) / AllVar
     # Return
-    return W, λ, V, Scores
+    return W, λ, V, Scores, CapVar
 end
 
 # Output log file （only GD）
@@ -379,12 +395,11 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
         RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
         REs = [REs[1], REs[2], REs[3], REs[4], REs[5], "RelChange"=> RelChange]
         if RelChange < lower
-
-            println("Relative change of reconstruction error is below the lower value")
+            println("Relative change of reconstruction error is below the lower value (no change)")
             stop = true
         end
         if RelChange > upper
-            println("Relative change of reconstruction error is above the upper value")
+            println("Relative change of reconstruction error is above the upper value (unstable)")
             stop = true
         end
     end
