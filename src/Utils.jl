@@ -452,7 +452,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             pc = W'normx
             E = E + dot(normx, normx) - dot(pc, pc)
-            V[n, :] = normx'W
+            V[n, :] = pc
         end
         close(stream)
     end
