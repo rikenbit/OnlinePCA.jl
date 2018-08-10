@@ -391,7 +391,7 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
     if s != 1
         old_E = readcsv("$(logdir)/RecError_Epoch$(string(s-1)).csv")
         RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
-        REs = [REs[1], REs[2], REs[3], REs[4], REs[5], "RelChange"=> RelChange]
+        REs = [REs[1], REs[2], REs[3], REs[4], REs[5], REs[6], "RelChange" => RelChange]
         if RelChange < lower
             println("Relative change of reconstruction error is below the lower value (no change)")
             stop = true
@@ -413,7 +413,7 @@ function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::
         if n != evalfreq
             old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-evalfreq)))).csv")
             RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
-            REs = [REs[1], REs[2], REs[3], REs[4], REs[5], "RelChange"=> RelChange]
+            REs = [REs[1], REs[2], REs[3], REs[4], REs[5], REs[6], "RelChange"=> RelChange]
             if RelChange < lower
                 println("Relative change of reconstruction error is below the lower value")
                 stop = true
@@ -434,6 +434,8 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
+    dim = size(W)[2]
+    V = zeros(Float32, N, dim)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
     E = 0.0f0
@@ -450,9 +452,18 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             pc = W'normx
             E = E + dot(normx, normx) - dot(pc, pc)
+            V[n, :] = normx'W
         end
         close(stream)
     end
+    # Eigen value
+    σ = Float32[norm(V[:, x]) for x=1:dim]
+    for n = 1:dim
+        V[:, n] ./= σ[n]
+    end
+    λ = σ .* σ ./ M
+    CapVar = sum(λ) / AllVar
+
     AE = E / M
     RMSE = sqrt(E / (N * M))
     ARE = sqrt(E / AllVar)
@@ -461,7 +472,7 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
     @assert RMSE isa Float32
     @assert ARE isa Float32
     # Return
-    return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "AllVar"=>AllVar]
+    return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "CapVar"=>CapVar, "AllVar"=>AllVar]
 end
 
 # Row vector
