@@ -28,12 +28,12 @@ function checkNaN(N::Number, s::Number, n::Number, W::AbstractArray, evalfreq::N
 end
 
 # Output the result of PCA
-function output(outdir::AbstractString, out::Tuple, capvar::Number)
+function output(outdir::AbstractString, out::Tuple, expvar::Number)
     writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
     writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
     writecsv(joinpath(outdir, "Loadings.csv"), out[3])
     writecsv(joinpath(outdir, "Scores.csv"), out[4])
-    if out[5] > capvar
+    if out[5] > expvar
         touch(joinpath(outdir, "Converged"))
     end
 end
@@ -111,7 +111,7 @@ function parse_commandline(pca::CCIPCA)
             help = "Whether the data matrix is shuffled at random"
             arg_type = Union{Bool,AbstractString}
             default = false
-        "--capvar"
+        "--expvar"
             help = "The calculation is determined as converged when captured variance is larger than this value (0 - 1)"
             arg_type = Union{Number,AbstractString}
             default = 0.1f0
@@ -209,7 +209,7 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             help = "Whether the data matrix is shuffled at random"
             arg_type = Union{Bool,AbstractString}
             default = false
-        "--capvar"
+        "--expvar"
             help = "The calculation is determined as converged when captured variance is larger than this value (0 - 1)"
             arg_type = Union{Number,AbstractString}
             default = 0.1f0
@@ -263,7 +263,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
         colsumvec = readcsv(colsumlist, Float32)
     end
     # N, M, All Variance
-    AllVar = 0
+    TotalVar = 0
     open(input) do file
         stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
@@ -272,18 +272,18 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-            AllVar = AllVar + normx'normx
+            TotalVar = TotalVar + normx'normx
         end
         close(stream)
     end
-    AllVar = AllVar / M
+    TotalVar = TotalVar / M
     # directory for log file
     if logdir isa String
         if(!isdir(logdir))
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, lower, upper, evalfreq, offsetFull, offsetStoch
+    return pseudocount, stepsize, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetFull, offsetStoch
 end
 
 # Initialization (other PCA)
@@ -321,7 +321,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
         colsumvec = readcsv(colsumlist, Float32)
     end
     # N, M, All Variance
-    AllVar = 0
+    TotalVar = 0
     open(input) do file
         stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
@@ -330,22 +330,22 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
             # Data Import
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-            AllVar = AllVar + normx'normx
+            TotalVar = TotalVar + normx'normx
         end
         close(stream)
     end
-    AllVar = AllVar / M
+    TotalVar = TotalVar / M
     # directory for log file
     if logdir isa String
         if !isdir(logdir)
             mkdir(logdir)
         end
     end
-    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, AllVar, lower, upper, evalfreq, offsetFull, offsetStoch
+    return pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetFull, offsetStoch
 end
 
 # Eigen value, Loading, Scores
-function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, AllVar::Number)
+function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, TotalVar::Number)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -380,14 +380,14 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
     for n = 1:dim
         Scores[:, n] .= λ[n] .* W[:, n]
     end
-    CapVar = sum(λ) / AllVar
+    ExpVar = sum(λ) / TotalVar
     # Return
-    return W, λ, V, Scores, CapVar
+    return W, λ, V, Scores, ExpVar
 end
 
 # Output log file （only GD）
-function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool)
-    REs = RecError(W, input, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool)
+    REs = RecError(W, input, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
     if s != 1
         old_E = readcsv("$(logdir)/RecError_Epoch$(string(s-1)).csv")
         RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
@@ -407,9 +407,9 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
 end
 
 # Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool, evalfreq::Number)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool, evalfreq::Number)
     if(mod((N*(s-1)+n), evalfreq) == 0)
-        REs = RecError(W, input, AllVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+        REs = RecError(W, input, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         if n != evalfreq
             old_E = readcsv("$(logdir)/RecError_$(string((N*(s-1)+(n-evalfreq)))).csv")
             RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
@@ -430,7 +430,7 @@ function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::
 end
 
 # Reconstuction Error
-function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
+function RecError(W::AbstractArray, input::AbstractString, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -462,17 +462,17 @@ function RecError(W::AbstractArray, input::AbstractString, AllVar::Number, scale
         V[:, n] ./= σ[n]
     end
     λ = σ .* σ ./ M
-    CapVar = sum(λ) / AllVar
+    ExpVar = sum(λ) / TotalVar
 
     AE = E / M
     RMSE = sqrt(E / (N * M))
-    ARE = sqrt(E / AllVar)
+    ARE = sqrt(E / TotalVar)
     @assert E isa Float32
     @assert AE isa Float32
     @assert RMSE isa Float32
     @assert ARE isa Float32
     # Return
-    return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "CapVar"=>CapVar, "AllVar"=>AllVar]
+    return ["E"=>E, "AE"=>AE, "RMSE"=>RMSE, "ARE"=>ARE, "Explained Variance"=>ExpVar, "Total Variance"=>TotalVar]
 end
 
 # Row vector
