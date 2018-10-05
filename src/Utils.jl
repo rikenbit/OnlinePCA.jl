@@ -38,6 +38,10 @@ function output(outdir::AbstractString, out::Tuple, expvar::Number)
     end
 end
 
+writecsv(filename::AbstractString, data) = writedlm(filename, data, ',')
+readcsv(filename::AbstractString) = readdlm(filename, ',')
+readcsv(filename::AbstractString, ::Type{T}) where {T} = readdlm(filename, ',', T)
+
 # Parse command line options (only CCIPCA)
 function parse_commandline(pca::CCIPCA)
     s = ArgParseSettings()
@@ -105,7 +109,7 @@ function parse_commandline(pca::CCIPCA)
             default = 1f-15
         "--logdir", "-l"
             help = "The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration."
-            arg_type = Union{Void,AbstractString}
+            arg_type = Union{Nothing,AbstractString}
             default = nothing
         "--perm"
             help = "Whether the data matrix is shuffled at random"
@@ -203,7 +207,7 @@ function parse_commandline(pca::Union{OJA,GD,RSGD,SVRG,RSVRG})
             default = 1.0f-6
         "--logdir", "-l"
             help = "The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration."
-            arg_type = Union{Void,AbstractString}
+            arg_type = Union{Nothing,AbstractString}
             default = nothing
         "--perm"
             help = "Whether the data matrix is shuffled at random"
@@ -232,7 +236,7 @@ function nm(input::AbstractString)
 end
 
 # Initialization (only CCIPCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::CCIPCA, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Nothing,AbstractString}, pca::CCIPCA, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -287,7 +291,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
 end
 
 # Initialization (other PCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Void,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, logdir::Union{Nothing,AbstractString}, pca::Union{OJA,GD,RSGD,SVRG,RSVRG}, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -485,13 +489,13 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
     # Logscale, FTTscale, Raw
     if scale == "log"
         pc = UInt32(pseudocount)
-        xx = Vector{Float32}(length(x))
+        xx = Vector{Float32}(undef, length(x))
         @inbounds for i in 1:length(x)
             xx[i] = log10(x[i] + pc)
         end
     end
     if scale == "ftt"
-        xx = Vector{Float32}(length(x))
+        xx = Vector{Float32}(undef, length(x))
         @inbounds for i in 1:length(x)
             xx[i] = sqrt(x[i]) + sqrt(x[i] + 1.0f0)
         end
