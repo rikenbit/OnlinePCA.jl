@@ -1,5 +1,5 @@
 """
-    svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
+    svrg(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
 
 Online PCA solved by variance-reduced stochastic gradient descent method, also known as VR-PCA.
 
@@ -36,7 +36,7 @@ Reference
 ---------
 - SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 """
-function svrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
+function svrg(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
     pca = SVRG()
     if scheduling == "robbins-monro"
@@ -92,7 +92,7 @@ function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
                 # NaN
                 checkNaN(N, s, n, W, evalfreq, pca)
                 # Retraction
-                W .= full(qrfact!(W)[:Q], thin=true)
+                W .= Array(qr!(W).Q)
                 # save log file
                 if logdir isa String
                     stop = outputlog(N, s, n, input, dim, logdir, W, pca, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop, evalfreq)
@@ -141,6 +141,6 @@ function svrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, no
     grad = ∇fn(W, normx, D, M, stepsize, offsetStoch) .- ∇fn(Ws, normx, D, M, stepsize, offsetStoch) .+ u
     grad = grad / stepsize
     v .= v .+ grad .* grad
-    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
+    W .= W .+ stepsize ./ (sqrt.(v) .+ epsilon) .* grad
     return W, v
 end

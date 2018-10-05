@@ -1,5 +1,5 @@
 """
-    gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
+    gd(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
 
 
 Online PCA solved by gradient descent method.
@@ -35,7 +35,7 @@ Output Arguments
 - `λ` : Eigen values (dim × dim)
 - `V` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 """
-function gd(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
+function gd(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
     pca = GD()
     if scheduling == "robbins-monro"
@@ -72,7 +72,7 @@ function gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumli
         # NaN
         checkNaN(W, pca)
         # Retraction
-        W .= full(qrfact!(W)[:Q], thin=true)
+        W .= Array(qr!(W).Q)
         # save log file
         if logdir isa String
             stop = outputlog(s, input, dim, logdir, W, pca, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop)
@@ -110,6 +110,6 @@ function gdupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, s, i
     grad = ∇f(W, input, D, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stepsize/s, offsetFull, offsetStoch, perm)
     grad = grad / stepsize
     v .= v .+ grad .* grad
-    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
+    W .= W .+ stepsize ./ (sqrt.(v) .+ epsilon) .* grad
     return W, v
 end

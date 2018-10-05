@@ -1,5 +1,5 @@
 """
-    rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
+    rsvrg(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
 
 Online PCA solved by Riemannian variance-reduced stochastic gradient descent method.
 
@@ -36,7 +36,7 @@ Reference
 ---------
 - RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
 """
-function rsvrg(;input::AbstractString="", outdir::Union{Void,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Void,AbstractString}=nothing, perm::Bool=false)
+function rsvrg(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
     pca = RSVRG()
     if scheduling == "robbins-monro"
@@ -92,7 +92,7 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 # NaN
                 checkNaN(N, s, n, W, evalfreq, pca)
                 # Retraction
-                W .= full(qrfact!(W)[:Q], thin=true)
+                W .= Array(qr!(W).Q)
                 # save log file
                 if logdir isa String
                     stop = outputlog(N, s, n, input, dim, logdir, W, pca, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop, evalfreq)
@@ -141,6 +141,6 @@ function rsvrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, W, v, n
     grad = Pw(∇fn(W, normx, D, M, stepsize, offsetStoch), W) .- Pw(∇fn(Ws, normx, D, M, stepsize, offsetStoch), Ws) .+ u
     grad = grad / stepsize
     v .= v .+ grad .* grad
-    W .= W .+ stepsize ./ (sqrt.(v) + epsilon) .* grad
+    W .= W .+ stepsize ./ (sqrt.(v) .+ epsilon) .* grad
     return W, v
 end

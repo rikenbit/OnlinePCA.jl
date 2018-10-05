@@ -1,5 +1,13 @@
 module OnlinePCA
 
+using DelimitedFiles:
+    writedlm, readdlm
+using Statistics:
+    mean, var
+using LinearAlgebra:
+    Diagonal, qr!, dot, norm
+using Random:
+    randperm
 using ProgressMeter:
 	Progress, next!
 using ArgParse:

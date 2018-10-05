@@ -50,7 +50,7 @@ function hvg(;binfile::AbstractString="", rowmeanlist::AbstractString="", rowvar
 
     # Fitting
 	println("Highly Variable Genes are calculated...")
-    data = DataFrame(Y=rowcv2vec[useForFit], X=1./rowmeanvec[useForFit])
+    data = DataFrame(Y=rowcv2vec[useForFit], X=1 ./ rowmeanvec[useForFit])
     fit = glm(@formula(Y ~ X), data, Gamma(), IdentityLink())
     a0, a1 = coef(fit)
     afit = a1 ./ rowmeanvec .+ a0
