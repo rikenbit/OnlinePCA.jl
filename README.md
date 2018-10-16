@@ -24,7 +24,10 @@ julia> Pkg.add("OnlinePCA")
 ```
  -->
 ```julia
-Pkg.clone("git://github.com/rikenbit/OnlinePCA.jl.git")
+# push the key "]" and type the following command.
+(v1.0) pkg> add https://github.com/rikenbit/OnlinePCA.jl
+(v1.0) pkg> add PlotlyJS
+# After that, push Ctrl + C to leave from Pkg REPL mode
 ```
 
 ## Basic API usage
@@ -32,7 +35,9 @@ Pkg.clone("git://github.com/rikenbit/OnlinePCA.jl.git")
 ### Preprocess of CSV
 ```julia
 using OnlinePCA
+using OnlinePCA: readcsv, writecsv
 using Distributions
+using DelimitedFiles
 
 # CSV
 tmp = mktempdir()
@@ -51,8 +56,8 @@ sumr(binfile=tmp*"/Data.zst", outdir=tmp)
 
 ### Setting for plot
 ```julia
-using PlotlyJS
 using DataFrames
+using PlotlyJS
 
 function subplots(respca, group)
 	# data frame
@@ -84,13 +89,13 @@ group=vcat(repeat(["group1"],inner=33), repeat(["group2"],inner=33), repeat(["gr
 
 ### Oja's method
 ```julia
-out_oja1 = oja(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=10,
+out_oja1 = oja(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E+0,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja2 = oja(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=0.01,
+out_oja2 = oja(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja3 = oja(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=0.01,
+out_oja3 = oja(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja4 = oja(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=0.1,
+out_oja4 = oja(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-1,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 subplots(out_oja1, group) # Top, Left
@@ -102,8 +107,8 @@ subplots(out_oja4, group) # Bottom, Right
 
 ### CCIPCA
 ```julia
-out_ccipca1 = ccipca(input=tmp*"/Data.zst", dim=3, stepsize=1,
-    numepoch=1, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_ccipca1 = ccipca(input=tmp*"/Data.zst", dim=3, stepsize=1E-0,
+    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 subplots(out_ccipca1, group)
 ```
@@ -111,13 +116,13 @@ subplots(out_ccipca1, group)
 
 ### GD-PCA
 ```julia
-out_gd1 = gd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=0.00001,
+out_gd1 = gd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-3,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd2 = gd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=0.000001,
+out_gd2 = gd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd3 = gd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=0.0000001,
+out_gd3 = gd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd4 = gd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=0.0000001,
+out_gd4 = gd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-0,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 subplots(out_gd1, group) # Top, Left
@@ -129,13 +134,13 @@ subplots(out_gd4, group) # Bottom, Right
 
 ### RSGD-PCA
 ```julia
-out_rsgd1 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=10,
+out_rsgd1 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E+2,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd2 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=0.001,
+out_rsgd2 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd3 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=0.001,
+out_rsgd3 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd4 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=0.1,
+out_rsgd4 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-1,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 subplots(out_rsgd1, group) # Top, Left
@@ -147,13 +152,13 @@ subplots(out_rsgd4, group) # Bottom, Right
 
 ### SVRG-PCA
 ```julia
-out_svrg1 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=0.00001,
+out_svrg1 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-5,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg2 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=0.00001,
+out_svrg2 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-5,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg3 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=0.00001,
+out_svrg3 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-5,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg4 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=0.000001,
+out_svrg4 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-2,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 subplots(out_svrg1, group) # Top, Left
@@ -165,13 +170,13 @@ subplots(out_svrg4, group) # Bottom, Right
 
 ### RSVRG-PCA
 ```julia
-out_rsvrg1 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=0.000001,
+out_rsvrg1 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-6,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg2 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=0.000001,
+out_rsvrg2 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-6,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg3 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=0.000001,
+out_rsvrg3 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-6,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg4 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=0.000001,
+out_rsvrg4 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-2,
     numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
 
 subplots(out_rsvrg1, group) # Top, Left
