@@ -31,10 +31,14 @@ function filtering(;input::AbstractString="", featurelist::AbstractString="", sa
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     nr, nc, ix1, ix2 = rcfilter(input, featurevec, samplevec, thr1, thr2, direct1, direct2)
+    nr = UInt32(nr)
+    nc = UInt32(nc)
     open(output, "w") do file1
         stream1 = ZstdCompressorStream(file1)
         write(stream1, nr) # by rcfilter
         write(stream1, nc) # by rcfilter
+        @show nr
+        @show nc
         open(input , "r") do file2
             stream2 = ZstdDecompressorStream(file2)
             read!(stream2, tmpN)

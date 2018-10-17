@@ -63,11 +63,11 @@ function hvg(;binfile::AbstractString="", rowmeanlist::AbstractString="", rowvar
     end
 
     # Save
-    writecsv(outdir*"/HVG_useForFit.csv", useForFit)
-    writecsv(outdir*"/HVG_a0.csv", a0)
-    writecsv(outdir*"/HVG_a1.csv", a1)
-    writecsv(outdir*"/HVG_afit.csv", afit)
-    writecsv(outdir*"/HVG_varFitRatio.csv", varFitRatio)
-    writecsv(outdir*"/HVG_df.csv", df)
-    writecsv(outdir*"/HVG_pval.csv", pval)
+    writecsv(joinpath(outdir, "HVG_useForFit.csv"), useForFit)
+    writecsv(joinpath(outdir, "HVG_a0.csv"), a0)
+    writecsv(joinpath(outdir, "HVG_a1.csv"), a1)
+    writecsv(joinpath(outdir, "HVG_afit.csv"), afit)
+    writecsv(joinpath(outdir, "HVG_varFitRatio.csv"), varFitRatio)
+    writecsv(joinpath(outdir, "HVG_df.csv"), df)
+    writecsv(joinpath(outdir, "HVG_pval.csv"), pval)
 end

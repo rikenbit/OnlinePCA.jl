@@ -28,15 +28,15 @@ function sumr(;binfile::AbstractString="", outdir::AbstractString=".", pseudocou
     Feature_Means, Feature_LogMeans, Feature_FTTMeans, Feature_Vars, Feature_LogVars, Feature_FTTVars, Feature_CV2s, Feature_NoZeros = stats(binfile, pseudocount)
 
     # Save
-    writecsv(outdir*"/Sample_NoCounts.csv", Sample_NoCounts)
-    writecsv(outdir*"/Feature_Means.csv", Feature_Means)
-    writecsv(outdir*"/Feature_LogMeans.csv", Feature_LogMeans)
-    writecsv(outdir*"/Feature_FTTMeans.csv", Feature_FTTMeans)
-    writecsv(outdir*"/Feature_Vars.csv", Feature_Vars)
-    writecsv(outdir*"/Feature_LogVars.csv", Feature_LogVars)
-    writecsv(outdir*"/Feature_FTTVars.csv", Feature_FTTVars)
-    writecsv(outdir*"/Feature_CV2s.csv", Feature_CV2s)
-    writecsv(outdir*"/Feature_NoZeros.csv", Feature_NoZeros)
+    writecsv(joinpath(outdir, "Sample_NoCounts.csv"), Sample_NoCounts)
+    writecsv(joinpath(outdir, "Feature_Means.csv"), Feature_Means)
+    writecsv(joinpath(outdir, "Feature_LogMeans.csv"), Feature_LogMeans)
+    writecsv(joinpath(outdir, "Feature_FTTMeans.csv"), Feature_FTTMeans)
+    writecsv(joinpath(outdir, "Feature_Vars.csv"), Feature_Vars)
+    writecsv(joinpath(outdir, "Feature_LogVars.csv"), Feature_LogVars)
+    writecsv(joinpath(outdir, "Feature_FTTVars.csv"), Feature_FTTVars)
+    writecsv(joinpath(outdir, "Feature_CV2s.csv"), Feature_CV2s)
+    writecsv(joinpath(outdir, "Feature_NoZeros.csv"), Feature_NoZeros)
 end
 
 # Column-wise statistics
