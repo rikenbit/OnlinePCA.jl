@@ -393,7 +393,7 @@ end
 function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool)
     REs = RecError(W, input, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
     if s != 1
-        old_E = readcsv(joinpath(logdir, "RecError_Epoch", string(s-1), ".csv"))
+        old_E = readcsv(joinpath(logdir, "RecError_Epoch"*string(s-1)*".csv"))
         RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
         REs = [REs[1], REs[2], REs[3], REs[4], REs[5], REs[6], "RelChange" => RelChange]
         if RelChange < lower
@@ -405,8 +405,8 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
             stop = true
         end
     end
-    writecsv(joinpath(logdir, "RecError_Epoch", string(s), ".csv"), REs)
-    writecsv(joinpath(logdir, "W_Epoch", string(s), ".csv"), W)
+    writecsv(joinpath(logdir, "RecError_Epoch"*string(s)*".csv"), REs)
+    writecsv(joinpath(logdir, "W_Epoch"*string(s)*".csv"), W)
     return stop
 end
 
@@ -415,7 +415,7 @@ function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::
     if(mod((N*(s-1)+n), evalfreq) == 0)
         REs = RecError(W, input, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         if n != evalfreq
-            old_E = readcsv(joinpath(logdir, "RecError_", string((N*(s-1)+(n-evalfreq))), ".csv"))
+            old_E = readcsv(joinpath(logdir, "RecError_"*string((N*(s-1)+(n-evalfreq)))*".csv"))
             RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
             REs = [REs[1], REs[2], REs[3], REs[4], REs[5], REs[6], "RelChange"=> RelChange]
             if RelChange < lower
@@ -427,8 +427,8 @@ function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::
                 stop = true
             end
         end
-        writecsv(joinpath(logdir, "W_", string((N*(s-1)+n)), ".csv"), W)
-        writecsv(joinpath(logdir, "RecError_", string((N*(s-1)+n)), ".csv"), REs)
+        writecsv(joinpath(logdir, "W_"*string((N*(s-1)+n))*".csv"), W)
+        writecsv(joinpath(logdir, "RecError_"*string((N*(s-1)+n))*".csv"), REs)
     end
     return stop
 end

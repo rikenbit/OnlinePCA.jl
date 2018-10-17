@@ -37,8 +37,6 @@ function filtering(;input::AbstractString="", featurelist::AbstractString="", sa
         stream1 = ZstdCompressorStream(file1)
         write(stream1, nr) # by rcfilter
         write(stream1, nc) # by rcfilter
-        @show nr
-        @show nc
         open(input , "r") do file2
             stream2 = ZstdDecompressorStream(file2)
             read!(stream2, tmpN)
