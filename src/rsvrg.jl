@@ -65,13 +65,13 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
-    # If true the calculation is converged
-    stop = false
+    # If not 0 the calculation is converged
+    stop = 0
     s = 1
     n = 1
     # Each epoch s
     progress = Progress(numepoch*N)
-    while(!stop && s <= numepoch)
+    while(stop == 0 && s <= numepoch)
         u = ∇f(W, input, D, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stepsize/s, offsetFull, offsetStoch, perm)
         Ws = W
         open(input) do file
@@ -79,7 +79,7 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n
-            while(!stop && n <= N)
+            while(stop == 0 && n <= N)
                 next!(progress)
                 # Row vector of data matrix
                 read!(stream, x)
@@ -112,7 +112,8 @@ function rsvrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     end
 
     # Return, W, λ, V
-    WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar)
+    out = WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar)
+    return (out[1], out[2], out[3], out[4], out[5], stop)
 end
 
 # RSVRG × Robbins-Monro

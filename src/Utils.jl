@@ -33,7 +33,7 @@ function output(outdir::AbstractString, out::Tuple, expvar::Number)
     writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
     writecsv(joinpath(outdir, "Loadings.csv"), out[3])
     writecsv(joinpath(outdir, "Scores.csv"), out[4])
-    if out[5] > expvar
+    if out[5] > expvar && out[6] == 1
         touch(joinpath(outdir, "Converged"))
     end
 end
@@ -390,7 +390,7 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
 end
 
 # Output log file （only GD）
-function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool)
+function outputlog(s::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::GD, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Number)
     REs = RecError(W, input, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
     if s != 1
         old_E = readcsv(joinpath(logdir, "RecError_Epoch"*string(s-1)*".csv"))
@@ -398,11 +398,11 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
         REs = [REs[1], REs[2], REs[3], REs[4], REs[5], REs[6], "RelChange" => RelChange]
         if RelChange < lower
             println("Relative change of reconstruction error is below the lower value (no change)")
-            stop = true
+            stop = 1
         end
         if RelChange > upper
             println("Relative change of reconstruction error is above the upper value (unstable)")
-            stop = true
+            stop = 2
         end
     end
     writecsv(joinpath(logdir, "RecError_Epoch"*string(s)*".csv"), REs)
@@ -411,7 +411,7 @@ function outputlog(s::Number, input::AbstractString, dim::Number, logdir::Abstra
 end
 
 # Output log file (other PCA)
-function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Bool, evalfreq::Number)
+function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Number, evalfreq::Number)
     if(mod((N*(s-1)+n), evalfreq) == 0)
         REs = RecError(W, input, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
         if n != evalfreq
@@ -419,12 +419,12 @@ function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::
             RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
             REs = [REs[1], REs[2], REs[3], REs[4], REs[5], REs[6], "RelChange"=> RelChange]
             if RelChange < lower
-                println("Relative change of reconstruction error is below the lower value")
-                stop = true
+                println("Relative change of reconstruction error is below the lower value (no change)")
+                stop = 1
             end
             if RelChange > upper
-                println("Relative change of reconstruction error is above the upper value")
-                stop = true
+                println("Relative change of reconstruction error is above the upper value (unstable)")
+                stop = 2
             end
         end
         writecsv(joinpath(logdir, "W_"*string((N*(s-1)+n))*".csv"), W)

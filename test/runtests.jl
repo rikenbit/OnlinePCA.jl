@@ -114,19 +114,43 @@ filtering(input=joinpath(tmp, "Data.zst"),
 	samplelist=joinpath(tmp, "Sample_NoCounts.csv"),
 	thr1=10, thr2=10,
 	direct1="+", direct2="+",
-	output=joinpath(tmp, "filtered.zst"))
+	outdir=tmp)
+
+filtering(input=joinpath(tmp, "Data.zst"),
+	featurelist=joinpath(tmp, "Feature_Means.csv"),
+	thr1=10, thr2=10,
+	direct1="+", direct2="+",
+	outdir=tmp)
+
+filtering(input=joinpath(tmp, "Data.zst"),
+	samplelist=joinpath(tmp, "Sample_NoCounts.csv"),
+	thr1=10, thr2=10,
+	direct1="+", direct2="+",
+	outdir=tmp)
 
 testfilesize(true,
 	joinpath(tmp, "filtered.zst"))
+testfilesize(true,
+	joinpath(tmp, "filteredFeature.csv"))
+testfilesize(true,
+	joinpath(tmp, "filteredSample.csv"))
 #####################################
 
 
 #####################################
 println("####### Filtering (Command line) #######")
-run(`$(julia) $(joinpath(bindir, "filtering")) --input $(joinpath(tmp, "Data.zst")) --featurelist $(joinpath(tmp, "Feature_Means.csv")) --samplelist $(joinpath(tmp, "Sample_NoCounts.csv")) --thr1 10 --thr2 10 --output $(joinpath(tmp, "filtered.zst"))`)
+run(`$(julia) $(joinpath(bindir, "filtering")) --input $(joinpath(tmp, "Data.zst")) --featurelist $(joinpath(tmp, "Feature_Means.csv")) --samplelist $(joinpath(tmp, "Sample_NoCounts.csv")) --thr1 10 --thr2 10 --outdir $(tmp)`)
+
+run(`$(julia) $(joinpath(bindir, "filtering")) --input $(joinpath(tmp, "Data.zst")) --featurelist $(joinpath(tmp, "Feature_Means.csv")) --thr1 10 --thr2 10 --outdir $(tmp)`)
+
+run(`$(julia) $(joinpath(bindir, "filtering")) --input $(joinpath(tmp, "Data.zst")) --samplelist $(joinpath(tmp, "Sample_NoCounts.csv")) --thr1 10 --thr2 10 --outdir $(tmp)`)
 
 testfilesize(false,
 	joinpath(tmp, "filtered.zst"))
+testfilesize(false,
+	joinpath(tmp, "filteredFeature.csv"))
+testfilesize(false,
+	joinpath(tmp, "filteredSample.csv"))
 #####################################
 
 
@@ -160,21 +184,29 @@ out_gd4 = gd(input=joinpath(tmp, "Data.zst"),
 @test size(out_gd1[2]) == (3, )
 @test size(out_gd1[3]) == (300, 3)
 @test size(out_gd1[4]) == (99, 3)
+@test size(out_gd1[5]) == ()
+@test size(out_gd1[6]) == ()
 
 @test size(out_gd2[1]) == (99, 3)
 @test size(out_gd2[2]) == (3, )
 @test size(out_gd2[3]) == (300, 3)
 @test size(out_gd2[4]) == (99, 3)
+@test size(out_gd2[5]) == ()
+@test size(out_gd2[6]) == ()
 
 @test size(out_gd3[1]) == (99, 3)
 @test size(out_gd3[2]) == (3, )
 @test size(out_gd3[3]) == (300, 3)
 @test size(out_gd3[4]) == (99, 3)
+@test size(out_gd3[5]) == ()
+@test size(out_gd3[6]) == ()
 
 @test size(out_gd4[1]) == (99, 3)
 @test size(out_gd4[2]) == (3, )
 @test size(out_gd4[3]) == (300, 3)
 @test size(out_gd4[4]) == (99, 3)
+@test size(out_gd4[5]) == ()
+@test size(out_gd4[6]) == ()
 #####################################
 
 
@@ -244,21 +276,29 @@ out_oja4 = oja(input=joinpath(tmp, "Data.zst"),
 @test size(out_oja1[2]) == (3, )
 @test size(out_oja1[3]) == (300, 3)
 @test size(out_oja1[4]) == (99, 3)
+@test size(out_oja1[5]) == ()
+@test size(out_oja1[6]) == ()
 
 @test size(out_oja2[1]) == (99, 3)
 @test size(out_oja2[2]) == (3, )
 @test size(out_oja2[3]) == (300, 3)
 @test size(out_oja2[4]) == (99, 3)
+@test size(out_oja2[5]) == ()
+@test size(out_oja2[6]) == ()
 
 @test size(out_oja3[1]) == (99, 3)
 @test size(out_oja3[2]) == (3, )
 @test size(out_oja3[3]) == (300, 3)
 @test size(out_oja3[4]) == (99, 3)
+@test size(out_oja3[5]) == ()
+@test size(out_oja3[6]) == ()
 
 @test size(out_oja4[1]) == (99, 3)
 @test size(out_oja4[2]) == (3, )
 @test size(out_oja4[3]) == (300, 3)
 @test size(out_oja4[4]) == (99, 3)
+@test size(out_oja4[5]) == ()
+@test size(out_oja4[6]) == ()
 #####################################
 
 
@@ -309,6 +349,8 @@ out_ccipca1 = ccipca(input=joinpath(tmp, "Data.zst"),
 @test size(out_ccipca1[2]) == (3, )
 @test size(out_ccipca1[3]) == (300, 3)
 @test size(out_ccipca1[4]) == (99, 3)
+@test size(out_ccipca1[5]) == ()
+@test size(out_ccipca1[6]) == ()
 #####################################
 
 
@@ -354,21 +396,29 @@ out_rsgd4 = rsgd(input=joinpath(tmp, "Data.zst"),
 @test size(out_rsgd1[2]) == (3, )
 @test size(out_rsgd1[3]) == (300, 3)
 @test size(out_rsgd1[4]) == (99, 3)
+@test size(out_rsgd1[5]) == ()
+@test size(out_rsgd1[6]) == ()
 
 @test size(out_rsgd2[1]) == (99, 3)
 @test size(out_rsgd2[2]) == (3, )
 @test size(out_rsgd2[3]) == (300, 3)
 @test size(out_rsgd2[4]) == (99, 3)
+@test size(out_rsgd2[5]) == ()
+@test size(out_rsgd2[6]) == ()
 
 @test size(out_rsgd3[1]) == (99, 3)
 @test size(out_rsgd3[2]) == (3, )
 @test size(out_rsgd3[3]) == (300, 3)
 @test size(out_rsgd3[4]) == (99, 3)
+@test size(out_rsgd3[5]) == ()
+@test size(out_rsgd3[6]) == ()
 
 @test size(out_rsgd4[1]) == (99, 3)
 @test size(out_rsgd4[2]) == (3, )
 @test size(out_rsgd4[3]) == (300, 3)
 @test size(out_rsgd4[4]) == (99, 3)
+@test size(out_rsgd4[5]) == ()
+@test size(out_rsgd4[6]) == ()
 #####################################
 
 
@@ -438,21 +488,29 @@ out_svrg4 = svrg(input=joinpath(tmp, "Data.zst"),
 @test size(out_svrg1[2]) == (3, )
 @test size(out_svrg1[3]) == (300, 3)
 @test size(out_svrg1[4]) == (99, 3)
+@test size(out_svrg1[5]) == ()
+@test size(out_svrg1[6]) == ()
 
 @test size(out_svrg2[1]) == (99, 3)
 @test size(out_svrg2[2]) == (3, )
 @test size(out_svrg2[3]) == (300, 3)
 @test size(out_svrg2[4]) == (99, 3)
+@test size(out_svrg2[5]) == ()
+@test size(out_svrg2[6]) == ()
 
 @test size(out_svrg3[1]) == (99, 3)
 @test size(out_svrg3[2]) == (3, )
 @test size(out_svrg3[3]) == (300, 3)
 @test size(out_svrg3[4]) == (99, 3)
+@test size(out_svrg3[5]) == ()
+@test size(out_svrg3[6]) == ()
 
 @test size(out_svrg4[1]) == (99, 3)
 @test size(out_svrg4[2]) == (3, )
 @test size(out_svrg4[3]) == (300, 3)
 @test size(out_svrg4[4]) == (99, 3)
+@test size(out_svrg4[5]) == ()
+@test size(out_svrg4[6]) == ()
 #####################################
 
 
@@ -522,21 +580,29 @@ out_rsvrg4 = rsvrg(input=joinpath(tmp, "Data.zst"),
 @test size(out_rsvrg1[2]) == (3, )
 @test size(out_rsvrg1[3]) == (300, 3)
 @test size(out_rsvrg1[4]) == (99, 3)
+@test size(out_rsvrg1[5]) == ()
+@test size(out_rsvrg1[6]) == ()
 
 @test size(out_rsvrg2[1]) == (99, 3)
 @test size(out_rsvrg2[2]) == (3, )
 @test size(out_rsvrg2[3]) == (300, 3)
 @test size(out_rsvrg2[4]) == (99, 3)
+@test size(out_rsvrg2[5]) == ()
+@test size(out_rsvrg2[6]) == ()
 
 @test size(out_rsvrg3[1]) == (99, 3)
 @test size(out_rsvrg3[2]) == (3, )
 @test size(out_rsvrg3[3]) == (300, 3)
 @test size(out_rsvrg3[4]) == (99, 3)
+@test size(out_rsvrg3[5]) == ()
+@test size(out_rsvrg3[6]) == ()
 
 @test size(out_rsvrg4[1]) == (99, 3)
 @test size(out_rsvrg4[2]) == (3, )
 @test size(out_rsvrg4[3]) == (300, 3)
 @test size(out_rsvrg4[4]) == (99, 3)
+@test size(out_rsvrg4[5]) == ()
+@test size(out_rsvrg4[6]) == ()
 #####################################
 
 

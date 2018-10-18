@@ -59,13 +59,13 @@ function gd(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=not
 end
 
 function gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, stepsize, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetFull, offsetStoch, perm)
-    # If true the calculation is converged
-    stop = false
+    # If not 0 the calculation is converged
+    stop = 0
     s = 1
     n = 1
     # Each epoch s
     progress = Progress(numepoch)
-    while(!stop && s <= numepoch)
+    while(stop == 0 && s <= numepoch)
         next!(progress)
         # Update Eigen vector
         W, v = gdupdate(scheduling, stepsize, g, epsilon, D, N, M, W, v, s, input, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, offsetFull, offsetStoch, perm)
@@ -81,7 +81,8 @@ function gd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumli
     end
 
     # Return, W, λ, V
-    WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar)
+    out = WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar)
+    return (out[1], out[2], out[3], out[4], out[5], stop)
 end
 
 # GD × Robbins-Monro
