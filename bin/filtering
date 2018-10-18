@@ -53,9 +53,6 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    thr1 = parse(Float32, parsed_args["thr1"])
-    thr2 = parse(Float32, parsed_args["thr2"])
-
     OnlinePCA.filtering(input=parsed_args["input"], featurelist=parsed_args["featurelist"], samplelist=parsed_args["samplelist"], thr1=thr1, thr2=thr2, direct1=parsed_args["direct1"], direct2=parsed_args["direct2"], outdir=parsed_args["outdir"])
 end
 

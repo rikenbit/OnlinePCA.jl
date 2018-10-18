@@ -14,7 +14,7 @@ Output Files
 ---------
 - `filtered.zst` : Filtered binary file.
 """
-function filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0, thr2::Number=0, direct1::AbstractString="+", direct2::AbstractString="+", outdir::AbstractString=".")
+function filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0.0, thr2::Number=0.0, direct1::AbstractString="+", direct2::AbstractString="+", outdir::AbstractString=".")
     # Feature selection
     if featurelist == "" && samplelist == ""
         error("At least featurelist or samplelist must be specified")
