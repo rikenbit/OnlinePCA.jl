@@ -1,4 +1,6 @@
-docs/build
+docs/build/
+docs/site/
+
 #################
 ## Eclipse
 #################

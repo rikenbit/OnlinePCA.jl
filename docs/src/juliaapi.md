@@ -12,7 +12,7 @@ sumr(;binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Numbe
 
 ## Filtering
 ```@docs
-filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0, thr2::Number=0, direct1::AbstractString="+", direct2::AbstractString="+", output::AbstractString=".")
+filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0, thr2::Number=0, direct1::AbstractString="+", direct2::AbstractString="+", outdir::AbstractString=".")
 ```
 
 ## Identifying Highly Variable Genes

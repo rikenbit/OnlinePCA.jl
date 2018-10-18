@@ -28,7 +28,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/filtering \
 --featurelist OUTDIR/Feature_Means.csv \
 --thr1 10 \
 --direct1 "+" \
---output OUTDIR
+--outdir OUTDIR
 ```
 
 ## Identifying Highly Variable Genes

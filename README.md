@@ -1,6 +1,8 @@
 # OnlinePCA.jl
 Online Principal Component Analysis
 
+[![Build Status](https://travis-ci.org/rikenbit/OnlinePCA.jl.svg?branch=master)](https://travis-ci.org/rikenbit/OnlinePCA.jl)
+
 ## Description
 OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, performs some online-PCA functions for extreamly large scale matrix.
 
