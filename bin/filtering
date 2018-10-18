@@ -53,6 +53,15 @@ function main()
         println("  $arg  =>  $val")
     end
 
+    thr1 = parsed_args["thr1"]
+    thr2 = parsed_args["thr2"]
+    if typeof(thr1) == String
+        thr1 = parse(Float32, thr1)
+    end
+    if typeof(thr2) == String
+        thr2 = parse(Float32, thr2)
+    end
+
     OnlinePCA.filtering(input=parsed_args["input"], featurelist=parsed_args["featurelist"], samplelist=parsed_args["samplelist"], thr1=thr1, thr2=thr2, direct1=parsed_args["direct1"], direct2=parsed_args["direct2"], outdir=parsed_args["outdir"])
 end
 
