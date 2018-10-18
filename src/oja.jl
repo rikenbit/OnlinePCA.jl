@@ -78,8 +78,7 @@ function oja(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsuml
             read!(stream, tmpM)
             # Each step n
             while(stop == 0 && n <= N)
-                # next!(progress)
-                @show (s, n)
+                next!(progress)
                 # Row vector of data matrix
                 read!(stream, x)
                 normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)

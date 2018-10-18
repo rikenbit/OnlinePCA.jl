@@ -414,7 +414,7 @@ end
 function outputlog(N::Number, s::Number, n::Number, input::AbstractString, dim::Number, logdir::AbstractString, W::AbstractArray, pca::Union{OJA,CCIPCA,RSGD,SVRG,RSVRG}, TotalVar::Number, scale::AbstractString, pseudocount::Number, rowmeanlist::AbstractString, rowmeanvec::AbstractArray, rowvarlist::AbstractString, rowvarvec::AbstractArray, colsumlist::AbstractString, colsumvec::AbstractArray, lower::Number, upper::Number, stop::Number, evalfreq::Number)
     if(mod((N*(s-1)+n), evalfreq) == 0)
         REs = RecError(W, input, TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
-        if n != evalfreq
+        if n != evalfreq && (N*(s-1)+(n-evalfreq)) != 0
             old_E = readcsv(joinpath(logdir, "RecError_"*string((N*(s-1)+(n-evalfreq)))*".csv"))
             RelChange = abs(REs[1][2] - old_E[1,2]) / REs[1][2]
             REs = [REs[1], REs[2], REs[3], REs[4], REs[5], REs[6], "RelChange"=> RelChange]
