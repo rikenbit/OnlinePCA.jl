@@ -1,7 +1,7 @@
 """
-    svrg(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numbatch::Number=100, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, initW::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+    sgd(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numbatch::Number=100, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, initW::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
 
-Online PCA solved by variance-reduced stochastic gradient descent method, also known as VR-PCA.
+Online PCA solved by stochastic gradient descent method.
 
 Input Arguments
 ---------
@@ -36,14 +36,10 @@ Output Arguments
 - `Scores` : Principal component scores
 - `ExpVar` : Explained variance by the eigenvectors
 - stop : Whether the calculation is converged
-
-Reference
----------
-- SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 """
-function svrg(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numbatch::Number=100, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, initW::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+function sgd(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, stepsize::Number=0.1, numbatch::Number=100, numepoch::Number=3, scheduling::AbstractString="robbins-monro", g::Number=0.9, epsilon::Number=1.0e-8, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, evalfreq::Number=5000, offsetFull::Number=1f-20, offsetStoch::Number=1f-6, initW::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
-    pca = SVRG()
+    pca = SGD()
     if scheduling == "robbins-monro"
         scheduling = ROBBINS_MONRO()
     elseif scheduling == "momentum"
@@ -57,21 +53,20 @@ function svrg(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=n
     end
     pseudocount, stepsize, g, epsilon, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetFull, offsetStoch = init(input, pseudocount, stepsize, g, epsilon, dim, rowmeanlist, rowvarlist, colsumlist, initW, logdir, pca, lower, upper, evalfreq, offsetFull, offsetStoch, scale)
     # Perform PCA
-    out = svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, stepsize, numbatch, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetFull, offsetStoch, perm)
+    out = sgd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, stepsize, numbatch, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetStoch, perm)
     if outdir isa String
         output(outdir, out, expvar)
     end
     return out
 end
 
-function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, stepsize, numbatch, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetFull, offsetStoch, perm)
+function sgd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, stepsize, numbatch, numepoch, scheduling, g, epsilon, logdir, pca, W, v, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper, evalfreq, offsetStoch, perm)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
-    batchgrad1 = zeros(Float32, M, dim)
-    batchgrad2 = zeros(Float32, M, dim)
+    batchgrad = zeros(Float32, M, dim)
     # If not 0 the calculation is converged
     stop = 0
     s = 1
@@ -81,8 +76,6 @@ function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
     # Each epoch s
     progress = Progress(numepoch*N)
     while(stop == 0 && s <= numepoch)
-        u = ∇f(W, input, D, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, stepsize/s, offsetFull, offsetStoch, perm)
-        Ws = W
         open(input) do file
             stream = ZstdDecompressorStream(file)
             read!(stream, tmpN)
@@ -97,7 +90,7 @@ function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
                     normx .= normx[randperm(length(normx))]
                 end
                 # Update Eigen vector
-                W, v, batchgrad1, batchgrad2, batchidx, batchcount = svrgupdate(scheduling, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad1, batchgrad2, batchidx, batchcount, numbatch, normx, s, n, u, Ws, offsetStoch)
+                W, v, batchgrad, batchidx, batchcount = sgdupdate(scheduling, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad, batchidx, batchcount, numbatch, normx, s, n, offsetStoch)
                 # NaN
                 checkNaN(N, s, n, W, evalfreq, pca)
                 # Retraction
@@ -125,72 +118,63 @@ function svrg(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
     return (out[1], out[2], out[3], out[4], out[5], stop)
 end
 
-# SVRG × Robbins-Monro
-function svrgupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad1, batchgrad2, batchidx, batchcount, numbatch, normx, s, n, u, Ws, offsetStoch)
+# SGD × Robbins-Monro
+function sgdupdate(scheduling::ROBBINS_MONRO, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad, batchidx, batchcount, numbatch, normx, s, n, offsetStoch)
     if mod(batchidx, numbatch) == 0 && n != 1
-        W .= W .+ batchgrad1 .- batchgrad2 .+ u
-        batchgrad1 = zeros(Float32, M, dim)
-        batchgrad2 = zeros(Float32, M, dim)
+        W .= W .+ batchgrad
+        batchgrad = zeros(Float32, M, dim)
         batchidx = 1
         batchcount += 1
     else
-        batchgrad1 .+= ∇fn(W, normx, D, M, stepsize/batchcount, offsetStoch)
-        batchgrad2 .+= ∇fn(Ws, normx, D, M, stepsize/batchcount, offsetStoch)
+        batchgrad .+= ∇fn(W, normx, D , M, stepsize/batchcount, offsetStoch)
         batchidx += 1
     end
     v = nothing
-    return W, v, batchgrad1, batchgrad2, batchidx, batchcount
+    return W, v, batchgrad, batchidx, batchcount
 end
 
-# SVRG × Momentum
-function svrgupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad1, batchgrad2, batchidx, batchcount, numbatch, normx, s, n, u, Ws, offsetStoch)
+# SGD × Momentum
+function sgdupdate(scheduling::MOMENTUM, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad, batchidx, batchcount, numbatch, normx, s, n, offsetStoch)
     if mod(batchidx, numbatch) == 0 && n != 1
-        v .= g .* v .+ batchgrad1 .- batchgrad2 .+ u
+        v .= g .* v .+ batchgrad
         W .= W .+ v
-        batchgrad1 = zeros(Float32, M, dim)
-        batchgrad2 = zeros(Float32, M, dim)
+        batchgrad = zeros(Float32, M, dim)
         batchidx = 1
         batchcount += 1
     else
-        batchgrad1 .+= ∇fn(W, normx, D, M, stepsize, offsetStoch)
-        batchgrad2 .+= ∇fn(Ws, normx, D, M, stepsize, offsetStoch)
+        batchgrad .+= ∇fn(W, normx, D , M, stepsize, offsetStoch)
         batchidx += 1
     end
-    return W, v, batchgrad1, batchgrad2, batchidx, batchcount
+    return W, v, batchgrad, batchidx, batchcount
 end
 
-# SVRG × NAG
-function svrgupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad1, batchgrad2, batchidx, batchcount, numbatch, normx, s, n, u, Ws, offsetStoch)
+# SGD × NAG
+function sgdupdate(scheduling::NAG, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad, batchidx, batchcount, numbatch, normx, s, n, offsetStoch)
     if mod(batchidx, numbatch) == 0 && n != 1
-        v = g .* v + batchgrad1 .- batchgrad2 .+ u
+        v = g .* v + batchgrad
         W .= W .+ v
-        batchgrad1 = zeros(Float32, M, dim)
-        batchgrad2 = zeros(Float32, M, dim)
+        batchgrad = zeros(Float32, M, dim)
         batchidx = 1
         batchcount += 1
     else
-        batchgrad1 .+= ∇fn(W - g .* v, normx, D, M, stepsize, offsetStoch)
-        batchgrad2 .+= ∇fn(Ws, normx, D, M, stepsize, offsetStoch)
+        batchgrad .+= ∇fn(W - g .* v, normx, D, M, stepsize, offsetStoch)
         batchidx += 1
     end
-    return W, v, batchgrad1, batchgrad2, batchidx, batchcount
+    return W, v, batchgrad, batchidx, batchcount
 end
 
-# SVRG × Adagrad
-function svrgupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad1, batchgrad2, batchidx, batchcount, numbatch, normx, s, n, u, Ws, offsetStoch)
+# SGD × Adagrad
+function sgdupdate(scheduling::ADAGRAD, stepsize, g, epsilon, D, N, M, dim, W, v, batchgrad, batchidx, batchcount, numbatch, normx, s, n, offsetStoch)
     if mod(batchidx, numbatch) == 0 && n != 1
-        grad = batchgrad1 .- batchgrad2 .+ u
-        grad = grad / stepsize
+        grad = batchgrad / stepsize
         v .= v .+ grad .* grad
         W .= W .+ stepsize ./ (sqrt.(v) .+ epsilon) .* grad
-        batchgrad1 = zeros(Float32, M, dim)
-        batchgrad2 = zeros(Float32, M, dim)
+        batchgrad = zeros(Float32, M, dim)
         batchidx = 1
         batchcount += 1
     else
-        batchgrad1 .+= ∇fn(W, normx, D, M, stepsize, offsetStoch)
-        batchgrad2 .+= ∇fn(Ws, normx, D, M, stepsize, offsetStoch)
+        batchgrad .+= ∇fn(W, normx, D, M, stepsize, offsetStoch)
         batchidx += 1
     end
-    return W, v, batchgrad1, batchgrad2, batchidx, batchcount
+    return W, v, batchgrad, batchidx, batchcount
 end

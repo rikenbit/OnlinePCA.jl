@@ -9,12 +9,17 @@ Online Principal Component Analysis
 OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, performs some online-PCA functions for extreamly large scale matrix.
 
 ## Algorithms
-- SGD-PCA（Oja's method) : [Erkki Oja et. al., 1985](https://www.sciencedirect.com/science/article/pii/0022247X85901313), [Erkki Oja, 1992](https://www.sciencedirect.com/science/article/pii/S0893608005800899)
-- CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
-- GD-PCA : None (Just for comparision with other methods)
-- RSGD-PCA : [Silvere Bonnabel, 2013](https://arxiv.org/abs/1111.5280)
-- SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
-- RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
+- Gradient-based
+	- GD-PCA
+	- SGD-PCA
+	- Oja's method : [Erkki Oja et. al., 1985](https://www.sciencedirect.com/science/article/pii/0022247X85901313), [Erkki Oja, 1992](https://www.sciencedirect.com/science/article/pii/S0893608005800899)
+	- CCIPCA : [Juyang Weng et. al., 2003](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.7.5665&rep=rep1&type=pdf)
+	- RSGD-PCA : [Silvere Bonnabel, 2013](https://arxiv.org/abs/1111.5280)
+	- SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
+	- RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
+- Randomized-based
+	- Halko's method : [Halko, N., et. al., 2011](https://arxiv.org/abs/0909.4061), [Halko, N. et. al., 2011](https://epubs.siam.org/doi/abs/10.1137/100804139)
+	- oocPCA (Out-of-core PCA) : [George C. Linderman, et. al., 2017](https://arxiv.org/abs/1712.09005), [Huamin, Li, et. al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5625842/)
 
 ## Learning Parameter Scheduling
 - Robbins-Monro : [Herbert Robbins, et. al., 1951](https://projecteuclid.org/download/pdf_1/euclid.aoms/1177729586)
@@ -91,6 +96,42 @@ end
 group=vcat(repeat(["group1"],inner=33), repeat(["group2"],inner=33), repeat(["group3"],inner=33))
 ```
 
+### GD-PCA
+```julia
+out_gd1 = gd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-3,
+    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd2 = gd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
+    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd3 = gd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
+    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd4 = gd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-0,
+    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+
+subplots(out_gd1, group) # Top, Left
+subplots(out_gd2, group) # Top, Right
+subplots(out_gd3, group) # Bottom, Left
+subplots(out_gd4, group) # Bottom, Right
+```
+![GD-PCA](./docs/src/figure/gd.png)
+
+### SGD-PCA
+```julia
+out_sgd1 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-3,
+    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_sgd2 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
+    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_sgd3 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
+    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_sgd4 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-0,
+    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+
+subplots(out_sgd1, group) # Top, Left
+subplots(out_sgd2, group) # Top, Right
+subplots(out_sgd3, group) # Bottom, Left
+subplots(out_sgd4, group) # Bottom, Right
+```
+![SGD-PCA](./docs/src/figure/sgd.png)
+
 ### Oja's method
 ```julia
 out_oja1 = oja(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E+0,
@@ -117,24 +158,6 @@ out_ccipca1 = ccipca(input=tmp*"/Data.zst", dim=3, stepsize=1E-0,
 subplots(out_ccipca1, group)
 ```
 ![CCIPCA](./docs/src/figure/ccipca.png)
-
-### GD-PCA
-```julia
-out_gd1 = gd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd2 = gd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd3 = gd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd4 = gd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-0,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-
-subplots(out_gd1, group) # Top, Left
-subplots(out_gd2, group) # Top, Right
-subplots(out_gd3, group) # Bottom, Left
-subplots(out_gd4, group) # Bottom, Right
-```
-![GD-PCA](./docs/src/figure/gd.png)
 
 ### RSGD-PCA
 ```julia
@@ -190,6 +213,22 @@ subplots(out_rsvrg4, group) # Bottom, Right
 ```
 ![RSVRG-PCA](./docs/src/figure/rsvrg.png)
 
+### Halko's method
+```julia
+out_halko = halko(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+
+subplots(out_halko, group)
+```
+![Halko's method](./docs/src/figure/halko.png)
+
+### oocPCA
+```julia
+out_oocpca = oocpca(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+
+subplots(out_oocpca, group)
+```
+![oocPCA](./docs/src/figure/oocpca.png)
+
 ## Command line usage
 All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.
 
@@ -203,7 +242,7 @@ julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/sumr \
     --binfile Data.zst
 
 # PCA
-julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
+julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
     --input Data.zst --dim 3 --scheduling robbins-monro --stepsize 10 \
     --numepoch 10 --rowmeanlist Feature_LogMeans.csv
 ```

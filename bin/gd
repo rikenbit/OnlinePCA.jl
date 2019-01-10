@@ -7,8 +7,8 @@ function main()
     pca = OnlinePCA.GD()
     parsed_args = OnlinePCA.parse_commandline(pca)
     println("Parsed args:")
-    for (arg,val) in parsed_args
-        println("  $arg  =>  $val")
+    for (arg, val) in parsed_args
+        println("  $arg  =>  ", repr(val))
     end
 
     if parsed_args["pseudocount"] == 1.0f0
@@ -25,7 +25,11 @@ function main()
         stepsize=parse(Float32, parsed_args["stepsize"])
     end
 
-    numepoch=parse(Int64, parsed_args["numepoch"])
+    if parsed_args["numepoch"] == 5
+        numepoch = 5
+    else
+        numepoch=parse(Int64, parsed_args["numepoch"])
+    end
 
     if parsed_args["g"] == 0.9f0
         g = 0.9f0
@@ -69,6 +73,12 @@ function main()
         offsetStoch=parse(Float32, parsed_args["offsetStoch"])
     end
 
+    if parsed_args["initW"] == nothing
+        initW = parsed_args["initW"]
+    else
+        initW = String(parsed_args["initW"])
+    end
+
     if parsed_args["logdir"] == nothing
         logdir = parsed_args["logdir"]
     else
@@ -106,6 +116,7 @@ function main()
         evalfreq=evalfreq,
         offsetFull=offsetFull,
         offsetStoch=offsetStoch,
+        initW=initW,
         logdir=logdir,
         perm=perm)
     OnlinePCA.output(parsed_args["outdir"], out, expvar)

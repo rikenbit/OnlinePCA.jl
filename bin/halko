@@ -1,10 +1,11 @@
 using OnlinePCA
+using OnlinePCA: writecsv
 using ArgParse:
     ArgParseSettings, parse_args, @add_arg_table
 
 # main
 function main()
-    pca = OnlinePCA.CCIPCA()
+    pca = OnlinePCA.HALKO()
     parsed_args = OnlinePCA.parse_commandline(pca)
     println("Parsed args:")
     for (arg, val) in parsed_args
@@ -18,42 +19,6 @@ function main()
     end
 
     dim=parse(Int64, parsed_args["dim"])
-
-    if parsed_args["stepsize"] == 1.0f3
-        stepsize = 1.0f3
-    else
-        stepsize=parse(Float32, parsed_args["stepsize"])
-    end
-
-    if parsed_args["numepoch"] == 5
-        numepoch = 5
-    else
-        numepoch=parse(Int64, parsed_args["numepoch"])
-    end
-
-    if parsed_args["lower"] == 0
-        lower = 0
-    else
-        lower=parse(Float32, parsed_args["lower"])
-    end
-
-    if parsed_args["upper"] == 1.0f+38
-        upper = 1.0f+38
-    else
-        upper=parse(Float32, parsed_args["upper"])
-    end
-
-    if parsed_args["evalfreq"] == 5000
-        evalfreq = 5000
-    else
-        evalfreq=parse(Int64, parsed_args["evalfreq"])
-    end
-
-    if parsed_args["offsetStoch"] == 1f-15
-        offsetStoch = 1f-15
-    else
-        offsetStoch=parse(Float32, parsed_args["offsetStoch"])
-    end
 
     if parsed_args["initW"] == nothing
         initW = parsed_args["initW"]
@@ -75,29 +40,20 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
-    if parsed_args["expvar"] == 0.1f0
-        expvar = 0.1f0
-    else
-        expvar = parse(Float32, parsed_args["expvar"])
-    end
-
-    out = OnlinePCA.ccipca(input=parsed_args["input"],
+    out = OnlinePCA.halko(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
         rowvarlist=parsed_args["rowvarlist"],
         colsumlist=parsed_args["colsumlist"],
         dim=dim,
-        stepsize=stepsize,
-        numepoch=numepoch,
-        lower=lower,
-        upper=upper,
-        evalfreq=evalfreq,
-        offsetStoch=offsetStoch,
         initW=initW,
         logdir=logdir,
         perm=perm)
-    OnlinePCA.output(parsed_args["outdir"], out, expvar)
+    writecsv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
+    writecsv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
+    writecsv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
+    writecsv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
 end
 
 main()

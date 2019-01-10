@@ -4,7 +4,7 @@ using ArgParse:
 
 # main
 function main()
-    pca = OnlinePCA.RSVRG()
+    pca = OnlinePCA.SGD()
     parsed_args = OnlinePCA.parse_commandline(pca)
     println("Parsed args:")
     for (arg, val) in parsed_args
@@ -67,12 +67,6 @@ function main()
         evalfreq=parse(Int64, parsed_args["evalfreq"])
     end
 
-    if parsed_args["offsetFull"] == 1.0f-20
-        offsetFull = 1.0f-20
-    else
-        offsetFull=parse(Float32, parsed_args["offsetFull"])
-    end
-
     if parsed_args["offsetStoch"] == 1.0f-6
         offsetStoch = 1.0f-6
     else
@@ -105,7 +99,7 @@ function main()
         expvar = parse(Float32, parsed_args["expvar"])
     end
 
-    out = OnlinePCA.rsvrg(input=parsed_args["input"],
+    out = OnlinePCA.sgd(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
@@ -120,7 +114,6 @@ function main()
         lower=lower,
         upper=upper,
         evalfreq=evalfreq,
-        offsetFull=offsetFull,
         offsetStoch=offsetStoch,
         initW=initW,
         logdir=logdir,

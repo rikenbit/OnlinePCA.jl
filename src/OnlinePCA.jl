@@ -5,7 +5,7 @@ using DelimitedFiles:
 using Statistics:
     mean, var
 using LinearAlgebra:
-    Diagonal, qr!, dot, norm
+    Diagonal, lu!, qr!, svd, dot, norm
 using Random:
     randperm
 using ProgressMeter:
@@ -23,18 +23,21 @@ using Distributions:
 using CodecZstd:
 	ZstdCompressorStream, ZstdDecompressorStream
 
-export output, common_parse_commandline, csv2bin, sumr, filtering, hvg, oja, ccipca, gd, rsgd, svrg, rsvrg
+export output, common_parse_commandline, csv2bin, sumr, filtering, hvg, sgd, oja, ccipca, gd, rsgd, svrg, rsvrg, halko, oocpca
 
 include("Utils.jl")
 include("csv2bin.jl")
 include("sumr.jl")
 include("filtering.jl")
 include("hvg.jl")
+include("sgd.jl")
 include("oja.jl")
 include("ccipca.jl")
 include("gd.jl")
 include("rsgd.jl")
 include("svrg.jl")
 include("rsvrg.jl")
+include("halko.jl")
+include("oocpca.jl")
 
 end
