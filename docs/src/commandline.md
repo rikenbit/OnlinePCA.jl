@@ -68,6 +68,33 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
 --perm false
 ```
 
+## SGD
+```bash
+shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
+--input OUTDIR/Data.zst \
+--outdir OUTDIR \
+--scale ftt \
+--pseudocount 1 \
+--rowmeanlist OUTDIR/Feature_FTTMeans.csv \
+--colsumlist OUTDIR/Sample_NoCounts.csv \
+--masklist OUTDIR/MASKLIST.csv \
+--dim 3 \
+--stepsize 0.1 \
+--numepoch 5 \
+--scheduling "robbins-monro" \
+--g 0.9 \
+--epsilon 1.0e-8 \
+--lower 0 \
+--upper 1.0f+38 \
+--expvar 0.1f0 \
+--evalfreq 5000 \
+--offsetStoch 1f-6 \
+--initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
+--logdir OUTDIR \
+--perm false
+```
+
 ## Oja
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
@@ -113,33 +140,6 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/ccipca \
 --expvar 0.1f0 \
 --evalfreq 5000 \
 --offsetStoch 1f-15 \
---initW OUTDIR/Eigen_vectors.csv \
---initV OUTDIR/Loadings.csv \
---logdir OUTDIR \
---perm false
-```
-
-## SGD
-```bash
-shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
---input OUTDIR/Data.zst \
---outdir OUTDIR \
---scale ftt \
---pseudocount 1 \
---rowmeanlist OUTDIR/Feature_FTTMeans.csv \
---colsumlist OUTDIR/Sample_NoCounts.csv \
---masklist OUTDIR/MASKLIST.csv \
---dim 3 \
---stepsize 0.1 \
---numepoch 5 \
---scheduling "robbins-monro" \
---g 0.9 \
---epsilon 1.0e-8 \
---lower 0 \
---upper 1.0f+38 \
---expvar 0.1f0 \
---evalfreq 5000 \
---offsetStoch 1f-6 \
 --initW OUTDIR/Eigen_vectors.csv \
 --initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
