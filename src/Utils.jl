@@ -91,6 +91,10 @@ function parse_commandline(pca::Union{OOCPCA,HALKO})
             help = "The CSV file saving the initial values of eigenvectors."
             arg_type = Union{Nothing,AbstractString}
             default = nothing
+        "--initV"
+            help = "The CSV file saving the initial values of loadings."
+            arg_type = Union{Nothing,AbstractString}
+            default = nothing
         "--logdir", "-l"
             help = "The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration."
             arg_type = Union{Nothing,AbstractString}
@@ -171,6 +175,10 @@ function parse_commandline(pca::CCIPCA)
             default = 1f-15
         "--initW"
             help = "The CSV file saving the initial values of eigenvectors."
+            arg_type = Union{Nothing,AbstractString}
+            default = nothing
+        "--initV"
+            help = "The CSV file saving the initial values of loadings."
             arg_type = Union{Nothing,AbstractString}
             default = nothing
         "--logdir", "-l"
@@ -279,6 +287,10 @@ function parse_commandline(pca::Union{SGD,RSGD,SVRG,RSVRG})
             help = "The CSV file saving the initial values of eigenvectors."
             arg_type = Union{Nothing,AbstractString}
             default = nothing
+        "--initV"
+            help = "The CSV file saving the initial values of loadings."
+            arg_type = Union{Nothing,AbstractString}
+            default = nothing
         "--logdir", "-l"
             help = "The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration."
             arg_type = Union{Nothing,AbstractString}
@@ -381,6 +393,10 @@ function parse_commandline(pca::Union{OJA,GD})
             help = "The CSV file saving the initial values of eigenvectors."
             arg_type = Union{Nothing,AbstractString}
             default = nothing
+        "--initV"
+            help = "The CSV file saving the initial values of loadings."
+            arg_type = Union{Nothing,AbstractString}
+            default = nothing
         "--logdir", "-l"
             help = "The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration."
             arg_type = Union{Nothing,AbstractString}
@@ -412,22 +428,32 @@ function nm(input::AbstractString)
 end
 
 # Initialization (only OOCPCA and HALKO)
-function init(input::AbstractString, pseudocount::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::Union{OOCPCA,HALKO}, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::Union{OOCPCA,HALKO}, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     pseudocount = Float32(pseudocount)
     # Eigen vectors
+    # Eigen vectors
     if initW == nothing
         W = zeros(Float32, M, dim)
-    else
-        W = readcsv(initW, Float32)
+        for i=1:dim
+            W[i, i] = 1
+        end
     end
-    D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
+    if typeof(initW) == String
+        if initV == nothing
+            W = readcsv(initW, Float32)
+        else
+            error("initW and initV are not specified at once. You only have one choice.")
+        end
+    end
+    if typeof(initV) == String
+            V = readcsv(initV, Float32)
+            V = V[:,1:dim]
+    end
+    D = Diagonal(reverse(1:dim)) # Diagonal Matrix
     x = zeros(UInt32, M)
-    for i=1:dim
-        W[i, i] = 1
-    end
     rowmeanvec = zeros(Float32, N, 1)
     rowvarvec = zeros(Float32, N, 1)
     colsumvec = zeros(Float32, M, 1)
@@ -451,6 +477,10 @@ function init(input::AbstractString, pseudocount::Number, dim::Number, rowmeanli
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             TotalVar = TotalVar + normx'normx
+            # Creating W from V
+            if typeof(initV) == String
+                W = W .+ (V[n,:]*normx')'
+            end
         end
         close(stream)
     end
@@ -465,7 +495,7 @@ function init(input::AbstractString, pseudocount::Number, dim::Number, rowmeanli
 end
 
 # Initialization (only CCIPCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::CCIPCA, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::CCIPCA, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -479,15 +509,24 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
     # Eigen vectors
     if initW == nothing
         W = zeros(Float32, M, dim)
-    else
-        W = readcsv(initW, Float32)
+        for i=1:dim
+            W[i, i] = 1
+        end
+    end
+    if typeof(initW) == String
+        if initV == nothing
+            W = readcsv(initW, Float32)
+        else
+            error("initW and initV are not specified at once. You only have one choice.")
+        end
+    end
+    if typeof(initV) == String
+            V = readcsv(initV, Float32)
+            V = V[:,1:dim]
     end
     X = zeros(Float32, M, dim+1) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
     x = zeros(UInt32, M)
-    for i=1:dim
-        W[i, i] = 1
-    end
     rowmeanvec = zeros(Float32, N, 1)
     rowvarvec = zeros(Float32, N, 1)
     colsumvec = zeros(Float32, M, 1)
@@ -511,6 +550,10 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             TotalVar = TotalVar + normx'normx
+            # Creating W from V
+            if typeof(initV) == String
+                W = W .+ (V[n,:]*normx')'
+            end
         end
         close(stream)
     end
@@ -525,7 +568,7 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, dim:
 end
 
 # Initialization (other PCA)
-function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::Union{OJA,SGD,GD,RSGD,SVRG,RSVRG}, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
+function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::Number, epsilon::Number, dim::Number, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::Union{OJA,SGD,GD,RSGD,SVRG,RSVRG}, lower::Number, upper::Number, evalfreq::Number, offsetFull::Number, offsetStoch::Number, scale::AbstractString="ftt")
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -541,16 +584,25 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
     # Eigen vectors
     if initW == nothing
         W = zeros(Float32, M, dim)
-    else
-        W = readcsv(initW, Float32)
+        for i=1:dim
+            W[i, i] = 1
+        end
+    end
+    if typeof(initW) == String
+        if initV == nothing
+            W = readcsv(initW, Float32)
+        else
+            error("initW and initV are not specified at once. You only have one choice.")
+        end
+    end
+    if typeof(initV) == String
+            V = readcsv(initV, Float32)
+            V = V[:,1:dim]
     end
     v = zeros(Float32, M, dim) # Temporal Vector (Same length
     D = Diagonal(reverse(1:dim)) # Diagonaml Matrix
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
-    for i=1:dim
-        W[i, i] = 1
-    end
     rowmeanvec = zeros(Float32, N, 1)
     rowvarvec = zeros(Float32, N, 1)
     colsumvec = zeros(Float32, M, 1)
@@ -574,6 +626,10 @@ function init(input::AbstractString, pseudocount::Number, stepsize::Number, g::N
             read!(stream, x)
             normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
             TotalVar = TotalVar + normx'normx
+            # Creating W from V
+            if typeof(initV) == String
+                W = W .+ (V[n,:]*normx')'
+            end
         end
         close(stream)
     end

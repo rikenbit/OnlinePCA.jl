@@ -79,6 +79,12 @@ function main()
         initW = String(parsed_args["initW"])
     end
 
+    if parsed_args["initV"] == nothing
+        initV = parsed_args["initV"]
+    else
+        initV = String(parsed_args["initV"])
+    end
+
     if parsed_args["logdir"] == nothing
         logdir = parsed_args["logdir"]
     else
@@ -117,6 +123,7 @@ function main()
         offsetFull=offsetFull,
         offsetStoch=offsetStoch,
         initW=initW,
+        initV=initV,
         logdir=logdir,
         perm=perm)
     OnlinePCA.output(parsed_args["outdir"], out, expvar)

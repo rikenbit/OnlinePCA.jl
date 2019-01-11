@@ -63,6 +63,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
 --evalfreq 5000 \
 --offsetFull 1f-20 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -89,6 +90,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/oja \
 --evalfreq 5000 \
 --offsetStoch 1f-6 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -112,6 +114,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/ccipca \
 --evalfreq 5000 \
 --offsetStoch 1f-15 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -138,6 +141,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
 --evalfreq 5000 \
 --offsetStoch 1f-6 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -164,6 +168,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsgd \
 --evalfreq 5000 \
 --offsetStoch 1f-6 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -191,6 +196,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/svrg \
 --offsetFull 1f-20 \
 --offsetStoch 1f-6 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -218,6 +224,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/rsvrg \
 --offsetFull 1f-20 \
 --offsetStoch 1f-6 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -235,6 +242,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/halko \
 --masklist OUTDIR/MASKLIST.csv \
 --dim 3 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
@@ -252,6 +260,7 @@ shell> julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/halko \
 --masklist OUTDIR/MASKLIST.csv \
 --dim 3 \
 --initW OUTDIR/Eigen_vectors.csv \
+--initV OUTDIR/Loadings.csv \
 --logdir OUTDIR \
 --perm false
 ```
