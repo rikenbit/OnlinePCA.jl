@@ -25,6 +25,7 @@ Output Arguments
 - `U` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 - `Scores` : Principal component scores
 - `ExpVar` : Explained variance by the eigenvectors
+- `TotalVar` : Total variance of the data matrix
 """
 function oocpca(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
@@ -39,6 +40,7 @@ function oocpca(;input::AbstractString="", outdir::Union{Nothing,AbstractString}
         writecsv(joinpath(outdir, "Loadings.csv"), out[3])
         writecsv(joinpath(outdir, "Scores.csv"), out[4])
         writecsv(joinpath(outdir, "ExpVar.csv"), out[5])
+        writecsv(joinpath(outdir, "TotalVar.csv"), out[6])
     end
     return out
 end
@@ -174,5 +176,5 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
     end
     ExpVar = sum(λ) / TotalVar
     # Return
-    return (V[:,1:dim], λ[1:dim], U[:,1:dim], Scores[:,1:dim], ExpVar)
+    return (V[:,1:dim], λ[1:dim], U[:,1:dim], Scores[:,1:dim], ExpVar, TotalVar)
 end

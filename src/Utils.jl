@@ -682,7 +682,7 @@ function WλV(W::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
     end
     ExpVar = sum(λ) / TotalVar
     # Return
-    return W, λ, V, Scores, ExpVar
+    return W, λ, V, Scores, ExpVar, TotalVar
 end
 
 # Output log file （only GD）

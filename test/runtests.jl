@@ -430,60 +430,6 @@ testfilesize(true,
 
 
 #####################################
-println("####### OOCPCA (Julia API) #######")
-out_oocpca = oocpca(input=joinpath(tmp, "Data.zst"),
-	dim=3,
-	rowmeanlist=joinpath(tmp, "Feature_FTTMeans.csv"),
-	logdir=tmp)
-
-@test size(out_oocpca[1]) == (99, 3)
-@test size(out_oocpca[2]) == (3, )
-@test size(out_oocpca[3]) == (300, 3)
-@test size(out_oocpca[4]) == (99, 3)
-@test size(out_oocpca[5]) == ()
-#####################################
-
-
-#####################################
-println("####### OOCPCA (Command line) #######")
-run(`$(julia) $(joinpath(bindir, "oocpca")) --input $(joinpath(tmp, "Data.zst")) --outdir $(tmp) --dim 3 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv")) --logdir $(tmp)`)
-
-testfilesize(true,
-	joinpath(tmp, "Eigen_vectors.csv"),
-	joinpath(tmp, "Eigen_values.csv"),
-	joinpath(tmp, "Loadings.csv"),
-	joinpath(tmp, "Scores.csv"))
-#####################################
-
-
-#####################################
-println("####### HALKO (Julia API) #######")
-out_halko = halko(input=joinpath(tmp, "Data.zst"),
-	dim=3,
-	rowmeanlist=joinpath(tmp, "Feature_FTTMeans.csv"),
-	logdir=tmp)
-
-@test size(out_halko[1]) == (99, 3)
-@test size(out_halko[2]) == (3, )
-@test size(out_halko[3]) == (300, 3)
-@test size(out_halko[4]) == (99, 3)
-@test size(out_halko[5]) == ()
-####################################
-
-
-#####################################
-println("####### HALKO (Command line) #######")
-run(`$(julia) $(joinpath(bindir, "halko")) --input $(joinpath(tmp, "Data.zst")) --outdir $(tmp) --dim 3 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv")) --logdir $(tmp)`)
-
-testfilesize(true,
-	joinpath(tmp, "Eigen_vectors.csv"),
-	joinpath(tmp, "Eigen_values.csv"),
-	joinpath(tmp, "Loadings.csv"),
-	joinpath(tmp, "Scores.csv"))
-#####################################
-
-
-#####################################
 println("####### CCIPCA (Julia API) #######")
 out_ccipca1 = ccipca(input=joinpath(tmp, "Data.zst"),
 	dim=3, stepsize=1.0e-15, numepoch=1,
@@ -778,6 +724,60 @@ testfilesize(true,
 	joinpath(tmp, "Scores.csv"))
 
 run(`$(julia) $(joinpath(bindir, "rsvrg")) --input $(joinpath(tmp, "Data.zst"))  --outdir $(tmp) --dim 3 --scheduling adagrad --stepsize 1.0e-15 --numepoch 1 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv")) --logdir $(tmp)`)
+
+testfilesize(true,
+	joinpath(tmp, "Eigen_vectors.csv"),
+	joinpath(tmp, "Eigen_values.csv"),
+	joinpath(tmp, "Loadings.csv"),
+	joinpath(tmp, "Scores.csv"))
+#####################################
+
+
+#####################################
+println("####### HALKO (Julia API) #######")
+out_halko = halko(input=joinpath(tmp, "Data.zst"),
+	dim=3,
+	rowmeanlist=joinpath(tmp, "Feature_FTTMeans.csv"),
+	logdir=tmp)
+
+@test size(out_halko[1]) == (99, 3)
+@test size(out_halko[2]) == (3, )
+@test size(out_halko[3]) == (300, 3)
+@test size(out_halko[4]) == (99, 3)
+@test size(out_halko[5]) == ()
+####################################
+
+
+#####################################
+println("####### HALKO (Command line) #######")
+run(`$(julia) $(joinpath(bindir, "halko")) --input $(joinpath(tmp, "Data.zst")) --outdir $(tmp) --dim 3 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv")) --logdir $(tmp)`)
+
+testfilesize(true,
+	joinpath(tmp, "Eigen_vectors.csv"),
+	joinpath(tmp, "Eigen_values.csv"),
+	joinpath(tmp, "Loadings.csv"),
+	joinpath(tmp, "Scores.csv"))
+#####################################
+
+
+#####################################
+println("####### OOCPCA (Julia API) #######")
+out_oocpca = oocpca(input=joinpath(tmp, "Data.zst"),
+	dim=3,
+	rowmeanlist=joinpath(tmp, "Feature_FTTMeans.csv"),
+	logdir=tmp)
+
+@test size(out_oocpca[1]) == (99, 3)
+@test size(out_oocpca[2]) == (3, )
+@test size(out_oocpca[3]) == (300, 3)
+@test size(out_oocpca[4]) == (99, 3)
+@test size(out_oocpca[5]) == ()
+#####################################
+
+
+#####################################
+println("####### OOCPCA (Command line) #######")
+run(`$(julia) $(joinpath(bindir, "oocpca")) --input $(joinpath(tmp, "Data.zst")) --outdir $(tmp) --dim 3 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv")) --logdir $(tmp)`)
 
 testfilesize(true,
 	joinpath(tmp, "Eigen_vectors.csv"),

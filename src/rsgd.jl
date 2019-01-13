@@ -36,6 +36,7 @@ Output Arguments
 - `V` : Loading vectors of covariance matrix (No. rows of the data matrix × dim)
 - `Scores` : Principal component scores
 - `ExpVar` : Explained variance by the eigenvectors
+- `TotalVar` : Total variance of the data matrix
 - stop : Whether the calculation is converged
 
 Reference
@@ -120,7 +121,7 @@ function rsgd(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsum
 
     # Return, W, λ, V
     out = WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar)
-    return (out[1], out[2], out[3], out[4], out[5], stop)
+    return (out[1], out[2], out[3], out[4], out[5], out[6], stop)
 end
 
 # RSGD × Robbins-Monro
