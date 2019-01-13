@@ -36,6 +36,7 @@ function output(outdir::AbstractString, out::Tuple, expvar::Number)
     writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
     writecsv(joinpath(outdir, "Loadings.csv"), out[3])
     writecsv(joinpath(outdir, "Scores.csv"), out[4])
+    writecsv(joinpath(outdir, "ExpVar.csv"), out[5])
     if out[5] > expvar && out[6] == 1
         touch(joinpath(outdir, "Converged"))
     end
