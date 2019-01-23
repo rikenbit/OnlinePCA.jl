@@ -4,7 +4,7 @@ using ArgParse:
 
 # main
 function main()
-    pca = OnlinePCA.CCIPCA()
+    pca = OnlinePCA.ORTHITER()
     parsed_args = OnlinePCA.parse_commandline(pca)
     println("Parsed args:")
     for (arg, val) in parsed_args
@@ -18,12 +18,6 @@ function main()
     end
 
     dim=parse(Int64, parsed_args["dim"])
-
-    if parsed_args["stepsize"] == 0.0f0
-        stepsize = 1.0f3
-    else
-        stepsize=parse(Float32, parsed_args["stepsize"])
-    end
 
     if parsed_args["numepoch"] == 5
         numepoch = 5
@@ -41,18 +35,6 @@ function main()
         upper = 1.0f+38
     else
         upper=parse(Float32, parsed_args["upper"])
-    end
-
-    if parsed_args["evalfreq"] == 5000
-        evalfreq = 5000
-    else
-        evalfreq=parse(Int64, parsed_args["evalfreq"])
-    end
-
-    if parsed_args["offsetStoch"] == 1f-15
-        offsetStoch = 1f-15
-    else
-        offsetStoch=parse(Float32, parsed_args["offsetStoch"])
     end
 
     if parsed_args["initW"] == nothing
@@ -87,19 +69,16 @@ function main()
         expvar = parse(Float32, parsed_args["expvar"])
     end
 
-    out = OnlinePCA.ccipca(input=parsed_args["input"],
+    out = OnlinePCA.orthiter(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
         rowvarlist=parsed_args["rowvarlist"],
         colsumlist=parsed_args["colsumlist"],
         dim=dim,
-        stepsize=stepsize,
         numepoch=numepoch,
         lower=lower,
         upper=upper,
-        evalfreq=evalfreq,
-        offsetStoch=offsetStoch,
         initW=initW,
         initV=initV,
         logdir=logdir,

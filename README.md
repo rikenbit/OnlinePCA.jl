@@ -17,6 +17,10 @@ OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, 
 	- RSGD-PCA : [Silvere Bonnabel, 2013](https://arxiv.org/abs/1111.5280)
 	- SVRG-PCA : [Ohad Shamir, 2015](http://proceedings.mlr.press/v37/shamir15.pdf)
 	- RSVRG-PCA : [Hongyi Zhang, et. al., 2016](http://papers.nips.cc/paper/6515-riemannian-svrg-fast-stochastic-optimization-on-riemannian-manifolds.pdf), [Hiroyuki Sato, et. al., 2017](https://arxiv.org/abs/1702.05594)
+- Krylov subspace-based
+	- Orthgonal Iteration (A power method to calculate multiple eigenvectors at once) : [Zhaofun Bai, 1987](https://www.amazon.co.jp/Templates-Solution-Algebraic-Eigenvalue-Problems/dp/0898714710)
+	- Arnoldi method : [Zhaofun Bai, 1987](https://www.amazon.co.jp/Templates-Solution-Algebraic-Eigenvalue-Problems/dp/0898714710)
+	- Lanczos method : [Zhaofun Bai, 1987](https://www.amazon.co.jp/Templates-Solution-Algebraic-Eigenvalue-Problems/dp/0898714710)
 - Random projection-based
 	- Halko's method : [Halko, N., et. al., 2011](https://arxiv.org/abs/0909.4061), [Halko, N. et. al., 2011](https://epubs.siam.org/doi/abs/10.1137/100804139)
 	- oocPCA (Out-of-core PCA) : [George C. Linderman, et. al., 2017](https://arxiv.org/abs/1712.09005), [Huamin, Li, et. al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5625842/)
@@ -212,6 +216,31 @@ subplots(out_rsvrg3, group) # Bottom, Left
 subplots(out_rsvrg4, group) # Bottom, Right
 ```
 ![RSVRG-PCA](./docs/src/figure/rsvrg.png)
+
+### Orthogonal Iteration (Power method)
+```julia
+out_orthiter = orthiter(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+
+subplots(out_orthiter, group)
+```
+![Orthogonal Iteration](./docs/src/figure/orthiter.png)
+
+### Arnoldi method
+```julia
+out_arnoldi = arnoldi(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+
+subplots(out_arnoldi, group)
+```
+![Arnoldi method](./docs/src/figure/arnoldi.png)
+
+### Lanczos method
+```julia
+out_lanczos = lanczos(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+
+subplots(out_lanczos, group)
+```
+![Orthogonal Iteration](./docs/src/figure/lanczos.png)
+
 
 ### Halko's method
 ```julia

@@ -785,3 +785,82 @@ testfilesize(true,
 	joinpath(tmp, "Loadings.csv"),
 	joinpath(tmp, "Scores.csv"))
 #####################################
+
+#####################################
+println("####### Orthogonal Iteration (Julia API) #######")
+out_orthiter1 = orthiter(input=joinpath(tmp, "Data.zst"),
+	dim=3, numepoch=3,
+	rowmeanlist=joinpath(tmp, "Feature_FTTMeans.csv"),
+	logdir=tmp)
+
+@test size(out_orthiter1[1]) == (99, 3)
+@test size(out_orthiter1[2]) == (3, )
+@test size(out_orthiter1[3]) == (300, 3)
+@test size(out_orthiter1[4]) == (99, 3)
+@test size(out_orthiter1[5]) == ()
+@test size(out_orthiter1[6]) == ()
+#####################################
+
+
+#####################################
+println("####### Orthogonal Iteration (Command line) #######")
+run(`$(julia) $(joinpath(bindir, "orthiter")) --input $(joinpath(tmp, "Data.zst")) --outdir $(tmp) --dim 3 --numepoch 3 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv")) --logdir $(tmp)`)
+
+testfilesize(true,
+	joinpath(tmp, "Eigen_vectors.csv"),
+	joinpath(tmp, "Eigen_values.csv"),
+	joinpath(tmp, "Loadings.csv"),
+	joinpath(tmp, "Scores.csv"))
+#####################################
+
+
+#####################################
+println("####### ARNOLDI (Julia API) #######")
+out_arnoldi1 = arnoldi(input=joinpath(tmp, "Data.zst"),
+	dim=3,
+	rowmeanlist=joinpath(tmp, "Feature_FTTMeans.csv"))
+
+@test size(out_arnoldi1[1]) == (99, 3)
+@test size(out_arnoldi1[2]) == (3, )
+@test size(out_arnoldi1[3]) == (300, 3)
+@test size(out_arnoldi1[4]) == (99, 3)
+@test size(out_arnoldi1[5]) == ()
+@test size(out_arnoldi1[6]) == ()
+#####################################
+
+#####################################
+println("####### ARNOLDI (Command line) #######")
+run(`$(julia) $(joinpath(bindir, "arnoldi")) --input $(joinpath(tmp, "Data.zst")) --outdir $(tmp) --dim 3 --numepoch 3 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv"))`)
+
+testfilesize(true,
+	joinpath(tmp, "Eigen_vectors.csv"),
+	joinpath(tmp, "Eigen_values.csv"),
+	joinpath(tmp, "Loadings.csv"),
+	joinpath(tmp, "Scores.csv"))
+#####################################
+
+
+#####################################
+println("####### LANCZOS (Julia API) #######")
+out_lanczos1 = lanczos(input=joinpath(tmp, "Data.zst"),
+	dim=3,
+	rowmeanlist=joinpath(tmp, "Feature_FTTMeans.csv"))
+
+@test size(out_lanczos1[1]) == (99, 3)
+@test size(out_lanczos1[2]) == (3, )
+@test size(out_lanczos1[3]) == (300, 3)
+@test size(out_lanczos1[4]) == (99, 3)
+@test size(out_lanczos1[5]) == ()
+@test size(out_lanczos1[6]) == ()
+#####################################
+
+#####################################
+println("####### LANCZOS (Command line) #######")
+run(`$(julia) $(joinpath(bindir, "lanczos")) --input $(joinpath(tmp, "Data.zst")) --outdir $(tmp) --dim 3 --numepoch 3 --rowmeanlist $(joinpath(tmp, "Feature_FTTMeans.csv"))`)
+
+testfilesize(true,
+	joinpath(tmp, "Eigen_vectors.csv"),
+	joinpath(tmp, "Eigen_values.csv"),
+	joinpath(tmp, "Loadings.csv"),
+	joinpath(tmp, "Scores.csv"))
+#####################################

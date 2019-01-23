@@ -1,0 +1,54 @@
+using OnlinePCA
+using ArgParse:
+    ArgParseSettings, parse_args, @add_arg_table
+
+# main
+function main()
+    pca = OnlinePCA.ARNOLDI()
+    parsed_args = OnlinePCA.parse_commandline(pca)
+    println("Parsed args:")
+    for (arg, val) in parsed_args
+        println("  $arg  =>  ", repr(val))
+    end
+
+    if parsed_args["pseudocount"] == 1.0f0
+        pseudocount = 1.0f0
+    else
+        pseudocount=Float32(parsed_args["pseudocount"])
+    end
+
+    dim=parse(Int64, parsed_args["dim"])
+
+    if parsed_args["numepoch"] == 5
+        numepoch = 5
+    else
+        numepoch=parse(Int64, parsed_args["numepoch"])
+    end
+
+    if parsed_args["perm"] == false
+        perm = false
+    elseif parsed_args["perm"] == "true"
+        perm = true
+    else
+        error("Please specify the perm option as true or false")
+    end
+
+    if parsed_args["expvar"] == 0.1f0
+        expvar = 0.1f0
+    else
+        expvar = parse(Float32, parsed_args["expvar"])
+    end
+
+    out = OnlinePCA.arnoldi(input=parsed_args["input"],
+        scale=parsed_args["scale"],
+        pseudocount=pseudocount,
+        rowmeanlist=parsed_args["rowmeanlist"],
+        rowvarlist=parsed_args["rowvarlist"],
+        colsumlist=parsed_args["colsumlist"],
+        dim=dim,
+        numepoch=numepoch,
+        perm=perm)
+    OnlinePCA.output(parsed_args["outdir"], out, expvar)
+end
+
+main()
