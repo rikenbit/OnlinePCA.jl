@@ -184,7 +184,10 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         XΩ[startp:endp,:] .= X*Ω
         # 遅い
         println("Xmean*Ω")
-        XmeanΩ[startp:endp,:] .= (zeros(Float32, (endp-startp+1), M) .+ rowmeanvec[startp:endp])*Ω
+        for m in 1:M
+            XmeanΩ[startp:endp,:] .+= rowmeanvec[startp:endp]*Ω[m,:]'
+        end
+        # XmeanΩ[startp:endp,:] .= (zeros(Float32, (endp-startp+1), M) .+ rowmeanvec[startp:endp])*Ω
     end
     println("XΩ - XmeanΩ")
     Y .= XΩ .- Xmean*Ω
@@ -235,7 +238,10 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             XAtL[startp:endp,:] .= X * AtL
             # 遅い
             println("rowmeanvec * AtL[m,:]'")
-            XmeanAtL[startp:endp,:] .= (zeros(Float32, (endp-startp+1), M) .+ rowmeanvec[startp:endp])*AtL
+            for m = 1:M
+                XmeanAtL .+= rowmeanvec * AtL[m,:]'
+            end
+            # XmeanAtL[startp:endp,:] .= (zeros(Float32, (endp-startp+1), M) .+ rowmeanvec[startp:endp])*AtL
         end
         println("XAtL .- XmeanAtL")
         Y .= XAtL .- XmeanAtL
