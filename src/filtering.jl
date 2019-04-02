@@ -1,5 +1,5 @@
 """
-    filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0, thr2::Number=0, direct1::AbstractString="+", direct2::AbstractString="+", outdir::AbstractString=".")
+    filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0.0, thr2::Number=0.0, direct1::AbstractString="+", direct2::AbstractString="+", outdir::AbstractString=".")
 
 This function filters the genes by some standards such as mean or variance of the genes.
 

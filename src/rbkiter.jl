@@ -1,7 +1,8 @@
 """
-    orthiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+    rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
 
-Orthogonal iteration, also known as block power method, subspace iteration or simultaneous iteration, ...etc.
+Randomized Block Krylov Iteration.
+
 
 Input Arguments
 ---------
@@ -31,12 +32,15 @@ Output Arguments
 - `TotalVar` : Total variance of the data matrix
 - stop : Whether the calculation is converged
 """
-function orthiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
-    pca = ORTHITER()
+    pca = RBKITER()
     N, M = nm(input)
     pseudocount, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper = init(input, pseudocount, dim, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, lower, upper, scale)
     tmpW = zeros(Float32, M, dim)
+    K = zeros(Float32, M, dim*numepoch)
+    QtAt = zeros(Float32, dim*numepoch, N)
+    QtAtA = zeros(Float32, dim*numepoch, M)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
     x = zeros(UInt32, M)
@@ -47,13 +51,13 @@ function orthiter(;input::AbstractString="", outdir::Union{Nothing,AbstractStrin
     n = 1
     # Each epoch s
     progress = Progress(numepoch*N)
-    while(stop == 0 && s <= numepoch)
+    while s <= numepoch
         open(input) do file
             stream = ZstdDecompressorStream(file)
             read!(stream, tmpN)
             read!(stream, tmpM)
-        # Each step n
-            while(stop == 0 && n <= N)
+            # Each step n
+            while n <= N
                 next!(progress)
                 # Row vector of data matrix
                 read!(stream, x)
@@ -76,6 +80,8 @@ function orthiter(;input::AbstractString="", outdir::Union{Nothing,AbstractStrin
         W .= Array(qr!(W).Q)
         # Check Float32
         @assert W[1,1] isa Float32
+        # Save to K
+        K[:, (s-1)*dim+1:s*dim] = W
         # save log file
         if logdir isa String
             stop = outputlog(s, input, dim, logdir, W, GD(), TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop)
@@ -85,7 +91,55 @@ function orthiter(;input::AbstractString="", outdir::Union{Nothing,AbstractStrin
             n = 1
         end
     end
+    Q = Array(qr!(K).Q)
+    n = 1
+    println("Q' A")
+    open(input) do file
+        stream = ZstdDecompressorStream(file)
+        read!(stream, tmpN)
+        read!(stream, tmpM)
+        # Each step n
+        while n <= N
+            next!(progress)
+            # Row vector of data matrix
+            read!(stream, x)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            if perm
+                normx .= normx[randperm(length(normx))]
+            end
+            # Power iteration
+            QtAt .+= Q'*normx
+            n += 1
+        end
+        close(stream)
+    end
+    n = 1
+    println("Q' A' A")
+    open(input) do file
+        stream = ZstdDecompressorStream(file)
+        read!(stream, tmpN)
+        read!(stream, tmpM)
+        # Each step n
+        while n <= N
+            next!(progress)
+            # Row vector of data matrix
+            read!(stream, x)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            if perm
+                normx .= normx[randperm(length(normx))]
+            end
+            # Power iteration
+            QtAtA .+= QtAt[:,n]*normx'
+            n += 1
+        end
+        close(stream)
+    end
 
+    # SVD
+    println("svd(Q' A' A)")
+    U, Σ, V = svd(QtAtA)
+    println("Q*U")
+    W = Q*U[:,1:dim]
     # Return, W, λ, V
     out = WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar)
     out = (out[1], out[2], out[3], out[4], out[5], out[6], stop)

@@ -5,17 +5,11 @@ using ArgParse:
 
 # main
 function main()
-    pca = OnlinePCA.HALKO()
+    pca = OnlinePCA.TENXPCA()
     parsed_args = OnlinePCA.parse_commandline(pca)
     println("Parsed args:")
     for (arg, val) in parsed_args
         println("  $arg  =>  ", repr(val))
-    end
-
-    if parsed_args["pseudocount"] == 1.0f0
-        pseudocount = 1.0f0
-    else
-        pseudocount=Float32(parsed_args["pseudocount"])
     end
 
     if typeof(parsed_args["dim"]) == String
@@ -34,6 +28,12 @@ function main()
         niter = parse(Int64, parsed_args["niter"])
     else
         niter = parsed_args["niter"]
+    end
+
+    if typeof(parsed_args["chunksize"]) == String
+        chunksize = parse(Int64, parsed_args["chunksize"])
+    else
+        chunksize = parsed_args["chunksize"]
     end
 
     if parsed_args["initW"] == nothing
@@ -62,15 +62,16 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
-    out = OnlinePCA.halko(input=parsed_args["input"],
+    out = OnlinePCA.tenxpca(tenxfile=parsed_args["tenxfile"],
         scale=parsed_args["scale"],
-        pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
         rowvarlist=parsed_args["rowvarlist"],
         colsumlist=parsed_args["colsumlist"],
         dim=dim,
         noversamples=noversamples,
         niter=niter,
+        chunksize=chunksize,
+        group=parsed_args["group"],
         initW=initW,
         initV=initV,
         logdir=logdir,

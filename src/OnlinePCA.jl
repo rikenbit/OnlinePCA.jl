@@ -1,11 +1,14 @@
 module OnlinePCA
 
+using HDF5:
+    h5open
+using SparseArrays
 using DelimitedFiles:
     writedlm, readdlm
 using Statistics:
     mean, var
 using LinearAlgebra:
-    Diagonal, lu!, qr!, svd, dot, norm, eigvecs
+    Diagonal, lu!, qr!, svd, dot, norm, eigvecs, tr
 using Random:
     randperm
 using ProgressMeter:
@@ -23,11 +26,12 @@ using Distributions:
 using CodecZstd:
 	ZstdCompressorStream, ZstdDecompressorStream
 
-export output, common_parse_commandline, csv2bin, sumr, filtering, hvg, sgd, oja, ccipca, gd, rsgd, svrg, rsvrg, halko, oocpca, orthiter, arnoldi, lanczos
+export output, common_parse_commandline, csv2bin, sumr, tenxsumr, filtering, hvg, sgd, oja, ccipca, gd, rsgd, svrg, rsvrg, orthiter, arnoldi, lanczos, halko, algorithm971, rbkiter, singlepass, singlepass2, tenxpca
 
 include("Utils.jl")
 include("csv2bin.jl")
 include("sumr.jl")
+include("tenxsumr.jl")
 include("filtering.jl")
 include("hvg.jl")
 include("sgd.jl")
@@ -37,10 +41,14 @@ include("gd.jl")
 include("rsgd.jl")
 include("svrg.jl")
 include("rsvrg.jl")
-include("halko.jl")
-include("oocpca.jl")
 include("orthiter.jl")
 include("arnoldi.jl")
 include("lanczos.jl")
+include("halko.jl")
+include("algorithm971.jl")
+include("rbkiter.jl")
+include("singlepass.jl")
+include("singlepass2.jl")
+include("tenxpca.jl")
 
 end

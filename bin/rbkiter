@@ -1,11 +1,10 @@
 using OnlinePCA
-using OnlinePCA: writecsv
 using ArgParse:
     ArgParseSettings, parse_args, @add_arg_table
 
 # main
 function main()
-    pca = OnlinePCA.HALKO()
+    pca = OnlinePCA.RBKITER()
     parsed_args = OnlinePCA.parse_commandline(pca)
     println("Parsed args:")
     for (arg, val) in parsed_args
@@ -18,22 +17,24 @@ function main()
         pseudocount=Float32(parsed_args["pseudocount"])
     end
 
-    if typeof(parsed_args["dim"]) == String
-        dim = parse(Int64, parsed_args["dim"])
+    dim=parse(Int64, parsed_args["dim"])
+
+    if parsed_args["numepoch"] == 5
+        numepoch = 5
     else
-        dim = parsed_args["dim"]
+        numepoch=parse(Int64, parsed_args["numepoch"])
     end
 
-    if typeof(parsed_args["noversamples"]) == String
-        noversamples = parse(Int64, parsed_args["noversamples"])
+    if parsed_args["lower"] == 0
+        lower = 0
     else
-        noversamples = parsed_args["noversamples"]
+        lower=parse(Float32, parsed_args["lower"])
     end
 
-    if typeof(parsed_args["niter"]) == String
-        niter = parse(Int64, parsed_args["niter"])
+    if parsed_args["upper"] == 1.0f+38
+        upper = 1.0f+38
     else
-        niter = parsed_args["niter"]
+        upper=parse(Float32, parsed_args["upper"])
     end
 
     if parsed_args["initW"] == nothing
@@ -62,25 +63,27 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
-    out = OnlinePCA.halko(input=parsed_args["input"],
+    if parsed_args["expvar"] == 0.1f0
+        expvar = 0.1f0
+    else
+        expvar = parse(Float32, parsed_args["expvar"])
+    end
+
+    out = OnlinePCA.rbkiter(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
         rowvarlist=parsed_args["rowvarlist"],
         colsumlist=parsed_args["colsumlist"],
         dim=dim,
-        noversamples=noversamples,
-        niter=niter,
+        numepoch=numepoch,
+        lower=lower,
+        upper=upper,
         initW=initW,
         initV=initV,
         logdir=logdir,
         perm=perm)
-    writecsv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
-    writecsv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
-    writecsv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
-    writecsv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
-    writecsv(joinpath(parsed_args["outdir"], "ExpVar.csv"), out[5])
-    writecsv(joinpath(parsed_args["outdir"], "TotalVar.csv"), out[6])
+    OnlinePCA.output(parsed_args["outdir"], out, expvar)
 end
 
 main()

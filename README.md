@@ -23,7 +23,9 @@ OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, 
 	- Lanczos method : [Zhaofun Bai, 1987](https://www.amazon.co.jp/Templates-Solution-Algebraic-Eigenvalue-Problems/dp/0898714710)
 - Random projection-based
 	- Halko's method : [Halko, N., et. al., 2011](https://arxiv.org/abs/0909.4061), [Halko, N. et. al., 2011](https://epubs.siam.org/doi/abs/10.1137/100804139)
-	- oocPCA (Out-of-core PCA) : [George C. Linderman, et. al., 2017](https://arxiv.org/abs/1712.09005), [Huamin, Li, et. al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5625842/)
+	- Algorithm971 : [George C. Linderman, et. al., 2017](https://arxiv.org/abs/1712.09005), [Huamin, Li, et. al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5625842/), [Vladimir Rokhlin, et. al., 2009](https://arxiv.org/abs/0809.2274)
+	- Randomized Block Krylov Iteration : [W, Yu, et. al., 2017](https://arxiv.org/abs/1504.05477)
+	- Single-pass PCA : [C Musco, et. al., 2015](https://www.ijcai.org/proceedings/2017/0468.pdf)
 
 ## Learning Parameter Scheduling
 - Robbins-Monro : [Herbert Robbins, et. al., 1951](https://projecteuclid.org/download/pdf_1/euclid.aoms/1177729586)
@@ -58,13 +60,13 @@ input = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 300, 99)))
 input[1:50, 1:33] .= 100*input[1:50, 1:33]
 input[51:100, 34:66] .= 100*input[51:100, 34:66]
 input[101:150, 67:99] .= 100*input[101:150, 67:99]
-writecsv(tmp*"/Data.csv", input)
+writecsv(joinpath(tmp, "Data.csv"), input)
 
 # Binarization
-csv2bin(csvfile=tmp*"/Data.csv", binfile=tmp*"/Data.zst")
+csv2bin(csvfile=joinpath(tmp, "Data.csv"), binfile=joinpath(tmp, "Data.zst"))
 
 # Summary of data
-sumr(binfile=tmp*"/Data.zst", outdir=tmp)
+sumr(binfile=joinpath(tmp, "Data.zst"), outdir=tmp)
 ```
 
 ### Setting for plot
@@ -78,7 +80,8 @@ function subplots(respca, group)
 	data_right = DataFrame(pc2=respca[1][:,2], pc3=respca[1][:,3], group=group)
 	# plot
 	p_left = Plot(data_left, x=:pc1, y=:pc2, mode="markers", marker_size=10, group=:group)
-	p_right = Plot(data_right, x=:pc2, y=:pc3, mode="markers", marker_size=10, group=:group, showlegend=false)
+	p_right = Plot(data_right, x=:pc2, y=:pc3, mode="markers", marker_size=10,
+	group=:group, showlegend=false)
 	p_left.data[1]["marker_color"] = "red"
 	p_left.data[2]["marker_color"] = "blue"
 	p_left.data[3]["marker_color"] = "green"
@@ -102,14 +105,14 @@ group=vcat(repeat(["group1"],inner=33), repeat(["group2"],inner=33), repeat(["gr
 
 ### GD-PCA
 ```julia
-out_gd1 = gd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd2 = gd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd3 = gd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_gd4 = gd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-0,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_gd1 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-3,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_gd2 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_gd3 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_gd4 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-0,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_gd1, group) # Top, Left
 subplots(out_gd2, group) # Top, Right
@@ -120,14 +123,14 @@ subplots(out_gd4, group) # Bottom, Right
 
 ### SGD-PCA
 ```julia
-out_sgd1 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-3,
-    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_sgd2 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
-    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_sgd3 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
-    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_sgd4 = sgd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-0,
-    numbatch=100, numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_sgd1 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-3,
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_sgd2 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_sgd3 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_sgd4 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-0,
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_sgd1, group) # Top, Left
 subplots(out_sgd2, group) # Top, Right
@@ -138,14 +141,14 @@ subplots(out_sgd4, group) # Bottom, Right
 
 ### Oja's method
 ```julia
-out_oja1 = oja(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E+0,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja2 = oja(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja3 = oja(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_oja4 = oja(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-1,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_oja1 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E+0,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_oja2 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_oja3 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_oja4 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-1,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_oja1, group) # Top, Left
 subplots(out_oja2, group) # Top, Right
@@ -156,8 +159,8 @@ subplots(out_oja4, group) # Bottom, Right
 
 ### CCIPCA
 ```julia
-out_ccipca1 = ccipca(input=tmp*"/Data.zst", dim=3, stepsize=1E-0,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_ccipca1 = ccipca(input=joinpath(tmp, "Data.zst"), dim=3, stepsize=1E-0,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_ccipca1, group)
 ```
@@ -165,14 +168,14 @@ subplots(out_ccipca1, group)
 
 ### RSGD-PCA
 ```julia
-out_rsgd1 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E+2,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd2 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd3 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-3,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsgd4 = rsgd(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-1,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsgd1 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E+2,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_rsgd2 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_rsgd3 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_rsgd4 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-1,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_rsgd1, group) # Top, Left
 subplots(out_rsgd2, group) # Top, Right
@@ -183,14 +186,14 @@ subplots(out_rsgd4, group) # Bottom, Right
 
 ### SVRG-PCA
 ```julia
-out_svrg1 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-5,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg2 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-5,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg3 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-5,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_svrg4 = svrg(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-2,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_svrg1 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-5,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_svrg2 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-5,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_svrg3 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-5,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_svrg4 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-2,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_svrg1, group) # Top, Left
 subplots(out_svrg2, group) # Top, Right
@@ -201,14 +204,15 @@ subplots(out_svrg4, group) # Bottom, Right
 
 ### RSVRG-PCA
 ```julia
-out_rsvrg1 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="robbins-monro", stepsize=1E-6,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg2 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="momentum", stepsize=1E-6,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg3 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="nag", stepsize=1E-6,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
-out_rsvrg4 = rsvrg(input=tmp*"/Data.zst", dim=3, scheduling="adagrad", stepsize=1E-2,
-    numepoch=10, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_rsvrg1 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-6,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_rsvrg2 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-6,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_rsvrg3 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-6,
+    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+out_rsvrg4 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-2,
+
+numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_rsvrg1, group) # Top, Left
 subplots(out_rsvrg2, group) # Top, Right
@@ -219,7 +223,8 @@ subplots(out_rsvrg4, group) # Bottom, Right
 
 ### Orthogonal Iteration (Power method)
 ```julia
-out_orthiter = orthiter(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_orthiter = orthiter(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_orthiter, group)
 ```
@@ -227,7 +232,8 @@ subplots(out_orthiter, group)
 
 ### Arnoldi method
 ```julia
-out_arnoldi = arnoldi(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_arnoldi = arnoldi(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_arnoldi, group)
 ```
@@ -235,7 +241,8 @@ subplots(out_arnoldi, group)
 
 ### Lanczos method
 ```julia
-out_lanczos = lanczos(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_lanczos = lanczos(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_lanczos, group)
 ```
@@ -244,19 +251,60 @@ subplots(out_lanczos, group)
 
 ### Halko's method
 ```julia
-out_halko = halko(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_halko = halko(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
 subplots(out_halko, group)
 ```
 ![Halko's method](./docs/src/figure/halko.png)
 
-### oocPCA
+### Algorithm 971
 ```julia
-out_oocpca = oocpca(input=tmp*"/Data.zst", dim=3, rowmeanlist=tmp*"/Feature_LogMeans.csv")
+out_algorithm971 = algorithm971(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
 
-subplots(out_oocpca, group)
+subplots(out_algorithm971, group)
 ```
-![oocPCA](./docs/src/figure/oocpca.png)
+![algorithm971](./docs/src/figure/algorithm971.png)
+
+
+### Randomized Block Krylov Iteration
+```julia
+out_rbkiter = rbkiter(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+
+subplots(out_rbkiter, group)
+```
+![rbkiter](./docs/src/figure/rbkiter.png)
+
+### Single-pass PCA type I
+```julia
+out_singlepass = singlepass(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+
+subplots(out_singlepass, group)
+```
+![singlepass](./docs/src/figure/singlepass.png)
+
+### Single-pass PCA type II
+```julia
+out_singlepass2 = singlepass2(input=joinpath(tmp, "Data.zst"), dim=3,
+    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+
+subplots(out_singlepass2, group)
+```
+![singlepass2](./docs/src/figure/singlepass2.png)
+
+### Summarization for 10X-HDF5
+```julia
+tenxsumr(tenxfile="Data.h5", group="mm10", chunksize=5000)
+```
+
+### Algorithm 971 for 10X-HDF5
+```julia
+tenxpca(tenxfile="Data.h5", scale="sqrt",
+    rowmeanlist= "Feature_SqrtMeans.csv", dim=3, chunksize=5000, group="mm10")
+```
 
 ## Command line usage
 All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.

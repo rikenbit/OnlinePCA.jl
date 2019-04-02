@@ -1,7 +1,7 @@
 """
-    halko(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+    algorithm971(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
 
-Halko's method, which is one of randomized SVD algorithm.
+Algorithm 971, which is one of randomized SVD algorithm.
 
 Input Arguments
 ---------
@@ -29,12 +29,12 @@ Output Arguments
 - `ExpVar` : Explained variance by the eigenvectors
 - `TotalVar` : Total variance of the data matrix
 """
-function halko(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+function algorithm971(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
-    pca = HALKO()
+    pca = ALGORITHM971()
     pseudocount, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar = init(input, pseudocount, dim, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, scale)
     # Perform PCA
-    out = halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm)
+    out = algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm)
     # Output
     if outdir isa String
         writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
@@ -47,7 +47,7 @@ function halko(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=
     return out
 end
 
-function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm)
+function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm)
     N, M = nm(input)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -60,6 +60,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     B = zeros(Float32, l, M)
     # If not 0 the calculation is converged
     n = 1
+    # Each epoch s
     println("Random Projection : Y = A Ω")
     progress = Progress(N)
     open(input) do file
@@ -86,13 +87,13 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     end
 
     if niter > 0
-        # QR factorization
-        println("QR factorization : Q = qr(Y)")
-        F = qr!(Y)
+        # LU factorization
+        println("LU factorization : L = lu(Y)")
+        F = lu!(Y)
         for i in 1:niter
-            println("Subspace iterations (1/2) : qr(A' Q)")
+            println("Normalized power iterations (1/3) : A' L")
             n = 1
-            AtQ = zeros(Float32, M, l)
+            AtL = zeros(Float32, M, l)
             progress = Progress(N)
             open(input) do file
                 stream = ZstdDecompressorStream(file)
@@ -107,14 +108,13 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    AtQ = AtQ .+ normx*F.Q[n,1:l]'
+                    AtL = AtL .+ normx*F.L[n,:]'
                     n += 1
                 end
                 close(stream)
             end
-            G = qr!(AtQ)
 
-            println("Subspace iterations (2/2) : Q = qr(A qr(A' Q))")
+            println("Normalized power iterations (2/3) : A A' L")
             n = 1
             progress = Progress(N)
             open(input) do file
@@ -130,22 +130,28 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    @inbounds for i in 1:size(AtQ)[2]
-                        Y[n,i] = normx'*G.Q[:,i]
+                    @inbounds for i in 1:size(AtL)[2]
+                        Y[n,i] = normx'*AtL[:,i]
                     end
                     n += 1
                 end
                 close(stream)
             end
-            F = qr!(Y)
+            if i < niter
+                println("Normalized power iterations (3/3) : L = lu(A A' L)")
+                # Renormalize with LU factorization
+                F = lu!(Y)
+            else
+                println("QR factorization  (3/3) : Q = qr(A A' L)")
+                # Renormalize with QR factorization
+                F = qr!(Y)
+            end
         end
     else
         println("QR factorization : Q = qr(Y)")
         # Renormalize with QR factorization
         F = qr!(Y)
     end
-
-
 
     println("Calculation of small matrix : B = Q' A")
     Q = Matrix(F.Q)

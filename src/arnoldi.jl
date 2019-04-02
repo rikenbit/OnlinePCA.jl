@@ -1,7 +1,7 @@
 """
-    arnoldi(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, perm::Bool=false)
+    arnoldi(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, perm::Bool=false)
 
-Online PCA solved by candid covariance-free incremental PCA.
+Arnoldi method.
 
 Input Arguments
 ---------

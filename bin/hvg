@@ -41,7 +41,7 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    hvg(binfile=parsed_args["binfile"], rowmeanlist=parsed_args["rowmeanlist"], rowvarlist=parsed_args["rowvarlist"], rowcv2list=parsed_args["rowcv2list"], outdir=parsed_args["outdir"])
+    OnlinePCA.hvg(binfile=parsed_args["binfile"], rowmeanlist=parsed_args["rowmeanlist"], rowvarlist=parsed_args["rowvarlist"], rowcv2list=parsed_args["rowcv2list"], outdir=parsed_args["outdir"])
 end
 
 main()

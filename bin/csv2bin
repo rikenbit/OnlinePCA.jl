@@ -28,7 +28,7 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    csv2bin(csvfile=parsed_args["csvfile"],
+    OnlinePCA.csv2bin(csvfile=parsed_args["csvfile"],
         binfile=parsed_args["binfile"])
 end
 

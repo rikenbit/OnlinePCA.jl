@@ -7,8 +7,8 @@ function parse_commandline()
     s = ArgParseSettings()
 
     @add_arg_table s begin
-        "--binfile", "-b"
-            help = "input file (serialized)"
+        "--tenxfile"
+            help = "input 10XHDF5 file"
             arg_type = AbstractString
             required = true
         "--outdir", "-o"
@@ -16,10 +16,14 @@ function parse_commandline()
             arg_type = AbstractString
             default = "."
             required = false
-        "--pseudocount", "-p"
-            help = "log10(exp + pseudocount)"
+        "--group"
+            help = "The group name of HDF5 (e.g. mm10)"
+            arg_type = AbstractString
+            required = true
+        "--chunksize"
+            help = "The number of rows loaded at once from 10XHDF5"
             arg_type = Union{Number,AbstractString}
-            default = 1.0
+            default = 5000
     end
 
     return parse_args(s)
@@ -33,9 +37,13 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    pseudocount = Float32(parsed_args["pseudocount"])
+    if typeof(parsed_args["chunksize"]) == String
+        chunksize = parse(Int64, parsed_args["chunksize"])
+    else
+        chunksize = parsed_args["chunksize"]
+    end
 
-    OnlinePCA.sumr(binfile=parsed_args["binfile"], outdir=parsed_args["outdir"], pseudocount=pseudocount)
+    OnlinePCA.tenxsumr(tenxfile=parsed_args["tenxfile"], outdir=parsed_args["outdir"], group=parsed_args["group"], chunksize=chunksize)
 end
 
 main()

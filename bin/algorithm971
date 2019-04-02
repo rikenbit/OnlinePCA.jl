@@ -5,7 +5,7 @@ using ArgParse:
 
 # main
 function main()
-    pca = OnlinePCA.HALKO()
+    pca = OnlinePCA.ALGORITHM971()
     parsed_args = OnlinePCA.parse_commandline(pca)
     println("Parsed args:")
     for (arg, val) in parsed_args
@@ -62,7 +62,7 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
-    out = OnlinePCA.halko(input=parsed_args["input"],
+    out = OnlinePCA.algorithm971(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
         rowmeanlist=parsed_args["rowmeanlist"],
