@@ -176,21 +176,13 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         if N - endp + chunksize < chunksize
             endp = N
         end
-        println("loadchromium")
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-        # 遅いかもしれない
-        println("tenxnormalizex")
         X = tenxnormalizex(X, scale)
-        # 遅いかもしれない、ここにバグ？
-        println("X*Ω")
         XΩ[startp:endp,:] .= X*Ω
-        println("rowmeanvec[startp:endp]*Ω[m,:]'")
-        # 遅いかもしれない
+        # 遅い
         for m in 1:M
             XmeanΩ[startp:endp,:] .+= rowmeanvec[startp:endp]*Ω[m,:]'
         end
-        println("XΩ - XmeanΩ")
-        # 遅いかもしれない
         Y[startp:endp,:] = XΩ[startp:endp,:] .- XmeanΩ[startp:endp,:]
     end
 
@@ -216,8 +208,14 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             end
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
             X = tenxnormalizex(X, scale)
+            # 遅いかもしれない
+            println("X'*F.L[startp:endp,:]")
             XL .+= X'*F.L[startp:endp,:]
+            # 遅いかもしれない
+            println("rowmeanvec' * F.L")
             tmpXmeanL = rowmeanvec' * F.L
+            # 遅いかもしれない
+            println("tmpXmeanL[1,:]")
             for m = 1:M
                 XmeanL[m,:] .+= tmpXmeanL[1,:]
             end
@@ -233,7 +231,11 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             end
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
             X = tenxnormalizex(X, scale)
+            # 遅いかもしれない
+            println("X * AtL")
             XAtL[startp:endp,:] .= X * AtL
+            # 遅いかもしれない
+            println("rowmeanvec * AtL[m,:]'")
             for m = 1:M
                 XmeanAtL .+= rowmeanvec * AtL[m,:]'
             end
@@ -261,7 +263,8 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         end
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
         X = tenxnormalizex(X, scale)
-        println("QtX")
+        # 遅いかもしれない
+        println("(X' * Q[startp:endp,:])'")
         # Fast
         QtX .+= (X' * Q[startp:endp,:])'
 
@@ -276,8 +279,11 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         #     QtX .+= Q[startp:endp,:]' * X[:,m]
         # end
 
+        # 遅いかもしれない
         println("tmpQtXmean")
         tmpQtXmean = Q'*rowmeanvec
+        # 遅いかもしれない
+        println("tmpQtXmean[:,1]")
         for m = 1:M
             QtXmean[:,m] .+= tmpQtXmean[:,1]
         end
