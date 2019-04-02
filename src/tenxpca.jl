@@ -15,7 +15,7 @@ Input Arguments
 - `noversamples` : The number of over-sampling.
 - `niter` : The number of power interation.
 - `chunksize` is the number of rows reading at once (e.g. 5000).
-- `group` : Group name of 10XHDF5 (e.g. mm10).
+- `group` : The group name of 10XHDF5 (e.g. mm10).
 - `initW` : The CSV file saving the initial values of eigenvectors.
 - `initV` : The CSV file saving the initial values of loadings.
 - `logdir` : The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration.
@@ -55,7 +55,7 @@ function tenxnormalizex(X, scale)
 end
 
 # Initialization (only TENXPCA)
-function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, group::AbstractString, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::TENXPCA, scale::AbstractString="sqrt")
+function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, group::AbstractString, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::TENXPCA, scale::AbstractString="sqrt", perm::Bool)
     N, M = tenxnm(tenxfile, group)
     # Eigen vectors
     if initW == nothing
@@ -132,7 +132,7 @@ function tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractStr
     end
     pca = TENXPCA()
     println("Initial Setting...")
-    W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, idp = tenxinit(tenxfile, dim, chunksize, group, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, scale)
+    W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, idp = tenxinit(tenxfile, dim, chunksize, group, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, scale, perm)
     # Perform PCA
     out = tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp)
     # Output
