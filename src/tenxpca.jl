@@ -190,7 +190,7 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         # XmeanΩ[startp:endp,:] .= (zeros(Float32, (endp-startp+1), M) .+ rowmeanvec[startp:endp])*Ω
     end
     println("XΩ - XmeanΩ")
-    Y .= XΩ .- Xmean*Ω
+    Y .= XΩ .- XmeanΩ
 
     # LU factorization
     println("LU factorization : L = lu(Y)")
