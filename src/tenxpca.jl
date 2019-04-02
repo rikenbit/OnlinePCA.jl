@@ -176,12 +176,21 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         if N - endp + chunksize < chunksize
             endp = N
         end
+        println("loadchromium")
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
+        # 遅いかもしれない
+        println("tenxnormalizex")
         X = tenxnormalizex(X, scale)
+        # 遅いかもしれない、ここにバグ？
+        println("X*Ω")
         XΩ[startp:endp,:] .= X*Ω
+        println("rowmeanvec[startp:endp]*Ω[m,:]'")
+        # 遅いかもしれない
         for m in 1:M
             XmeanΩ[startp:endp,:] .+= rowmeanvec[startp:endp]*Ω[m,:]'
         end
+        println("XΩ - XmeanΩ")
+        # 遅いかもしれない
         Y[startp:endp,:] = XΩ[startp:endp,:] .- XmeanΩ[startp:endp,:]
     end
 
