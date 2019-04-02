@@ -55,7 +55,7 @@ function tenxnormalizex(X, scale)
 end
 
 # Initialization (only TENXPCA)
-function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, group::AbstractString, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::TENXPCA, scale::AbstractString="sqrt", perm::Bool)
+function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, group::AbstractString, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::TENXPCA, scale::AbstractString="sqrt", perm::Bool=false)
     N, M = tenxnm(tenxfile, group)
     # Eigen vectors
     if initW == nothing
