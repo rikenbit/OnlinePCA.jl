@@ -134,7 +134,7 @@ function tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractStr
     println("Initial Setting...")
     W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, idp = tenxinit(tenxfile, dim, chunksize, group, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, scale, perm)
     # Perform PCA
-    out = tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp)
+    out = tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp, group)
     # Output
     if outdir isa String
         writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
@@ -147,7 +147,7 @@ function tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractStr
     return out
 end
 
-function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp)
+function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp, group)
     # Setting
     N, M = tenxnm(tenxfile, group)
     l = dim + noversamples
