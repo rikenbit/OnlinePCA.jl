@@ -187,7 +187,6 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         for m in 1:M
             XmeanΩ[startp:endp,:] .+= rowmeanvec[startp:endp]*Ω[m,:]'
         end
-        # XmeanΩ[startp:endp,:] .= (zeros(Float32, (endp-startp+1), M) .+ rowmeanvec[startp:endp])*Ω
     end
     println("XΩ - XmeanΩ")
     Y .= XΩ .- XmeanΩ
@@ -241,7 +240,6 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             for m = 1:M
                 XmeanAtL .+= rowmeanvec * AtL[m,:]'
             end
-            # XmeanAtL[startp:endp,:] .= (zeros(Float32, (endp-startp+1), M) .+ rowmeanvec[startp:endp])*AtL
         end
         println("XAtL .- XmeanAtL")
         Y .= XAtL .- XmeanAtL
@@ -284,12 +282,8 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         #     QtX .+= Q[startp:endp,:]' * X[:,m]
         # end
 
-        # tmpQtXmean = Q'*rowmeanvec # (N*l)' × N*1 => l*1
         println("QtXmean .+ Q'*rowmeanvec")
         QtXmean .= QtXmean .+ Q'*rowmeanvec
-        # for m = 1:M
-        #     QtXmean[:,m] .+= tmpQtXmean[:,1]
-        # end
     end
     println("B")
     B = QtX .- QtXmean
