@@ -63,6 +63,8 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
+    Profile.init()
+
     @profile out = OnlinePCA.tenxpca(tenxfile=parsed_args["tenxfile"],
         scale=parsed_args["scale"],
         rowmeanlist=parsed_args["rowmeanlist"],
