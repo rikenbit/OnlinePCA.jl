@@ -176,19 +176,14 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         if N - endp + chunksize < chunksize
             endp = N
         end
-        println("loadchromium")
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-        println("tenxnormalizex")
         X = tenxnormalizex(X, scale)
-        println("X*Ω")
         XΩ[startp:endp,:] .= X*Ω
         # Slow
-        println("Xmean*Ω")
         for n in startp:endp
             XmeanΩ[n,:] .= sum(rowmeanvec[n].*Ω, dims=1)[1,:]
         end
     end
-    println("XΩ - XmeanΩ")
     Y .= XΩ .- XmeanΩ
 
     # LU factorization
@@ -211,13 +206,9 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             if N - endp + chunksize < chunksize
                 endp = N
             end
-            println("loadchromium")
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-            println("tenxnormalizex")
             X = tenxnormalizex(X, scale)
-            println("X'*F.L")
             XL .+= X'*F.L[startp:endp,:]
-            println("XmeanL .+ rowmeanvec' * F.L")
             XmeanL .= XmeanL .+ rowmeanvec' * F.L
         end
         AtL .= XL .- XmeanL # M*l
@@ -229,19 +220,14 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             if N - endp + chunksize < chunksize
                 endp = N
             end
-            println("loadchromium")
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-            println("tenxnormalizex")
             X = tenxnormalizex(X, scale)
-            println("X * AtL")
             XAtL[startp:endp,:] .= X * AtL
             # Slow
-            println("rowmeanvec * AtL[m,:]'")
             for n = startp:endp
                 XmeanAtL[n,:] .= sum(rowmeanvec[n].*AtL, dims=1)[1,:]
             end
         end
-        println("XAtL .- XmeanAtL")
         Y .= XAtL .- XmeanAtL
 
         if i < niter
@@ -263,16 +249,11 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         if N - endp + chunksize < chunksize
             endp = N
         end
-        println("loadchromium")
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-        println("tenxnormalizex")
         X = tenxnormalizex(X, scale)
-        println("(X' * Q[startp:endp,:])'")
         QtX .+= (X' * Q[startp:endp,:])'
-        println("QtXmean .+ Q'*rowmeanvec")
         QtXmean .= QtXmean .+ Q'*rowmeanvec
     end
-    println("B")
     B = QtX .- QtXmean
 
     # SVD with small matrix

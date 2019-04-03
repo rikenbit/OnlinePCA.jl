@@ -112,6 +112,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 end
                 close(stream)
             end
+            println("qr!(AtQ)")
             G = qr!(AtQ)
 
             println("Subspace iterations (2/2) : Q = qr(A qr(A' Q))")
@@ -137,6 +138,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 end
                 close(stream)
             end
+            println("qr!(Y)")
             F = qr!(Y)
         end
     else
