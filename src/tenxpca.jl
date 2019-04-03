@@ -182,22 +182,11 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         X = tenxnormalizex(X, scale)
         println("X*Ω")
         XΩ[startp:endp,:] .= X*Ω
-        # 遅い
+        # Slow
         println("Xmean*Ω")
         for n in startp:endp
-            if n % 10000 == 0 || n > 23700
-                println(n)
-                @show size(rowmeanvec[n])
-                @show size(Ω)
-                @show size(sum(rowmeanvec[n].*Ω, dims=1))
-                @show size(sum(rowmeanvec[n].*Ω, dims=1)[1,:])
-                @show size(XmeanΩ[n,:])
-            end
             XmeanΩ[n,:] .= sum(rowmeanvec[n].*Ω, dims=1)[1,:]
         end
-        # for m in 1:M
-        #     XmeanΩ[startp:endp,:] .+= rowmeanvec[startp:endp]*Ω[m,:]'
-        # end
     end
     println("XΩ - XmeanΩ")
     Y .= XΩ .- XmeanΩ
@@ -246,14 +235,11 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             X = tenxnormalizex(X, scale)
             println("X * AtL")
             XAtL[startp:endp,:] .= X * AtL
-            # 遅い
+            # Slow
             println("rowmeanvec * AtL[m,:]'")
             for n = startp:endp
                 XmeanAtL[n,:] .= sum(rowmeanvec[n].*AtL, dims=1)[1,:]
             end
-            # for m = 1:M
-            #     XmeanAtL .+= rowmeanvec * AtL[m,:]'
-            # end
         end
         println("XAtL .- XmeanAtL")
         Y .= XAtL .- XmeanAtL
@@ -281,21 +267,8 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
         println("tenxnormalizex")
         X = tenxnormalizex(X, scale)
-        # Fast
         println("(X' * Q[startp:endp,:])'")
         QtX .+= (X' * Q[startp:endp,:])'
-
-        # ↓ Too slow
-        # QtX .+= Q[startp:endp,:]' * X
-
-        # ↓ Too slow
-        # for m in 1:M
-        #     if m % 10000 == 0
-        #         println(string(m)*"\r")
-        #     end
-        #     QtX .+= Q[startp:endp,:]' * X[:,m]
-        # end
-
         println("QtXmean .+ Q'*rowmeanvec")
         QtXmean .= QtXmean .+ Q'*rowmeanvec
     end
