@@ -76,10 +76,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
-            tmpY = normx'*Ω
-            @inbounds for i in 1:size(tmpY)[2]
-                Y[n,i] = tmpY[1,i]
-            end
+            Y[n,:] .= (normx'*Ω)[1,:]
             n += 1
         end
         close(stream)
@@ -88,7 +85,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     if niter > 0
         # QR factorization
         println("QR factorization : Q = qr(Y)")
-        F = qr!(Y)
+        F = qr!(Y) # N * l
         for i in 1:niter
             println("Subspace iterations (1/2) : qr(A' Q)")
             n = 1
@@ -107,7 +104,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    AtQ = AtQ .+ normx*F.Q[n,1:l]'
+                    AtQ .+= normx*F.Q[n,:]'
                     n += 1
                 end
                 close(stream)
@@ -135,7 +132,12 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     @show size(Y[n,:])
                     @show size(normx')
                     @show size(G.Q)
-                    Y[n,:] .= (normx'*G.Q)
+                    @show size(normx'*G.Q)
+                    @show size((normx'*G.Q)[1,:])
+                    Y[n,:] .= (normx'*G.Q)[1,:]
+                    # @inbounds for i in 1:size(AtQ)[2]
+                    #     Y[n,i] = normx'*G.Q[:,i]
+                    # end
                     n += 1
                 end
                 close(stream)
