@@ -76,6 +76,11 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
+            @show size(Y)
+            @show size(Y[n,:])
+            @show size(normx')
+            @show size(Ω)
+            @show size((normx'*Ω)[1,:])
             Y[n,:] .= (normx'*Ω)[1,:]
             n += 1
         end
