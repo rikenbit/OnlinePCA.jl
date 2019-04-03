@@ -76,11 +76,6 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
-            @show size(Y)
-            @show size(Y[n,:])
-            @show size(normx')
-            @show size(Ω)
-            @show size((normx'*Ω)[1,:])
             Y[n,:] .= (normx'*Ω)[1,:]
             n += 1
         end
@@ -90,11 +85,12 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     if niter > 0
         # QR factorization
         println("QR factorization : Q = qr(Y)")
-        F = qr!(Y) # N * l
+        F = qr!(Y) # 21614 * 15
+        @show size(F.Q)
         for i in 1:niter
             println("Subspace iterations (1/2) : qr(A' Q)")
             n = 1
-            AtQ = zeros(Float32, M, l)
+            AtQ = zeros(Float32, M, l) # 1679 * 15
             progress = Progress(N)
             open(input) do file
                 stream = ZstdDecompressorStream(file)
@@ -111,6 +107,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     end
                     @show size(AtQ)
                     @show size(normx)
+                    @show size(F.Q)
                     @show size(F.Q[n,:])
                     @show size(normx*F.Q[n,:]')
                     AtQ .+= normx*F.Q[n,:]'
