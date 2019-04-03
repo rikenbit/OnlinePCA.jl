@@ -63,9 +63,7 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
-    Profile.init()
-
-    @profile out = OnlinePCA.tenxpca(tenxfile=parsed_args["tenxfile"],
+    out = OnlinePCA.tenxpca(tenxfile=parsed_args["tenxfile"],
         scale=parsed_args["scale"],
         rowmeanlist=parsed_args["rowmeanlist"],
         rowvarlist=parsed_args["rowvarlist"],
@@ -80,14 +78,12 @@ function main()
         logdir=logdir,
         perm=perm)
 
-    Profile.print()
-
-    # writecsv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
-    # writecsv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
-    # writecsv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
-    # writecsv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
-    # writecsv(joinpath(parsed_args["outdir"], "ExpVar.csv"), out[5])
-    # writecsv(joinpath(parsed_args["outdir"], "TotalVar.csv"), out[6])
+    writecsv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
+    writecsv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
+    writecsv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
+    writecsv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
+    writecsv(joinpath(parsed_args["outdir"], "ExpVar.csv"), out[5])
+    writecsv(joinpath(parsed_args["outdir"], "TotalVar.csv"), out[6])
 end
 
 main()
