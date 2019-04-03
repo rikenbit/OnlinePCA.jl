@@ -185,10 +185,7 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         # 遅い
         println("Xmean*Ω")
         for n in startp:endp
-            @show size(XmeanΩ[n,:])
-            @show size((zeros(Int, 1, M) .+ rowmeanvec[n]))
-            @show size(Ω)
-            XmeanΩ[n,:] .= (zeros(Int, 1, M) .+ rowmeanvec[n])*Ω
+            XmeanΩ[n,:] .= ((zeros(Int, 1, M) .+ rowmeanvec[n])*Ω)[1,:]
         end
         # for m in 1:M
         #     XmeanΩ[startp:endp,:] .+= rowmeanvec[startp:endp]*Ω[m,:]'
@@ -244,7 +241,7 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             # 遅い
             println("rowmeanvec * AtL[m,:]'")
             for n = startp:endp
-                XmeanAtL[n,:] .= (zeros(Int, 1, M) .+ rowmeanvec[n])*AtL
+                XmeanAtL[n,:] .= ((zeros(Int, 1, M) .+ rowmeanvec[n])*AtL)[1,:]
             end
             # for m = 1:M
             #     XmeanAtL .+= rowmeanvec * AtL[m,:]'
