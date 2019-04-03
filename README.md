@@ -302,8 +302,8 @@ tenxsumr(tenxfile="Data.h5", group="mm10", chunksize=5000)
 
 ### Algorithm 971 for 10X-HDF5
 ```julia
-tenxpca(tenxfile="Data.h5", scale="sqrt",
-    rowmeanlist= "Feature_SqrtMeans.csv", dim=3, chunksize=5000, group="mm10")
+out_tenxpca = tenxpca(tenxfile="Data.h5", scale="sqrt",
+    rowmeanlist="Feature_SqrtMeans.csv", dim=3, chunksize=5000, group="mm10")
 ```
 
 ## Command line usage

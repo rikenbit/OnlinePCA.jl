@@ -185,6 +185,14 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         # 遅い
         println("Xmean*Ω")
         for n in startp:endp
+            if n % 10000 == 0 || n > 23700
+                println(n)
+                @show size(rowmeanvec[n])
+                @show size(Ω)
+                @show size(sum(rowmeanvec[n].*Ω, dims=1))
+                @show size(sum(rowmeanvec[n].*Ω, dims=1)[1,:])
+                @show size(XmeanΩ[n,:])
+            end
             XmeanΩ[n,:] .= sum(rowmeanvec[n].*Ω, dims=1)[1,:]
         end
         # for m in 1:M
