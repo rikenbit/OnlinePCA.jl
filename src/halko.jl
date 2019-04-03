@@ -128,16 +128,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    @show size(Y)
-                    @show size(Y[n,:])
-                    @show size(normx')
-                    @show size(G.Q)
-                    @show size(normx'*G.Q)
-                    @show size((normx'*G.Q)[1,:])
                     Y[n,:] .= (normx'*G.Q[:,1:l])[1,:]
-                    # @inbounds for i in 1:size(AtQ)[2]
-                    #     Y[n,i] = normx'*G.Q[:,i]
-                    # end
                     n += 1
                 end
                 close(stream)
@@ -150,8 +141,6 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
         # Renormalize with QR factorization
         F = qr!(Y)
     end
-
-
 
     println("Calculation of small matrix : B = Q' A")
     Q = Matrix(F.Q)
