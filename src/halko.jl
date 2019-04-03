@@ -57,6 +57,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     @assert 0 < dim ≤ l ≤ min(N, M)
     Ω = rand(Float32, M, l)
     Y = rand(Float32, N, l)
+    @show size(Y)
     B = zeros(Float32, l, M)
     # If not 0 the calculation is converged
     n = 1
@@ -76,6 +77,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
+            @show size(Y)
             Y[n,:] .= (normx'*Ω)[1,:]
             n += 1
         end
@@ -84,6 +86,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
 
     if niter > 0
         # QR factorization
+        @show size(Y)
         println("QR factorization : Q = qr(Y)")
         F = qr!(Y) # 21614 * 15
         @show size(F.Q)
