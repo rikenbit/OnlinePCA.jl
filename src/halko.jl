@@ -131,7 +131,11 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    Y[n,:] .= (normx'*G.Q)[1,:]
+                    @show size(Y)
+                    @show size(Y[n,:])
+                    @show size(normx')
+                    @show size(G.Q)
+                    Y[n,:] .= (normx'*G.Q)
                     n += 1
                 end
                 close(stream)
