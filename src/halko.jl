@@ -111,7 +111,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
             end
             println("qr!(AtQ)")
             G = qr!(AtQ)
-
+            G = G.Q[:,1:l]
             println("Subspace iterations (2/2) : Q = qr(A qr(A' Q))")
             n = 1
             progress = Progress(N)
@@ -128,7 +128,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    Y[n,:] .= (normx'*G.Q[:,1:l])[1,:]
+                    Y[n,:] .= (normx'*G)[1,:]
                     n += 1
                 end
                 close(stream)
