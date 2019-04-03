@@ -104,6 +104,10 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
+                    @show size(AtQ)
+                    @show size(normx)
+                    @show size(F.Q[n,:])
+                    @show size(normx*F.Q[n,:]')
                     AtQ .+= normx*F.Q[n,:]'
                     n += 1
                 end
