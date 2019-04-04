@@ -93,16 +93,13 @@ function singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist,
         Yi = G[:, block] - Q*(B*Ωi)
         println("Subspace iterations (1/2) : Q = qr(Yi)")
         F1 = qr!(Yi)
-        Qi = Matrix(F1.Q)
+        Qi = Array(F1.Q)
         println("Subspace iterations (2/2) : Q = qr(Qi - Q(Q' Qi))")
         F2 = qr!(Qi - Q * (Q'*Qi))
-        Qi = Matrix(F2.Q)
+        Qi = Array(F2.Q)
+
         Ri = F2.R*F1.R
         Bi = inv(Ri)'*(H[:,block]' - Yi'*Q*B - Ωi'*B'B)
-        @show size(Q)
-        @show size(Qi)
-        @show size(B)
-        @show size(Bi)
         if i == 1
             Q = Qi
             B = Bi

@@ -57,7 +57,9 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     @assert 0 < dim ≤ l ≤ min(N, M)
     Ω = rand(Float32, M, l)
     Y = rand(Float32, N, l)
+    Q = rand(Float32, N, l)
     B = zeros(Float32, l, M)
+    G = zeros(Float32, M, l)
     # If not 0 the calculation is converged
     n = 1
     println("Random Projection : Y = A Ω")
@@ -85,11 +87,11 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     if niter > 0
         # QR factorization
         println("QR factorization : Q = qr(Y)")
-        F = qr!(Y) # 21614 * 21614になぜかなっている
+        Q .= Array(qr!(Y).Q)
         for i in 1:niter
             println("Subspace iterations (1/2) : qr(A' Q)")
             n = 1
-            AtQ = zeros(Float32, M, l) # 1679 * 15
+            AtQ = zeros(Float32, M, l)
             progress = Progress(N)
             open(input) do file
                 stream = ZstdDecompressorStream(file)
@@ -104,14 +106,13 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    AtQ .+= normx*F.Q[n,1:l]'
+                    AtQ .+= normx*Q[n,:]'
                     n += 1
                 end
                 close(stream)
             end
             println("qr!(AtQ)")
-            G = qr!(AtQ)
-            G = G.Q[:,1:l]
+            G .= Array(qr!(AtQ).Q)
             println("Subspace iterations (2/2) : Q = qr(A qr(A' Q))")
             n = 1
             progress = Progress(N)
@@ -134,16 +135,15 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 close(stream)
             end
             println("qr!(Y)")
-            F = qr!(Y)
+            Q .= Array(qr!(Y).Q)
         end
     else
         println("QR factorization : Q = qr(Y)")
         # Renormalize with QR factorization
-        F = qr!(Y)
+        Q .= Array(qr!(Y).Q)
     end
 
     println("Calculation of small matrix : B = Q' A")
-    Q = Matrix(F.Q)
     n = 1
     progress = Progress(N)
     open(input) do file
@@ -159,7 +159,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
             if perm
                 normx .= normx[randperm(length(normx))]
             end
-            B = B .+ Q[n,:]*normx'
+            B .+= Q[n,:]*normx'
             n += 1
         end
         close(stream)

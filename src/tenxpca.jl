@@ -153,9 +153,11 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
     l = dim + noversamples
     @assert 0 < dim ≤ l ≤ min(N, M)
     Ω = rand(Float32, M, l)
-    XΩ = zeros(Float32, N, l) # CSC
+    XΩ = zeros(Float32, N, l)
     XmeanΩ = zeros(Float32, N, l)
-    Y = zeros(Float32, N, l) # CSC
+    Y = zeros(Float32, N, l)
+    L = rand(Float32, N, l)
+    Q = rand(Float32, N, l)
     B = zeros(Float32, l, M)
     QtX = zeros(Float32, l, M)
     QtXmean = zeros(Float32, l, M)
@@ -188,7 +190,7 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
 
     # LU factorization
     println("LU factorization : L = lu(Y)")
-    F = lu!(Y) # Dense
+    L .= lu!(Y) # Dense
 
     for i in 1:niter
         println("##### "*string(i)*" / "*string(niter)*" niter #####")
@@ -208,8 +210,8 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             end
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
             X = tenxnormalizex(X, scale)
-            XL .+= X'*F.L[startp:endp,:]
-            XmeanL .= XmeanL .+ rowmeanvec' * F.L
+            XL .+= X'*L[startp:endp,:]
+            XmeanL .= XmeanL .+ rowmeanvec' * L
         end
         AtL .= XL .- XmeanL # M*l
 
@@ -233,16 +235,15 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         if i < niter
             println("Normalized power iterations (3/3) : L = lu(A A' L)")
             # Renormalize with LU factorization
-            F = lu!(Y)
+            L .= lu!(Y).L
         else
             println("QR factorization  (3/3) : Q = qr(A A' L)")
             # Renormalize with QR factorization
-            F = qr!(Y)
+            Q .= Array(qr!(Y).Q)
         end
     end
 
     println("Calculation of small matrix : B = Q' A")
-    Q = Matrix(F.Q) # N * l
     for j in 1:lasti
         startp = Int64((j-1)*chunksize+1)
         endp = Int64(j*chunksize)

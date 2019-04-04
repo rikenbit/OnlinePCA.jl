@@ -89,10 +89,8 @@ function singlepass(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, 
     end
     # QR factorization
     println("QR factorization : Q = qr(Y), Qtilde = qr(Ytilde)")
-    F = qr!(Y)
-    Q = Matrix(F.Q)
-    Ftilde = qr!(Ytilde)
-    Qtilde = Matrix(Ftilde.Q)
+    Q = Array(qr!(Y).Q)
+    Qtilde = Array(qr!(Ytilde).Q)
 
     println("Solve linear equation : Ωtilde' Q B = Ytilde' Qtilde for B")
     tmpW, tmpλ, tmpVt = svd(Ωtilde'Q)

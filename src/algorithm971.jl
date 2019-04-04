@@ -57,6 +57,8 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
     @assert 0 < dim ≤ l ≤ min(N, M)
     Ω = rand(Float32, M, l)
     Y = rand(Float32, N, l)
+    L = rand(Float32, N, l)
+    Q = rand(Float32, N, l)
     B = zeros(Float32, l, M)
     # If not 0 the calculation is converged
     n = 1
@@ -89,7 +91,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
     if niter > 0
         # LU factorization
         println("LU factorization : L = lu(Y)")
-        F = lu!(Y)
+        L .= lu!(Y).L
         for i in 1:niter
             println("Normalized power iterations (1/3) : A' L")
             n = 1
@@ -108,7 +110,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    AtL = AtL .+ normx*F.L[n,:]'
+                    AtL = AtL .+ normx*L[n,:]'
                     n += 1
                 end
                 close(stream)
@@ -140,21 +142,20 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
             if i < niter
                 println("Normalized power iterations (3/3) : L = lu(A A' L)")
                 # Renormalize with LU factorization
-                F = lu!(Y)
+                L .= lu!(Y).L
             else
                 println("QR factorization  (3/3) : Q = qr(A A' L)")
                 # Renormalize with QR factorization
-                F = qr!(Y)
+                Q .= Array(qr!(Y).Q)
             end
         end
     else
         println("QR factorization : Q = qr(Y)")
         # Renormalize with QR factorization
-        F = qr!(Y)
+        Q .= Array(qr!(Y).Q)
     end
 
     println("Calculation of small matrix : B = Q' A")
-    Q = Matrix(F.Q)
     n = 1
     progress = Progress(N)
     open(input) do file
