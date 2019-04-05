@@ -190,7 +190,7 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
 
     # LU factorization
     println("LU factorization : L = lu(Y)")
-    L .= lu!(Y) # Dense
+    L .= (lu!(Y).L)[:,1:l] # Dense
 
     for i in 1:niter
         println("##### "*string(i)*" / "*string(niter)*" niter #####")
@@ -235,7 +235,7 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         if i < niter
             println("Normalized power iterations (3/3) : L = lu(A A' L)")
             # Renormalize with LU factorization
-            L .= lu!(Y).L
+            L .= (lu!(Y).L)[:,1:l]
         else
             println("QR factorization  (3/3) : Q = qr(A A' L)")
             # Renormalize with QR factorization
