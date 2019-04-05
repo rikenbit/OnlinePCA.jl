@@ -79,10 +79,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
-            tmpY = normx'*Ω
-            @inbounds for i in 1:size(tmpY)[2]
-                Y[n,i] = tmpY[1,i]
-            end
+            Y[n,:] .= (normx'*Ω)[1,:]
             n += 1
         end
         close(stream)
@@ -132,9 +129,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    @inbounds for i in 1:size(AtL)[2]
-                        Y[n,i] = normx'*AtL[:,i]
-                    end
+                    Y[n,:] .= (normx'*AtL)[1,:]
                     n += 1
                 end
                 close(stream)
