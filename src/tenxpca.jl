@@ -154,13 +154,11 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
     @assert 0 < dim ≤ l ≤ min(N, M)
     Ω = rand(Float32, M, l)
     XΩ = zeros(Float32, N, l)
-    XmeanΩ = zeros(Float32, N, l)
     Y = zeros(Float32, N, l)
     L = rand(Float32, N, l)
     Q = rand(Float32, N, l)
     B = zeros(Float32, l, M)
     QtX = zeros(Float32, l, M)
-    QtXmean = zeros(Float32, l, M)
     Scores = zeros(Float32, M, dim)
     lasti = 0
     if N > chunksize
@@ -181,25 +179,19 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
         X = tenxnormalizex(X, scale)
         XΩ[startp:endp,:] .= X*Ω
-        # Slow
-        for n in startp:endp
-            XmeanΩ[n,:] .= sum(rowmeanvec[n].*Ω, dims=1)[1,:]
-        end
     end
-    Y .= XΩ .- XmeanΩ
+    Y .= XΩ .- rowmeanvec .* sum(Ω, dims=1) # N * l
 
     # LU factorization
     println("LU factorization : L = lu(Y)")
-    L .= (lu!(Y).L)[:,1:l] # Dense
+    L .= (lu!(Y).L)[:,1:l] # N * l
 
     for i in 1:niter
         println("##### "*string(i)*" / "*string(niter)*" niter #####")
         # Temporal matrix
-        XL = zeros(Float32, M, l) # CSR
-        XmeanL = zeros(Float32, M, l) # Dense
-        AtL = zeros(Float32, M, l) # CSR
-        XAtL = zeros(Float32, N, l) # CSC
-        XmeanAtL = zeros(Float32, N, l) # Dense
+        XL = zeros(Float32, M, l)
+        AtL = zeros(Float32, M, l)
+        XAtL = zeros(Float32, N, l)
 
         println("Normalized power iterations (1/3) : A' L")
         for j in 1:lasti
@@ -211,9 +203,8 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
             X = tenxnormalizex(X, scale)
             XL .+= X'*L[startp:endp,:]
-            XmeanL .= XmeanL .+ rowmeanvec' * L
         end
-        AtL .= XL .- XmeanL # M*l
+        AtL .= XL .- rowmeanvec' * L
 
         println("Normalized power iterations (2/3) : A A' L")
         for j in 1:lasti
@@ -225,12 +216,8 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
             X = tenxnormalizex(X, scale)
             XAtL[startp:endp,:] .= X * AtL
-            # Slow
-            for n = startp:endp
-                XmeanAtL[n,:] .= sum(rowmeanvec[n].*AtL, dims=1)[1,:]
-            end
         end
-        Y .= XAtL .- XmeanAtL
+        Y .= XAtL .- rowmeanvec .* sum(AtL, dims=1)
 
         if i < niter
             println("Normalized power iterations (3/3) : L = lu(A A' L)")
@@ -253,9 +240,8 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
         X = tenxnormalizex(X, scale)
         QtX .+= (X' * Q[startp:endp,:])'
-        QtXmean .= QtXmean .+ Q'*rowmeanvec
     end
-    B = QtX .- QtXmean
+    B = QtX .- Q'*rowmeanvec
 
     # SVD with small matrix
     println("SVD with small matrix : svd(B)")
