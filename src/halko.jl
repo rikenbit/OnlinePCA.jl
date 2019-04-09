@@ -166,8 +166,9 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     end
     # SVD with small matrix
     println("SVD with small matrix : svd(B)")
-    W, λ, V = svd(B)
+    W, σ, V = svd(B)
     U = Q*W
+    λ = σ .* σ ./ M
     # PC scores, Explained Variance
     Scores = zeros(Float32, M, dim)
     for n = 1:dim

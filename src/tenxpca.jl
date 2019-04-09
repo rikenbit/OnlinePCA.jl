@@ -245,8 +245,9 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
 
     # SVD with small matrix
     println("SVD with small matrix : svd(B)")
-    W, λ, V = svd(B)
+    W, σ, V = svd(B)
     U = Q*W
+    λ = σ .* σ ./ M
     # PC scores, Explained Variance
     for n = 1:dim
         Scores[:, n] .= λ[n] .* V[:, n]
