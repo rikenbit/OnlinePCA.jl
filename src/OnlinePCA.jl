@@ -8,7 +8,7 @@ using DelimitedFiles:
 using Statistics:
     mean, var
 using LinearAlgebra:
-    Diagonal, lu!, qr!, svd, dot, norm, eigvecs, tr
+    Diagonal, lu!, lu, qr!, qr, svd, dot, norm, eigvecs, tr
 using Random:
     randperm
 using ProgressMeter:
