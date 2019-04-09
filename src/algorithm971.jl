@@ -56,9 +56,9 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
     l = dim + noversamples
     @assert 0 < dim ≤ l ≤ min(N, M)
     Ω = rand(Float32, M, l)
-    Y = rand(Float32, N, l)
-    L = rand(Float32, N, l)
-    Q = rand(Float32, N, l)
+    Y = zeros(Float32, N, l)
+    L = zeros(Float32, N, l)
+    Q = zeros(Float32, N, l)
     B = zeros(Float32, l, M)
     # If not 0 the calculation is converged
     n = 1

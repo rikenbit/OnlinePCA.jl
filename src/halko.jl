@@ -56,8 +56,8 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     l = dim + noversamples
     @assert 0 < dim ≤ l ≤ min(N, M)
     Ω = rand(Float32, M, l)
-    Y = rand(Float32, N, l)
-    Q = rand(Float32, N, l)
+    Y = zeros(Float32, N, l)
+    Q = zeros(Float32, N, l)
     B = zeros(Float32, l, M)
     G = zeros(Float32, M, l)
     # If not 0 the calculation is converged
