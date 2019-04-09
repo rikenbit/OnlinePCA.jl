@@ -88,7 +88,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
     if niter > 0
         # LU factorization
         println("LU factorization : L = lu(Y)")
-        L .= Array(lu(Y).L)
+        L .= Array(lu!(Y).L)
         for i in 1:niter
             println("Normalized power iterations (1/3) : A' L")
             n = 1
@@ -137,7 +137,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
             if i < niter
                 println("Normalized power iterations (3/3) : L = lu(A A' L)")
                 # Renormalize with LU factorization
-                L .= Array(lu(Y).L)
+                L .= Array(lu!(Y).L)
             else
                 println("QR factorization  (3/3) : Q = qr(A A' L)")
                 # Renormalize with QR factorization
