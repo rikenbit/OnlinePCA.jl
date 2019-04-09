@@ -107,7 +107,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    AtL = AtL .+ normx*L[n,:]'
+                    AtL .+= normx*L[n,:]'
                     n += 1
                 end
                 close(stream)
@@ -166,7 +166,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
             if perm
                 normx .= normx[randperm(length(normx))]
             end
-            B = B .+ Q[n,:]*normx'
+            B .+= Q[n,:]*normx'
             n += 1
         end
         close(stream)

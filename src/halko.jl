@@ -113,6 +113,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
             end
             println("qr!(AtQ)")
             G .= Array(qr!(AtQ).Q)
+
             println("Subspace iterations (2/2) : Q = qr(A qr(A' Q))")
             n = 1
             progress = Progress(N)
