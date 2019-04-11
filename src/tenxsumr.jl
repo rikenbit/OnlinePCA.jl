@@ -7,7 +7,7 @@ Input Arguments
 ---------
 - `tenxfile` is the HDF5 file formatted by 10X Genomics.
 - `outdir` is specified the directory you want to save the result.
-    - `group` is the group name of HDF5 (e.g. mm10).
+- `group` is the group name of HDF5 (e.g. mm10).
 - `chunksize` is the number of rows reading at once (e.g. 5000).
 
 Output Files

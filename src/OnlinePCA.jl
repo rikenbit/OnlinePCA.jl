@@ -1,14 +1,15 @@
 module OnlinePCA
 
 using HDF5:
-    h5open
-using SparseArrays
+    HDF5File, HDF5Group, h5open
+using SparseArrays:
+    SparseMatrixCSC, sortSparseMatrixCSC!
 using DelimitedFiles:
     writedlm, readdlm
 using Statistics:
     mean, var
 using LinearAlgebra:
-    Diagonal, lu!, qr!, svd, dot, norm, eigvecs, tr
+    Diagonal, lu!, qr!, svd, svd!, dot, norm, eigvecs, tr
 using Random:
     randperm
 using ProgressMeter:

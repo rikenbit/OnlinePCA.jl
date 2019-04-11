@@ -60,6 +60,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
     L = zeros(Float32, N, l)
     Q = zeros(Float32, N, l)
     B = zeros(Float32, l, M)
+    G = zeros(Float32, M, l)
     # If not 0 the calculation is converged
     n = 1
     # Each epoch s
@@ -88,7 +89,7 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
     if niter > 0
         # LU factorization
         println("LU factorization : L = lu(Y)")
-        L .= Array(lu!(Y).L[:,1:l])
+        L .= lu!(Y).L
         for i in 1:niter
             println("Normalized power iterations (1/3) : A' L")
             n = 1
@@ -112,8 +113,10 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
                 end
                 close(stream)
             end
+            println("L = lu(A' L)")
+            G .= lu!(AtL).L
 
-            println("Normalized power iterations (2/3) : A A' L")
+            println("Normalized power iterations (2/3) : Y = A lu(A' L)")
             n = 1
             progress = Progress(N)
             open(input) do file
@@ -129,17 +132,17 @@ function algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    Y[n,:] .= (normx'*AtL)[1,:]
+                    Y[n,:] .= (normx'*G)[1,:]
                     n += 1
                 end
                 close(stream)
             end
             if i < niter
-                println("Normalized power iterations (3/3) : L = lu(A A' L)")
+                println("Normalized power iterations (3/3) : L = lu(A lu(A' L))")
                 # Renormalize with LU factorization
-                L .= Array(lu!(Y).L[:,1:l])
+                L .= lu!(Y).L
             else
-                println("QR factorization  (3/3) : Q = qr(A A' L)")
+                println("QR factorization  (3/3) : Q = qr(A lu(A' L))")
                 # Renormalize with QR factorization
                 Q .= Array(qr!(Y).Q)
             end

@@ -111,10 +111,10 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 end
                 close(stream)
             end
-            println("qr!(AtQ)")
+            println("qr(A' Q)")
             G .= Array(qr!(AtQ).Q)
 
-            println("Subspace iterations (2/2) : Q = qr(A qr(A' Q))")
+            println("Subspace iterations (2/2) : Y = qr(A qr(A' Q))")
             n = 1
             progress = Progress(N)
             open(input) do file
@@ -135,7 +135,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 end
                 close(stream)
             end
-            println("qr!(Y)")
+            println("Q = qr(Y)")
             Q .= Array(qr!(Y).Q)
         end
     else
