@@ -111,6 +111,12 @@ function main()
         expvar = parse(Float32, parsed_args["expvar"])
     end
 
+    if parsed_args["cper"] == 1.0f0
+        cper = 1.0f0
+    else
+        cper=Float32(parsed_args["cper"])
+    end
+
     out = OnlinePCA.rsvrg(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
@@ -131,7 +137,8 @@ function main()
         initW=initW,
         initV=initV,
         logdir=logdir,
-        perm=perm)
+        perm=perm,
+        cper=cper)
     OnlinePCA.output(parsed_args["outdir"], out, expvar)
 end
 

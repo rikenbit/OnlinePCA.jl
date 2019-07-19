@@ -62,6 +62,12 @@ function main()
         error("Please specify the perm option as true or false")
     end
 
+    if parsed_args["cper"] == 1.0f0
+        cper = 1.0f0
+    else
+        cper=Float32(parsed_args["cper"])
+    end
+
     out = OnlinePCA.singlepass2(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
@@ -74,7 +80,8 @@ function main()
         initW=initW,
         initV=initV,
         logdir=logdir,
-        perm=perm)
+        perm=perm,
+        cper=cper)
     writecsv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
     writecsv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
     writecsv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])

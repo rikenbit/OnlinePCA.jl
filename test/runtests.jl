@@ -7,6 +7,7 @@ using Statistics
 using Distributions
 
 tmp = mktempdir()
+println(tmp)
 julia = joinpath(Sys.BINDIR, "julia")
 bindir = joinpath(dirname(pathof(OnlinePCA)), "..", "bin")
 
@@ -51,12 +52,33 @@ sumr(binfile=joinpath(tmp, "Data.zst"), outdir=tmp)
 
 testfilesize(true,
 	joinpath(tmp, "Sample_NoCounts.csv"),
-	joinpath(tmp, "Feature_CV2s.csv"),
-	joinpath(tmp, "Feature_LogMeans.csv"),
 	joinpath(tmp, "Feature_Means.csv"),
-	joinpath(tmp, "Feature_NoZeros.csv"),
-	joinpath(tmp, "Feature_Vars.csv"))
-####################################
+	joinpath(tmp, "Feature_LogMeans.csv"),
+	joinpath(tmp, "Feature_FTTMeans.csv"),
+	joinpath(tmp, "Feature_CPMMeans.csv"),
+	joinpath(tmp, "Feature_LogCPMMeans.csv"),
+	joinpath(tmp, "Feature_FTTCPMMeans.csv"),
+	joinpath(tmp, "Feature_CPTMeans.csv"),
+	joinpath(tmp, "Feature_LogCPTMeans.csv"),
+	joinpath(tmp, "Feature_FTTCPTMeans.csv"),
+	joinpath(tmp, "Feature_CPMEDMeans.csv"),
+	joinpath(tmp, "Feature_LogCPMEDMeans.csv"),
+	joinpath(tmp, "Feature_FTTCPMEDMeans.csv"),
+	joinpath(tmp, "Feature_Vars.csv"),
+	joinpath(tmp, "Feature_LogVars.csv"),
+	joinpath(tmp, "Feature_FTTVars.csv"),
+	joinpath(tmp, "Feature_CPMVars.csv"),
+	joinpath(tmp, "Feature_LogCPMVars.csv"),
+	joinpath(tmp, "Feature_FTTCPMVars.csv"),
+	joinpath(tmp, "Feature_CPTVars.csv"),
+	joinpath(tmp, "Feature_LogCPTVars.csv"),
+	joinpath(tmp, "Feature_FTTCPTVars.csv"),
+	joinpath(tmp, "Feature_CPMEDVars.csv"),
+	joinpath(tmp, "Feature_LogCPMEDVars.csv"),
+	joinpath(tmp, "Feature_FTTCPMEDVars.csv"),
+	joinpath(tmp, "Feature_CV2s.csv"),
+	joinpath(tmp, "Feature_NoZeros.csv"))
+###################################
 
 
 #####################################
@@ -65,11 +87,32 @@ run(`$(julia) $(joinpath(bindir, "sumr")) --binfile $(joinpath(tmp, "Data.zst"))
 
 testfilesize(false,
 	joinpath(tmp, "Sample_NoCounts.csv"),
-	joinpath(tmp, "Feature_CV2s.csv"),
-	joinpath(tmp, "Feature_LogMeans.csv"),
 	joinpath(tmp, "Feature_Means.csv"),
-	joinpath(tmp, "Feature_NoZeros.csv"),
-	joinpath(tmp, "Feature_Vars.csv"))
+	joinpath(tmp, "Feature_LogMeans.csv"),
+	joinpath(tmp, "Feature_FTTMeans.csv"),
+	joinpath(tmp, "Feature_CPMMeans.csv"),
+	joinpath(tmp, "Feature_LogCPMMeans.csv"),
+	joinpath(tmp, "Feature_FTTCPMMeans.csv"),
+	joinpath(tmp, "Feature_CPTMeans.csv"),
+	joinpath(tmp, "Feature_LogCPTMeans.csv"),
+	joinpath(tmp, "Feature_FTTCPTMeans.csv"),
+	joinpath(tmp, "Feature_CPMEDMeans.csv"),
+	joinpath(tmp, "Feature_LogCPMEDMeans.csv"),
+	joinpath(tmp, "Feature_FTTCPMEDMeans.csv"),
+	joinpath(tmp, "Feature_Vars.csv"),
+	joinpath(tmp, "Feature_LogVars.csv"),
+	joinpath(tmp, "Feature_FTTVars.csv"),
+	joinpath(tmp, "Feature_CPMVars.csv"),
+	joinpath(tmp, "Feature_LogCPMVars.csv"),
+	joinpath(tmp, "Feature_FTTCPMVars.csv"),
+	joinpath(tmp, "Feature_CPTVars.csv"),
+	joinpath(tmp, "Feature_LogCPTVars.csv"),
+	joinpath(tmp, "Feature_FTTCPTVars.csv"),
+	joinpath(tmp, "Feature_CPMEDVars.csv"),
+	joinpath(tmp, "Feature_LogCPMEDVars.csv"),
+	joinpath(tmp, "Feature_FTTCPMEDVars.csv"),
+	joinpath(tmp, "Feature_CV2s.csv"),
+	joinpath(tmp, "Feature_NoZeros.csv"))
 #####################################
 
 

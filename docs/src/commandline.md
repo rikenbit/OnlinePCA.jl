@@ -18,7 +18,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/csv2bin \
 shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/sumr \
 --binfile OUTDIR/Data.zst \
 --outdir OUTDIR \
---pseudocount 1.0
+--pseudocount 1f0
 ```
 
 ## Filtering
@@ -47,7 +47,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/gd \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --colsumlist Sample_NoCounts.csv \
 --dim 3 \
@@ -64,7 +64,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/gd \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## SGD-PCA
@@ -73,7 +74,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rsgd \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --colsumlist Sample_NoCounts.csv \
 --dim 3 \
@@ -90,7 +91,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rsgd \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Oja's method
@@ -99,7 +101,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/oja \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -117,7 +119,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/oja \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## CCIPCA
@@ -126,7 +129,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/ccipca \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -141,7 +144,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/ccipca \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## RSGD-PCA
@@ -150,7 +154,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rsgd \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -168,7 +172,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rsgd \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## SVRG-PCA
@@ -177,7 +182,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/svrg \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -196,7 +201,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/svrg \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## RSVRG-PCA
@@ -205,7 +211,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rsvrg \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -224,7 +230,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rsvrg \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Orthogonal Iteration (Power method)
@@ -233,7 +240,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/orthiter \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1.0 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -245,7 +252,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/orthiter \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Arnoldi method
@@ -254,13 +262,14 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/arnoldi \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1.0 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
 --dim 3 \
 --numepoch 10 \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Lanczos method
@@ -269,13 +278,14 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/lanczos \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1.0 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
 --dim 3 \
 --numepoch 10 \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Halko's method
@@ -284,7 +294,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/halko \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -292,7 +302,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/halko \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Algorithm 971
@@ -301,7 +312,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/algorithm971 \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -309,7 +320,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/algorithm971 \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Randomized Block Krylov Iteration
@@ -318,7 +330,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rbkiter \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1.0 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -330,7 +342,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/rbkiter \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm::Bool=false) \
+--perm false \
+--cper 1f0
 ```
 
 ## Single-pass PCA type I
@@ -339,7 +352,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/singlepass \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1.0 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -349,7 +362,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/singlepass \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Single-pass PCA type II
@@ -358,7 +372,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/singlepass2 \
 --input Data.zst \
 --outdir OUTDIR \
 --scale ftt \
---pseudocount 1.0 \
+--pseudocount 1f0 \
 --rowmeanlist Feature_FTTMeans.csv \
 --rowvarlist Feature_FTTVars.csv \
 --colsumlist Sample_NoCounts.csv \
@@ -368,7 +382,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/singlepass2 \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```
 
 ## Summarization for 10X-HDF5
@@ -397,5 +412,6 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/tenxpca \
 --initW Eigen_vectors.csv \
 --initV Loadings.csv \
 --logdir OUTDIR \
---perm false
+--perm false \
+--cper 1f0
 ```

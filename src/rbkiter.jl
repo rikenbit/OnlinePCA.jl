@@ -1,5 +1,5 @@
 """
-    rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+    rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1f0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1f0)
 
 Randomized Block Krylov Iteration.
 
@@ -21,6 +21,7 @@ Input Arguments
 - `initV` : The CSV file saving the initial values of loadings.
 - `logdir` : The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration.
 - `perm` : Whether the data matrix is shuffled at random.
+- `cper` : Count per X (e.g. CPM: Count per million <1e+6>)
 
 Output Arguments
 ---------
@@ -32,11 +33,11 @@ Output Arguments
 - `TotalVar` : Total variance of the data matrix
 - stop : Whether the calculation is converged
 """
-function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1f0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="",colsumlist::AbstractString="", dim::Number=3, numepoch::Number=10, lower::Number=0, upper::Number=1.0f+38, expvar::Number=0.1f0, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1f0)
     # Initial Setting
     pca = RBKITER()
     N, M = nm(input)
-    pseudocount, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper = init(input, pseudocount, dim, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, lower, upper, scale)
+    pseudocount, W, X, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, lower, upper = init(input, pseudocount, dim, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, lower, upper, cper, scale)
     tmpW = zeros(Float32, M, dim)
     K = zeros(Float32, M, dim*numepoch)
     QtAt = zeros(Float32, dim*numepoch, N)
@@ -61,7 +62,7 @@ function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString
                 next!(progress)
                 # Row vector of data matrix
                 read!(stream, x)
-                normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+                normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, cper)
                 if perm
                     normx .= normx[randperm(length(normx))]
                 end
@@ -84,7 +85,7 @@ function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString
         K[:, (s-1)*dim+1:s*dim] = W
         # save log file
         if logdir isa String
-            stop = outputlog(s, input, dim, logdir, W, GD(), TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop)
+            stop = outputlog(s, input, dim, logdir, W, GD(), TotalVar, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, lower, upper, stop, cper)
         end
         s += 1
         if n == N + 1
@@ -103,7 +104,7 @@ function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString
             next!(progress)
             # Row vector of data matrix
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, cper)
             if perm
                 normx .= normx[randperm(length(normx))]
             end
@@ -124,7 +125,7 @@ function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString
             next!(progress)
             # Row vector of data matrix
             read!(stream, x)
-            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec)
+            normx = normalizex(x, n, stream, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, cper)
             if perm
                 normx .= normx[randperm(length(normx))]
             end
@@ -141,7 +142,7 @@ function rbkiter(;input::AbstractString="", outdir::Union{Nothing,AbstractString
     println("Q*U")
     W = Q*U[:,1:dim]
     # Return, W, λ, V
-    out = WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar)
+    out = WλV(W, input, dim, scale, pseudocount, rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec, TotalVar, cper)
     out = (out[1], out[2], out[3], out[4], out[5], out[6], stop)
     if outdir isa String
         output(outdir, out, expvar)

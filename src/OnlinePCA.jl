@@ -7,7 +7,7 @@ using SparseArrays:
 using DelimitedFiles:
     writedlm, readdlm
 using Statistics:
-    mean, var
+    mean, var, median
 using LinearAlgebra:
     Diagonal, lu!, qr!, svd, svd!, dot, norm, eigvecs, tr
 using Random:

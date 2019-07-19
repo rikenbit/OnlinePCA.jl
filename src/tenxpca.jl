@@ -1,5 +1,5 @@
 """
-    tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="sqrt", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, chunksize::Number=5000, group::AbstractString, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+    tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="sqrt", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, chunksize::Number=5000, group::AbstractString, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1f0)
 
 A randomized SVD.
 
@@ -20,6 +20,7 @@ Input Arguments
 - `initV` : The CSV file saving the initial values of loadings.
 - `logdir` : The directory where intermediate files are saved, in every evalfreq (e.g. 5000) iteration.
 - `perm` : Whether the data matrix is shuffled at random.
+- `cper` : Count per X (e.g. CPM: Count per million <1e+6>)
 
 Output Arguments
 ---------
@@ -44,18 +45,18 @@ function tv(TotalVar::Number, X::AbstractArray)
 end
 
 # Normalization of X
-function tenxnormalizex(X, scale)
+function tenxnormalizex(X, scale, cper, colsumvec)
     if scale == "sqrt"
-        X = sqrt.(X)
+        X = sqrt.(cper .* X ./ colsumvec')
     end
     if scale == "log"
-        X = log10.(X .+ 1)
+        X = log10.(cper .* X ./ colsumvec' .+ 1)
     end
     return X
 end
 
 # Initialization (only TENXPCA)
-function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, group::AbstractString, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::TENXPCA, scale::AbstractString="sqrt", perm::Bool=false)
+function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, group::AbstractString, rowmeanlist::AbstractString, rowvarlist::AbstractString, colsumlist::AbstractString, initW::Union{Nothing,AbstractString}, initV::Union{Nothing,AbstractString}, logdir::Union{Nothing,AbstractString}, pca::TENXPCA, cper::Number, scale::AbstractString="sqrt", perm::Bool=false)
     N, M = tenxnm(tenxfile, group)
     # Eigen vectors
     if initW == nothing
@@ -106,7 +107,7 @@ function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, grou
         end
         println("Loading a chunk of sparse matrix from 10XHDF5...")
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-        X = tenxnormalizex(X, scale)
+        X = tenxnormalizex(X, scale, cper, colsumvec)
         println("Calculating the total variance...")
         TotalVar = tv(TotalVar, X)
         # Creating W from V
@@ -124,7 +125,7 @@ function tenxinit(tenxfile::AbstractString, dim::Number, chunksize::Number, grou
     return W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, idp
 end
 
-function tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="sqrt", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, chunksize::Number=5000, group::AbstractString, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+function tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="sqrt", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, chunksize::Number=5000, group::AbstractString, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1f0)
     # Initial Setting
     # Input
     if !(scale in ["sqrt", "log", "raw"])
@@ -132,9 +133,9 @@ function tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractStr
     end
     pca = TENXPCA()
     println("Initial Setting...")
-    W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, idp = tenxinit(tenxfile, dim, chunksize, group, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, scale, perm)
+    W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, idp = tenxinit(tenxfile, dim, chunksize, group, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, cper, scale, perm)
     # Perform PCA
-    out = tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp, group)
+    out = tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp, group, cper)
     # Output
     if outdir isa String
         writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
@@ -147,7 +148,7 @@ function tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractStr
     return out
 end
 
-function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp, group)
+function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, chunksize, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, idp, group, cper)
     # Setting
     N, M = tenxnm(tenxfile, group)
     l = dim + noversamples
@@ -177,10 +178,18 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             endp = N
         end
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-        X = tenxnormalizex(X, scale)
-        XΩ[startp:endp,:] .= X*Ω
+        X = tenxnormalizex(X, scale, cper, colsumvec)
+        if rowvarlist != ""
+            XΩ[startp:endp,:] .= (X ./ rowvarvec[startp:endp])*Ω
+        else
+            XΩ[startp:endp,:] .= X*Ω
+        end
     end
-    Y .= XΩ .- rowmeanvec .* sum(Ω, dims=1) # N * l
+    if rowvarlist != ""
+        Y .= XΩ .- (rowmeanvec ./ rowvarvec) .* sum(Ω, dims=1) # N * l
+    else
+        Y .= XΩ .- rowmeanvec .* sum(Ω, dims=1) # N * l
+    end
 
     # LU factorization
     println("LU factorization : L = lu(Y)")
@@ -201,10 +210,18 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
                 endp = N
             end
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-            X = tenxnormalizex(X, scale)
-            XL .+= X'*L[startp:endp,:]
+            X = tenxnormalizex(X, scale, cper, colsumvec)
+            if rowvarlist != ""
+                XL .+= (X ./ rowvarvec[startp:endp])'*L[startp:endp,:]
+            else
+                XL .+= X'*L[startp:endp,:]
+            end
         end
-        AtL .= XL .- rowmeanvec' * L
+        if rowvarlist != ""
+            AtL .= XL .- (rowmeanvec ./ rowvarvec)' * L
+        else
+            AtL .= XL .- rowmeanvec' * L
+        end
 
         println("Normalized power iterations (2/3) : A A' L")
         for j in 1:lasti
@@ -214,10 +231,18 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
                 endp = N
             end
             X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-            X = tenxnormalizex(X, scale)
-            XAtL[startp:endp,:] .= X * AtL
+            X = tenxnormalizex(X, scale, cper, colsumvec)
+            if rowvarlist != ""
+                XAtL[startp:endp,:] .= (X ./ rowvarvec[startp:endp]) * AtL
+            else
+                XAtL[startp:endp,:] .= X * AtL
+            end
         end
-        Y .= XAtL .- rowmeanvec .* sum(AtL, dims=1)
+        if rowvarlist != ""
+            Y .= XAtL .- (rowmeanvec ./ rowvarvec) .* sum(AtL, dims=1)
+        else
+            Y .= XAtL .- rowmeanvec .* sum(AtL, dims=1)
+        end
 
         if i < niter
             println("Normalized power iterations (3/3) : L = lu(A A' L)")
@@ -238,10 +263,18 @@ function tenxpca(tenxfile, outdir, scale, rowmeanlist, rowvarlist, colsumlist, d
             endp = N
         end
         X = loadchromium(tenxfile, group, idp, startp, endp, M, perm)
-        X = tenxnormalizex(X, scale)
-        QtX .+= (X' * Q[startp:endp,:])'
+        X = tenxnormalizex(X, scale, cper, colsumvec)
+        if rowvarlist != ""
+            QtX .+= ((X ./ rowvarvec[startp:endp])' * Q[startp:endp,:])'
+        else
+            QtX .+= (X' * Q[startp:endp,:])'
+        end
     end
-    B = QtX .- Q'*rowmeanvec
+    if rowvarlist != ""
+        B = QtX .- Q'*(rowmeanvec ./ rowvarvec)
+    else
+        B = QtX .- Q'*rowmeanvec
+    end
 
     # SVD with small matrix
     println("SVD with small matrix : svd(B)")
