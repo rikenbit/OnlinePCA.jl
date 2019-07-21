@@ -2,7 +2,7 @@ name = "OnlinePCA"
 uuid = "975b03d1-ab45-5730-8389-540698ac00dc"
 authors = ["Koki Tsuyuzaki <koki.tsuyuzaki@gmail.com>"]
 license = "MIT"
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"

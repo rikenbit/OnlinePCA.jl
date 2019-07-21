@@ -19,7 +19,7 @@ function parse_commandline()
         "--pseudocount", "-p"
             help = "log10(exp + pseudocount)"
             arg_type = Union{Number,AbstractString}
-            default = 1.0
+            default = 1.0f0
     end
 
     return parse_args(s)
@@ -33,7 +33,11 @@ function main()
         println("  $arg  =>  $val")
     end
 
-    pseudocount = Float32(parsed_args["pseudocount"])
+    if parsed_args["pseudocount"] == 1.0f0
+        pseudocount = 1.0f0
+    else
+        pseudocount=parse(Float32, parsed_args["pseudocount"])
+    end
 
     OnlinePCA.sumr(binfile=parsed_args["binfile"], outdir=parsed_args["outdir"], pseudocount=pseudocount)
 end

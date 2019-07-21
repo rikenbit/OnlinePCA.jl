@@ -14,7 +14,7 @@ function main()
     if parsed_args["pseudocount"] == 1.0f0
         pseudocount = 1.0f0
     else
-        pseudocount=Float32(parsed_args["pseudocount"])
+        pseudocount=parse(Float32, parsed_args["pseudocount"])
     end
 
     dim=parse(Int64, parsed_args["dim"])
@@ -108,7 +108,7 @@ function main()
     if parsed_args["cper"] == 1.0f0
         cper = 1.0f0
     else
-        cper=Float32(parsed_args["cper"])
+        cper=parse(Float32, parsed_args["cper"])
     end
 
     out = OnlinePCA.rsgd(input=parsed_args["input"],
