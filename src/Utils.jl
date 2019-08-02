@@ -1225,7 +1225,7 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
     # Normalization
     if colsumlist != ""
         @inbounds for i in 1:length(xx)
-            xx[i] .= cper .* xx[i] ./ colsumvec[i]
+            xx[i] = cper * xx[i] / colsumvec[i, 1]
         end
     end
 
