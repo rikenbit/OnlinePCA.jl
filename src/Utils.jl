@@ -1225,15 +1225,14 @@ function normalizex(x::Array{UInt32,1}, n::Number, stream, scale::AbstractString
     # Normalization
     if colsumlist != ""
         @inbounds for i in 1:length(xx)
-            xx[i] .= cper .* xx[i] ./ colsumvec
+            xx[i] .= cper .* xx[i] ./ colsumvec[i]
         end
     end
 
     # Variance Stabilizing Transformation
     if scale == "log"
-        pc = UInt32(pseudocount)
         @inbounds for i in 1:length(xx)
-            xx[i] = log10(xx[i] + pc)
+            xx[i] = log10(xx[i] + pseudocount)
         end
     end
     if scale == "ftt"
