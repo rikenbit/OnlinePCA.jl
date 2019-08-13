@@ -3,7 +3,7 @@ module OnlinePCA
 using HDF5:
     HDF5File, HDF5Group, h5open
 using SparseArrays:
-    SparseMatrixCSC, sortSparseMatrixCSC!
+    SparseArrays, SparseMatrixCSC, sortSparseMatrixCSC!
 using DelimitedFiles:
     writedlm, readdlm
 using Statistics:
