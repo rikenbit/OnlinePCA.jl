@@ -3,7 +3,7 @@ import HDF5
 using HDF5:h5open
 HDF5File = HDF5.File
 using SparseArrays:
-    SparseArrays, SparseMatrixCSC, sortSparseMatrixCSC!
+    SparseArrays, SparseMatrixCSC
 using DelimitedFiles:
     writedlm, readdlm
 using Statistics:
