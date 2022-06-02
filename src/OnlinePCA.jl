@@ -1,7 +1,6 @@
 module OnlinePCA
 import HDF5
-using HDF5:
-    HDF5Group, h5open
+using HDF5:h5open
 HDF5File = HDF5.File
 using SparseArrays:
     SparseArrays, SparseMatrixCSC, sortSparseMatrixCSC!
