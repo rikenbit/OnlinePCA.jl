@@ -62,9 +62,3 @@ jobs:
           tag_with_ref: true
           tag_with_sha: true
           tags: latest
-
-# Ref
-# https://github.com/marketplace/actions/docker-login
-# https://github.com/inutano/cwl-log-generator/blob/master/.github/workflows/main.yml
-# https://www.docker.com/blog/first-docker-github-action-is-here/
-# https://github.com/docker/login-action
