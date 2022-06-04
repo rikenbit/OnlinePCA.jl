@@ -75,7 +75,6 @@ function loadchromium(tenxfile, group, idp, startp, endp, M, perm)
     else
     counts = SparseMatrixCSC(endp - startp + 1, M, newidp, newindices, newdata)
     end
-    SparseArrays.sortSparseMatrixCSC!(counts)
     return counts
 end
 
