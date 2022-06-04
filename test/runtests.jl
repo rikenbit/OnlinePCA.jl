@@ -1,7 +1,6 @@
 using OnlinePCA
 using OnlinePCA: readcsv, writecsv
 using Test
-using Pkg
 using DelimitedFiles
 using Statistics
 using Distributions

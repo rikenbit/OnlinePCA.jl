@@ -41,8 +41,8 @@ julia> Pkg.add("OnlinePCA")
  -->
 ```julia
 # push the key "]" and type the following command.
-(v1.0) pkg> add https://github.com/rikenbit/OnlinePCA.jl
-(v1.0) pkg> add PlotlyJS
+(v1.7) pkg> add https://github.com/rikenbit/OnlinePCA.jl
+(v1.7) pkg> add PlotlyJS
 # After that, push Ctrl + C to leave from Pkg REPL mode
 ```
 
