@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_push_test:
+  build_push:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -48,17 +48,8 @@ jobs:
 
       - uses: docker/build-push-action@v1
         with:
-          # The two entries below need to be entered as
-          # github secrets. The "secret" names are "DOCKER_USERNAME"
-          # and "DOCKER_PASSWORD". See https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository
-          # for detailed instructions.
-          #
-          # DO NOT EDIT THESE ENTRIES HERE. Doing so will
-          # expose your docker username and password on github.
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          # Use the environment variable on first few lines to set repo name--just centralizes changes
-          repository: ${{ env.repo-name }}
-          tag_with_ref: true
-          tag_with_sha: true
-          tags: latest
+           push: true
+           tags: |
+               ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.sha_short }}
+           cache-from: type=local,src=/tmp/.buildx-cache
+           cache-to: type=local,dest=/tmp/.buildx-cache-new
