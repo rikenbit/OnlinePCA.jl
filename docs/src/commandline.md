@@ -6,19 +6,35 @@ After installation of `OnlinePCA.jl`, command line tools are saved at `YOUR_HOME
 
 The functions can be performed as below.
 
-## Binarization
+## Binarization (CSV file)
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/csv2bin \
 --csvfile Data.csv \
 --binfile OUTDIR/Data.zst
 ```
 
-## Summarization
+## Binarization (Matrix Market <MM> file)
+```bash
+shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/mm2bin \
+--mmfile Data.mtx \
+--binfile OUTDIR/Data.mtx.zst
+```
+
+## Summarization (CSV file)
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/sumr \
 --binfile OUTDIR/Data.zst \
 --outdir OUTDIR \
 --pseudocount 1f0
+```
+
+## Summarization (MM file)
+```bash
+shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/sumr \
+--binfile OUTDIR/Data.zst \
+--outdir OUTDIR \
+--pseudocount 1f0 \
+--sparse_mode true
 ```
 
 ## Filtering
@@ -401,8 +417,8 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/tenxpca \
 --tenxfile Data.h5 \
 --outdir OUTDIR \
 --scale sqrt \
---rowmeanlist Feature_FTTMeans.csv \
---rowvarlist Feature_FTTVars.csv \
+--rowmeanlist Feature_SqrtMeans.csv \
+--rowvarlist Feature_SqrtVars.csv \
 --colsumlist Sample_NoCounts.csv \
 --dim 3 \
 --noversamples 5 \
@@ -414,4 +430,36 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/tenxpca \
 --logdir OUTDIR \
 --perm false \
 --cper 1f0
+```
+
+## Sparse Randomized SVD (ALGORITHM971 for Binarized MM file)
+```bash
+shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/sparse_rsvd \
+--input Data.mtx.zst \
+--outdir OUTDIR \
+--scale ftt \
+--rowmeanlist Feature_FTTMeans.csv \
+--rowvarlist Feature_FTTVars.csv \
+--colsumlist Sample_NoCounts.csv \
+--dim 3 \
+--noversamples 5 \
+--niter 3 \
+--chunksize 5000 \
+--initW Eigen_vectors.csv \
+--initV Loadings.csv \
+--logdir OUTDIR \
+--perm false \
+--cper 1f0
+```
+
+## Exact Out-of-Core PCA
+```bash
+shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/exact_ooc_pca \
+--input Data.mtx.zst \
+--outdir OUTDIR \
+--scale ftt \
+--pseudocount 1f0 \
+--dim 3 \
+--chunksize 5000 \
+--sparse_mode true
 ```

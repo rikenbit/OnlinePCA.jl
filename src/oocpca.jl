@@ -27,7 +27,7 @@ Output Arguments
 - `ExpVar` : Explained variance by the eigenvectors
 - `TotalVar` : Total variance of the data matrix
 """
-function oocpca(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
+function oocpca(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false)
     # Initial Setting
     pca = OOCPCA()
     pseudocount, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar = init(input, pseudocount, dim, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, scale)
@@ -35,12 +35,12 @@ function oocpca(;input::AbstractString="", outdir::Union{Nothing,AbstractString}
     out = oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm)
     # Output
     if outdir isa String
-        writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
-        writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
-        writecsv(joinpath(outdir, "Loadings.csv"), out[3])
-        writecsv(joinpath(outdir, "Scores.csv"), out[4])
-        writecsv(joinpath(outdir, "ExpVar.csv"), out[5])
-        writecsv(joinpath(outdir, "TotalVar.csv"), out[6])
+        write_csv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
+        write_csv(joinpath(outdir, "Eigen_values.csv"), out[2])
+        write_csv(joinpath(outdir, "Loadings.csv"), out[3])
+        write_csv(joinpath(outdir, "Scores.csv"), out[4])
+        write_csv(joinpath(outdir, "ExpVar.csv"), out[5])
+        write_csv(joinpath(outdir, "TotalVar.csv"), out[6])
     end
     return out
 end
@@ -67,7 +67,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
         read!(stream, tmpN)
         read!(stream, tmpM)
         # Each step n
-        while(n <= N)
+        while (n <= N)
             next!(progress)
             # Row vector of data matrix
             read!(stream, x)
@@ -76,9 +76,9 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
-            tmpY = normx'*Ω
+            tmpY = normx' * Ω
             @inbounds for i in 1:size(tmpY)[2]
-                Y[n,i] = tmpY[1,i]
+                Y[n, i] = tmpY[1, i]
             end
             n += 1
         end
@@ -97,7 +97,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n
-            while(n <= N)
+            while (n <= N)
                 next!(progress)
                 # Row vector of data matrix
                 read!(stream, x)
@@ -105,7 +105,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
                 if perm
                     normx .= normx[randperm(length(normx))]
                 end
-                AtL = AtL .+ normx*F.L[n,:]'
+                AtL = AtL .+ normx * F.L[n, :]'
                 n += 1
             end
             close(stream)
@@ -119,7 +119,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
             read!(stream, tmpN)
             read!(stream, tmpM)
             # Each step n
-            while(n <= N)
+            while (n <= N)
                 next!(progress)
                 # Row vector of data matrix
                 read!(stream, x)
@@ -128,7 +128,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
                     normx .= normx[randperm(length(normx))]
                 end
                 @inbounds for i in 1:size(AtL)[2]
-                    Y[n,i] = normx'*AtL[:,i]
+                    Y[n, i] = normx' * AtL[:, i]
                 end
                 n += 1
             end
@@ -152,7 +152,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
         read!(stream, tmpN)
         read!(stream, tmpM)
         # Each step n
-        while(n <= N)
+        while (n <= N)
             next!(progress)
             # Row vector of data matrix
             read!(stream, x)
@@ -160,7 +160,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
             if perm
                 normx .= normx[randperm(length(normx))]
             end
-            B = B .+ Q[n,:]*normx'
+            B = B .+ Q[n, :] * normx'
             n += 1
         end
         close(stream)
@@ -168,7 +168,7 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
     # SVD with small matrix
     println("SVD with small matrix : svd(Q'A)")
     W, λ, V = svd(B)
-    U = Q*W
+    U = Q * W
     # PC scores, Explained Variance
     Scores = zeros(Float32, M, dim)
     for n = 1:dim
@@ -176,5 +176,5 @@ function oocpca(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, cols
     end
     ExpVar = sum(λ) / TotalVar
     # Return
-    return (V[:,1:dim], λ[1:dim], U[:,1:dim], Scores[:,1:dim], ExpVar, TotalVar)
+    return (V[:, 1:dim], λ[1:dim], U[:, 1:dim], Scores[:, 1:dim], ExpVar, TotalVar)
 end

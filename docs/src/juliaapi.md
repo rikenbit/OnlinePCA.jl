@@ -1,13 +1,18 @@
 # OnlinePCA.jl (Julia API)
 
-## Binarization
+## Binarization (CSV file)
 ```@docs
 csv2bin(;csvfile::AbstractString="", binfile::AbstractString="")
 ```
 
+## Binarization (Matrix Market <MM> file)
+```@docs
+mm2bin(;mmfile::AbstractString="", binfile::AbstractString="")
+```
+
 ## Summarization
 ```@docs
-sumr(;binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0)
+sumr(; binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0, sparse_mode::Bool=false)
 ```
 
 ## Filtering
@@ -97,10 +102,20 @@ singlepass2(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=not
 
 ## Summarization for 10X-HDF5
 ```@docs
-tenxsumr(;tenxfile::AbstractString="", outdir::AbstractString=".", group::AbstractString="", chunksize::Number=5000)
+tenxsumr(; tenxfile::AbstractString="", outdir::AbstractString=".", group::AbstractString="", chunksize::Number=5000)
 ```
 
 ## ALGORITHM971 for 10X-HDF5
 ```@docs
-tenxpca(;tenxfile::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="sqrt", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, chunksize::Number=5000, group::AbstractString, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1f0)
+tenxpca(; tenxfile::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="sqrt", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, chunksize::Number=5000, group::AbstractString, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1.0f0)
+```
+
+## Sparse Randomized SVD (ALGORITHM971 for Binarized MM file)
+```@docs
+sparse_rsvd(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, chunksize::Number=1, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1.0f0)
+```
+
+## Exact Out-of-Core PCA
+```@docs
+exact_ooc_pca(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0f0, dim::Number=3, chunksize::Number=1, sparse_mode::Bool=false)
 ```

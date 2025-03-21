@@ -1,6 +1,6 @@
 using OnlinePCA
 using ArgParse:
-    ArgParseSettings, parse_args, @add_arg_table
+    ArgParseSettings, parse_args, @add_arg_table!
 
 # main
 function main()

@@ -1,7 +1,7 @@
 using OnlinePCA
-using OnlinePCA: writecsv
+using OnlinePCA: write_csv
 using ArgParse:
-    ArgParseSettings, parse_args, @add_arg_table
+    ArgParseSettings, parse_args, @add_arg_table!
 
 # main
 function main()
@@ -15,7 +15,7 @@ function main()
     if parsed_args["pseudocount"] == 1.0f0
         pseudocount = 1.0f0
     else
-        pseudocount=parse(Float32, parsed_args["pseudocount"])
+        pseudocount = parse(Float32, parsed_args["pseudocount"])
     end
 
     if typeof(parsed_args["dim"]) == String
@@ -65,7 +65,7 @@ function main()
     if parsed_args["cper"] == 1.0f0
         cper = 1.0f0
     else
-        cper=parse(Float32, parsed_args["cper"])
+        cper = parse(Float32, parsed_args["cper"])
     end
 
     out = OnlinePCA.singlepass2(input=parsed_args["input"],
@@ -82,12 +82,12 @@ function main()
         logdir=logdir,
         perm=perm,
         cper=cper)
-    writecsv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
-    writecsv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
-    writecsv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
-    writecsv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
-    writecsv(joinpath(parsed_args["outdir"], "ExpVar.csv"), out[5])
-    writecsv(joinpath(parsed_args["outdir"], "TotalVar.csv"), out[6])
+    write_csv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
+    write_csv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
+    write_csv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
+    write_csv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
+    write_csv(joinpath(parsed_args["outdir"], "ExpVar.csv"), out[5])
+    write_csv(joinpath(parsed_args["outdir"], "TotalVar.csv"), out[6])
 end
 
 main()

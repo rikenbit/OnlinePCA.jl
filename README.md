@@ -3,6 +3,7 @@ Online Principal Component Analysis
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/latest)
+[![Build Status](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Build Status](https://travis-ci.org/rikenbit/OnlinePCA.jl.svg?branch=master)](https://travis-ci.org/rikenbit/OnlinePCA.jl)
 [![DOI](https://zenodo.org/badge/125349253.svg)](https://zenodo.org/badge/latestdoi/125349253)
 
@@ -42,7 +43,6 @@ julia> Pkg.add("OnlinePCA")
 ```julia
 # push the key "]" and type the following command.
 (v1.7) pkg> add https://github.com/rikenbit/OnlinePCA.jl
-(v1.7) pkg> add PlotlyJS
 # After that, push Ctrl + C to leave from Pkg REPL mode
 ```
 
@@ -51,23 +51,32 @@ julia> Pkg.add("OnlinePCA")
 ### Preprocess of CSV
 ```julia
 using OnlinePCA
-using OnlinePCA: readcsv, writecsv
+using OnlinePCA: write_csv
 using Distributions
 using DelimitedFiles
+using SparseArrays
+using MatrixMarket
 
 # CSV
 tmp = mktempdir()
-input = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 300, 99)))
-input[1:50, 1:33] .= 100*input[1:50, 1:33]
-input[51:100, 34:66] .= 100*input[51:100, 34:66]
-input[101:150, 67:99] .= 100*input[101:150, 67:99]
-writecsv(joinpath(tmp, "Data.csv"), input)
+data = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 300, 99)))
+data[1:50, 1:33] .= 100*data[1:50, 1:33]
+data[51:100, 34:66] .= 100*data[51:100, 34:66]
+data[101:150, 67:99] .= 100*data[101:150, 67:99]
+write_csv(joinpath(tmp, "Data.csv"), data)
 
-# Binarization
+# Binarization (Zstandard)
 csv2bin(csvfile=joinpath(tmp, "Data.csv"), binfile=joinpath(tmp, "Data.zst"))
 
-# Summary of data
-sumr(binfile=joinpath(tmp, "Data.zst"), outdir=tmp)
+# Matrix Market (MM)
+mmwrite(joinpath(tmp, "Data.mtx"), sparse(data))
+
+# Binarization (Zstandard)
+csv2bin(csvfile=joinpath(tmp, "Data.csv"), binfile=joinpath(tmp, "Data.zst"))
+
+# Summary of data for CSV/Dense Matrix
+dense_path = mktempdir()
+sumr(binfile=joinpath(tmp, "Data.zst"), outdir=dense_path)
 ```
 
 ### Setting for plot
@@ -77,8 +86,8 @@ using PlotlyJS
 
 function subplots(respca, group)
 	# data frame
-	data_left = DataFrame(pc1=respca[1][:,1], pc2=respca[1][:,2], group=group)
-	data_right = DataFrame(pc2=respca[1][:,2], pc3=respca[1][:,3], group=group)
+	data_left = DataFrame(pc1=respca[:,1], pc2=respca[:,2], group=group)
+	data_right = DataFrame(pc2=respca[:,2], pc3=respca[:,3], group=group)
 	# plot
 	p_left = Plot(data_left, x=:pc1, y=:pc2, mode="markers", marker_size=10, group=:group)
 	p_right = Plot(data_right, x=:pc2, y=:pc3, mode="markers", marker_size=10,
@@ -107,219 +116,282 @@ group=vcat(repeat(["group1"],inner=33), repeat(["group2"],inner=33), repeat(["gr
 ### GD-PCA
 ```julia
 out_gd1 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-3,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_gd2 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_gd3 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_gd4 = gd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-0,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_gd1, group) # Top, Left
-subplots(out_gd2, group) # Top, Right
-subplots(out_gd3, group) # Bottom, Left
-subplots(out_gd4, group) # Bottom, Right
+subplots(out_gd1[1], group) # Top, Left
+subplots(out_gd2[1], group) # Top, Right
+subplots(out_gd3[1], group) # Bottom, Left
+subplots(out_gd4[1], group) # Bottom, Right
 ```
 ![GD-PCA](./docs/src/figure/gd.png)
 
 ### SGD-PCA
 ```julia
 out_sgd1 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-3,
-    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_sgd2 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
-    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_sgd3 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
-    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_sgd4 = sgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-0,
-    numbatch=100, numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numbatch=100, numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_sgd1, group) # Top, Left
-subplots(out_sgd2, group) # Top, Right
-subplots(out_sgd3, group) # Bottom, Left
-subplots(out_sgd4, group) # Bottom, Right
+subplots(out_sgd1[1], group) # Top, Left
+subplots(out_sgd2[1], group) # Top, Right
+subplots(out_sgd3[1], group) # Bottom, Left
+subplots(out_sgd4[1], group) # Bottom, Right
 ```
 ![SGD-PCA](./docs/src/figure/sgd.png)
 
 ### Oja's method
 ```julia
 out_oja1 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E+0,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_oja2 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_oja3 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_oja4 = oja(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-1,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_oja1, group) # Top, Left
-subplots(out_oja2, group) # Top, Right
-subplots(out_oja3, group) # Bottom, Left
-subplots(out_oja4, group) # Bottom, Right
+subplots(out_oja1[1], group) # Top, Left
+subplots(out_oja2[1], group) # Top, Right
+subplots(out_oja3[1], group) # Bottom, Left
+subplots(out_oja4[1], group) # Bottom, Right
 ```
 ![Oja](./docs/src/figure/oja.png)
 
 ### CCIPCA
 ```julia
 out_ccipca1 = ccipca(input=joinpath(tmp, "Data.zst"), dim=3, stepsize=1E-0,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_ccipca1, group)
+subplots(out_ccipca1[1], group)
 ```
 ![CCIPCA](./docs/src/figure/ccipca.png)
 
 ### RSGD-PCA
 ```julia
 out_rsgd1 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E+2,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_rsgd2 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-3,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_rsgd3 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-3,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_rsgd4 = rsgd(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-1,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_rsgd1, group) # Top, Left
-subplots(out_rsgd2, group) # Top, Right
-subplots(out_rsgd3, group) # Bottom, Left
-subplots(out_rsgd4, group) # Bottom, Right
+subplots(out_rsgd1[1], group) # Top, Left
+subplots(out_rsgd2[1], group) # Top, Right
+subplots(out_rsgd3[1], group) # Bottom, Left
+subplots(out_rsgd4[1], group) # Bottom, Right
 ```
 ![RSGD-PCA](./docs/src/figure/rsgd.png)
 
 ### SVRG-PCA
 ```julia
 out_svrg1 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-5,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_svrg2 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-5,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_svrg3 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-5,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_svrg4 = svrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-2,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_svrg1, group) # Top, Left
-subplots(out_svrg2, group) # Top, Right
-subplots(out_svrg3, group) # Bottom, Left
-subplots(out_svrg4, group) # Bottom, Right
+subplots(out_svrg1[1], group) # Top, Left
+subplots(out_svrg2[1], group) # Top, Right
+subplots(out_svrg3[1], group) # Bottom, Left
+subplots(out_svrg4[1], group) # Bottom, Right
 ```
 ![SVRG-PCA](./docs/src/figure/svrg.png)
 
 ### RSVRG-PCA
 ```julia
 out_rsvrg1 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="robbins-monro", stepsize=1E-6,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_rsvrg2 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="momentum", stepsize=1E-6,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_rsvrg3 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="nag", stepsize=1E-6,
-    numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 out_rsvrg4 = rsvrg(input=joinpath(tmp, "Data.zst"), dim=3, scheduling="adagrad", stepsize=1E-2,
+    numepoch=10, rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-numepoch=10, rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
-
-subplots(out_rsvrg1, group) # Top, Left
-subplots(out_rsvrg2, group) # Top, Right
-subplots(out_rsvrg3, group) # Bottom, Left
-subplots(out_rsvrg4, group) # Bottom, Right
+subplots(out_rsvrg1[1], group) # Top, Left
+subplots(out_rsvrg2[1], group) # Top, Right
+subplots(out_rsvrg3[1], group) # Bottom, Left
+subplots(out_rsvrg4[1], group) # Bottom, Right
 ```
 ![RSVRG-PCA](./docs/src/figure/rsvrg.png)
 
 ### Orthogonal Iteration (Power method)
 ```julia
 out_orthiter = orthiter(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_orthiter, group)
+subplots(out_orthiter[1], group)
 ```
 ![Orthogonal Iteration](./docs/src/figure/orthiter.png)
 
 ### Arnoldi method
 ```julia
 out_arnoldi = arnoldi(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_arnoldi, group)
+subplots(out_arnoldi[1], group)
 ```
 ![Arnoldi method](./docs/src/figure/arnoldi.png)
 
 ### Lanczos method
 ```julia
 out_lanczos = lanczos(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_lanczos, group)
+subplots(out_lanczos[1], group)
 ```
 ![Orthogonal Iteration](./docs/src/figure/lanczos.png)
-
 
 ### Halko's method
 ```julia
 out_halko = halko(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_halko, group)
+subplots(out_halko[1], group)
 ```
 ![Halko's method](./docs/src/figure/halko.png)
 
 ### Algorithm 971
 ```julia
 out_algorithm971 = algorithm971(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_algorithm971, group)
+subplots(out_algorithm971[1], group)
 ```
 ![algorithm971](./docs/src/figure/algorithm971.png)
-
 
 ### Randomized Block Krylov Iteration
 ```julia
 out_rbkiter = rbkiter(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_rbkiter, group)
+subplots(out_rbkiter[1], group)
 ```
 ![rbkiter](./docs/src/figure/rbkiter.png)
 
 ### Single-pass PCA type I
 ```julia
 out_singlepass = singlepass(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_singlepass, group)
+subplots(out_singlepass[1], group)
 ```
 ![singlepass](./docs/src/figure/singlepass.png)
 
 ### Single-pass PCA type II
 ```julia
 out_singlepass2 = singlepass2(input=joinpath(tmp, "Data.zst"), dim=3,
-    rowmeanlist=joinpath(tmp, "Feature_LogMeans.csv"))
+    rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
-subplots(out_singlepass2, group)
+subplots(out_singlepass2[1], group)
 ```
 ![singlepass2](./docs/src/figure/singlepass2.png)
 
 ### Summarization for 10X-HDF5
 ```julia
-tenxsumr(tenxfile="Data.h5", group="mm10", chunksize=5000)
+tenxsumr(tenxfile="Data.h5", group="mm10", chunksize=100)
 ```
 
 ### Algorithm 971 for 10X-HDF5
 ```julia
 out_tenxpca = tenxpca(tenxfile="Data.h5", scale="sqrt",
-    rowmeanlist="Feature_SqrtMeans.csv", dim=3, chunksize=5000, group="mm10")
+    rowmeanlist="Feature_SqrtMeans.csv", dim=3, chunksize=100, group="mm10")
 ```
+
+### Summary of data for MM/Sparse Matrix
+```julia
+# Sparsification + Binarization (Zstandard + MM format)
+mm2bin(mmfile=joinpath(tmp, "Data.mtx"), binfile=joinpath(tmp, "Data.mtx.zst"))
+
+sparse_path = mktempdir()
+sumr(binfile=joinpath(tmp, "Data.mtx.zst"), outdir=sparse_path, sparse_mode=true)
+```
+
+### Sparse Randomized SVD for MM format
+```julia
+out_sparse_rsvd = sparse_rsvd(
+	input=joinpath(tmp, "Data.mtx.zst"),
+	scale="ftt",
+    rowmeanlist=joinpath(sparse_path, "Feature_FTTMeans.csv"),
+	dim=3, chunksize=100)
+
+subplots(out_sparse_rsvd[1], group)
+```
+![out_sparse_rsvd](./docs/src/figure/sparse_rsvd.png)
+
+### Exact Out-of-Core PCA
+Unlike other PCAs, this function assumes matrix data with data x dimensions. It is also computationally efficient when the data is vertical with number of data >> number of dimensions. In the following, data assuming this assumption are first prepared. The function can also be used without performing a sumr to extract row and column statistics in advance.
+
+```julia
+# CSV
+tmp2 = mktempdir()
+data2 = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 99, 30)))
+data2[1:33, 1:10] .= 100*data2[1:33, 1:10]
+data2[34:66, 11:20] .= 100*data2[34:66, 11:20]
+data2[67:99, 21:30] .= 100*data2[67:99, 21:30]
+write_csv(joinpath(tmp2, "Data2.csv"), data2)
+
+# Binarization (Zstandard)
+csv2bin(csvfile=joinpath(tmp2, "Data2.csv"), binfile=joinpath(tmp2, "Data2.zst"))
+
+# Matrix Market (MM)
+mmwrite(joinpath(tmp2, "Data2.mtx"), sparse(data2))
+
+# Binarization (Zstandard)
+csv2bin(csvfile=joinpath(tmp2, "Data2.csv"), binfile=joinpath(tmp2, "Data2.zst"))
+
+# Binarization (Zstandard)
+mm2bin(mmfile=joinpath(tmp2, "Data2.mtx"), binfile=joinpath(tmp2, "Data2.mtx.zst"))
+```
+
+```julia
+# Dense-mode
+out_exact_ooc_pca_dense = exact_ooc_pca(
+	input=joinpath(tmp2, "Data2.zst"),
+	scale="ftt", dim=3, chunksize=10, sparse_mode=false)
+
+subplots(out_exact_ooc_pca_dense[3], group)
+```
+![exact_ooc_pca_dense](./docs/src/figure/exact_ooc_pca_dense.png)
+
+```julia
+# Sparse-mode
+out_exact_ooc_pca_sparse = exact_ooc_pca(
+	input=joinpath(tmp2, "Data2.mtx.zst"),
+	scale="ftt", dim=3, chunksize=10, sparse_mode=true)
+
+subplots(out_exact_ooc_pca_sparse[3], group)
+```
+![exact_ooc_pca_sparse](./docs/src/figure/exact_ooc_pca_sparse.png)
 
 ## Command line usage
 All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.
 
 ```bash
-# CSV → Julia Binary
+# CSV → Julia Binary (e.g, csv2bin, mm2bin)
 julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/csv2bin \
     --csvfile Data.csv --binfile Data.zst
 
-# Summary statistics extracted from Julia Binary
+# Summary statistics extracted from Julia Binary (e.g., sumr, tenxsumr)
 julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/sumr \
     --binfile Data.zst
 
-# PCA
+# Perform PCA
 julia YOUR_HOME_DIR/.julia/v0.x/OnlinePCA/bin/gd \
     --input Data.zst --dim 3 --scheduling robbins-monro --stepsize 10 \
     --numepoch 10 --rowmeanlist Feature_LogMeans.csv

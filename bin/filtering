@@ -1,12 +1,12 @@
 using OnlinePCA
 using ArgParse:
-    ArgParseSettings, parse_args, @add_arg_table
+    ArgParseSettings, parse_args, @add_arg_table!
 
 # options
 function parse_commandline()
     s = ArgParseSettings()
 
-    @add_arg_table s begin
+    @add_arg_table! s begin
         "--input", "-i"
             help = "input file (serialized)"
             arg_type = AbstractString

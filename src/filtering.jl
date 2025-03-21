@@ -14,18 +14,18 @@ Output Files
 ---------
 - `filtered.zst` : Filtered binary file.
 """
-function filtering(;input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0.0, thr2::Number=0.0, direct1::AbstractString="+", direct2::AbstractString="+", outdir::AbstractString=".")
+function filtering(; input::AbstractString="", featurelist::AbstractString="", samplelist::AbstractString="", thr1::Number=0.0, thr2::Number=0.0, direct1::AbstractString="+", direct2::AbstractString="+", outdir::AbstractString=".")
     # Feature selection
     if featurelist == "" && samplelist == ""
         error("At least featurelist or samplelist must be specified")
     end
     if featurelist != ""
-        featurevec = readcsv(featurelist) # e.g., HVG_pval.csv
+        featurevec = read_csv(featurelist) # e.g., HVG_pval.csv
     else
         featurevec = Nothing
     end
     if samplelist != ""
-        samplevec = readcsv(samplelist) # e.g., Sample_NoCounts.csv
+        samplevec = read_csv(samplelist) # e.g., Sample_NoCounts.csv
     else
         samplevec = Nothing
     end
@@ -51,13 +51,13 @@ function filtering(;input::AbstractString="", featurelist::AbstractString="", sa
     nc = UInt32(nc)
 
     # save
-    writecsv(outfile2, ix1)
-    writecsv(outfile3, ix2)
+    write_csv(outfile2, ix1)
+    write_csv(outfile3, ix2)
     open(outfile1, "w") do file1
         stream1 = ZstdCompressorStream(file1)
         write(stream1, nr) # by rcfilter
         write(stream1, nc) # by rcfilter
-        open(input , "r") do file2
+        open(input, "r") do file2
             stream2 = ZstdDecompressorStream(file2)
             read!(stream2, tmpN)
             read!(stream2, tmpM)
@@ -65,9 +65,9 @@ function filtering(;input::AbstractString="", featurelist::AbstractString="", sa
             for n = 1:N
                 next!(progress)
                 read!(stream2, x)
-                    if ix1[n] == 1
-                        write(stream1, x[ix2])
-                    end
+                if ix1[n] == 1
+                    write(stream1, x[ix2])
+                end
             end
             close(stream2)
         end
@@ -114,14 +114,14 @@ function rcfilter(input, featurevec, samplevec, thr1, thr2, direct1, direct2)
 
     # Column-wise filter
     if samplevec != Nothing
-        for m=1:M
+        for m = 1:M
             if direct2 == "+"
-                if(samplevec[m] >= thr2)
+                if (samplevec[m] >= thr2)
                     ncol += 1
                     push!(idx2, m)
                 end
             elseif direct2 == "-"
-                if(samplevec[m] <= thr2)
+                if (samplevec[m] <= thr2)
                     ncol += 1
                     push!(idx2, m)
                 end

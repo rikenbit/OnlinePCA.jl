@@ -1,5 +1,5 @@
 """
-    tenxsumr(;tenxfile::AbstractString="", outdir::AbstractString=".", group::AbstractString="", chunksize::Number=5000)
+    tenxsumr(; tenxfile::AbstractString="", outdir::AbstractString=".", group::AbstractString="", chunksize::Number=5000)
 
 Extract the summary information of 10X-HDF5.
 
@@ -21,20 +21,71 @@ Output Files
 - `Feature_SqrtVars.csv` : sqrt(Var+1) in each row.
 - `Feature_CV2s.csv` : Coefficient of Variation in each row.
 """
+function tenxsumr(; tenxfile::AbstractString="", outdir::AbstractString=".", group::AbstractString="", chunksize::Number=5000)
+    # Row / Column
+    N, M = tenxnm(tenxfile, group)
+    # Index Pointer
+    idp = indptr(tenxfile, group)
+
+    # 1 / 2 : Column-wise statistics
+    println("1 / 2 : Column-wise statistics are calculated...")
+    Sample_NoCounts = tenxnocounts(tenxfile, group, chunksize, N, M, idp)
+
+    # 2 / 2 : Row-wise statistics
+    println("2 / 2 : Row-wise statistics are calculated...")
+    Feature_Means, Feature_LogMeans, Feature_SqrtMeans, Feature_Vars, Feature_LogVars, Feature_SqrtVars, Feature_CPMMeans, Feature_LogCPMMeans, Feature_SqrtCPMMeans, Feature_CPMVars, Feature_LogCPMVars, Feature_SqrtCPMVars, Feature_CPTMeans, Feature_LogCPTMeans, Feature_SqrtCPTMeans, Feature_CPTVars, Feature_LogCPTVars, Feature_SqrtCPTVars, Feature_CPMEDMeans, Feature_LogCPMEDMeans, Feature_SqrtCPMEDMeans, Feature_CPMEDVars, Feature_LogCPMEDVars, Feature_SqrtCPMEDVars, Feature_CV2s = tenxstats(tenxfile, group, chunksize, N, M, idp, Sample_NoCounts)
+
+    # Save
+    write_csv(joinpath(outdir, "Sample_NoCounts.csv"), Sample_NoCounts)
+
+    write_csv(joinpath(outdir, "Feature_Means.csv"), Feature_Means)
+    write_csv(joinpath(outdir, "Feature_LogMeans.csv"), Feature_LogMeans)
+    write_csv(joinpath(outdir, "Feature_SqrtMeans.csv"), Feature_SqrtMeans)
+
+    write_csv(joinpath(outdir, "Feature_CPMMeans.csv"), Feature_CPMMeans)
+    write_csv(joinpath(outdir, "Feature_LogCPMMeans.csv"), Feature_LogCPMMeans)
+    write_csv(joinpath(outdir, "Feature_SqrtCPMMeans.csv"), Feature_SqrtCPMMeans)
+
+    write_csv(joinpath(outdir, "Feature_CPTMeans.csv"), Feature_CPTMeans)
+    write_csv(joinpath(outdir, "Feature_LogCPTMeans.csv"), Feature_LogCPTMeans)
+    write_csv(joinpath(outdir, "Feature_SqrtCPTMeans.csv"), Feature_SqrtCPTMeans)
+
+    write_csv(joinpath(outdir, "Feature_CPMEDMeans.csv"), Feature_CPMEDMeans)
+    write_csv(joinpath(outdir, "Feature_LogCPMEDMeans.csv"), Feature_LogCPMEDMeans)
+    write_csv(joinpath(outdir, "Feature_SqrtCPMEDMeans.csv"), Feature_SqrtCPMEDMeans)
+
+    write_csv(joinpath(outdir, "Feature_Vars.csv"), Feature_Vars)
+    write_csv(joinpath(outdir, "Feature_LogVars.csv"), Feature_LogVars)
+    write_csv(joinpath(outdir, "Feature_SqrtVars.csv"), Feature_SqrtVars)
+
+    write_csv(joinpath(outdir, "Feature_CPMVars.csv"), Feature_CPMVars)
+    write_csv(joinpath(outdir, "Feature_LogCPMVars.csv"), Feature_LogCPMVars)
+    write_csv(joinpath(outdir, "Feature_SqrtCPMVars.csv"), Feature_SqrtCPMVars)
+
+    write_csv(joinpath(outdir, "Feature_CPTVars.csv"), Feature_CPTVars)
+    write_csv(joinpath(outdir, "Feature_LogCPTVars.csv"), Feature_LogCPTVars)
+    write_csv(joinpath(outdir, "Feature_SqrtCPTVars.csv"), Feature_SqrtCPTVars)
+
+    write_csv(joinpath(outdir, "Feature_CPMEDVars.csv"), Feature_CPMEDVars)
+    write_csv(joinpath(outdir, "Feature_LogCPMEDVars.csv"), Feature_LogCPMEDVars)
+    write_csv(joinpath(outdir, "Feature_SqrtCPMEDVars.csv"), Feature_SqrtCPMEDVars)
+
+    write_csv(joinpath(outdir, "Feature_CV2s.csv"), Feature_CV2s)
+end
 
 # Column-wise statistics
 function tenxnocounts(tenxfile::AbstractString, group::AbstractString, chunksize::Number, N::Number, M::Number, idp::AbstractArray)
     nc = zeros(UInt32, M)
     # Each chunk
-	for i in 1:fld(N, chunksize)+1
-        startp = Int64((i-1)*chunksize+1)
-        endp = Int64(i*chunksize)
+    for i in 1:fld(N, chunksize)+1
+        startp = Int64((i - 1) * chunksize + 1)
+        endp = Int64(i * chunksize)
         if N - endp + chunksize < chunksize
-	        endp = N
+            endp = N
         end
         X = loadchromium(tenxfile, group, idp, startp, endp, M, false)
-        nc += sum(X, dims=1)[1,:]
-	end
+        nc += sum(X, dims=1)[1, :]
+    end
     return nc
 end
 
@@ -77,16 +128,16 @@ function tenxstats(tenxfile::AbstractString, group::AbstractString, chunksize::N
 
     # Each chunk
     if N > chunksize
-        lasti = fld(N, chunksize)+1
+        lasti = fld(N, chunksize) + 1
     else
         lasti = 1
     end
 
-	for i in 1:lasti
-        startp = Int64((i-1)*chunksize+1)
-        endp = Int64(i*chunksize)
+    for i in 1:lasti
+        startp = Int64((i - 1) * chunksize + 1)
+        endp = Int64(i * chunksize)
         if N - endp + chunksize < chunksize
-	        endp = N
+            endp = N
         end
         X = loadchromium(tenxfile, group, idp, startp, endp, M, false)
         logX = sparseLog10(X)
@@ -138,58 +189,6 @@ function tenxstats(tenxfile::AbstractString, group::AbstractString, chunksize::N
         sqrtcpmedv[startp:endp] = var(sqrtcpmedX, dims=2)
 
         c[startp:endp] = v[startp:endp] ./ (m[startp:endp] .* m[startp:endp])
-	end
+    end
     return m, lm, sqrtm, v, lv, sqrtv, cpmm, lcpmm, sqrtcpmm, cpmv, lcpmv, sqrtcpmv, cptm, lcptm, sqrtcptm, cptv, lcptv, sqrtcptv, cpmedm, lcpmedm, sqrtcpmedm, cpmedv, lcpmedv, sqrtcpmedv, c
-end
-
-function tenxsumr(;tenxfile::AbstractString="", outdir::AbstractString=".", group::AbstractString="", chunksize::Number=5000)
-	# Row / Column
-	N, M = tenxnm(tenxfile, group)
-	# Index Pointer
-	idp = indptr(tenxfile, group)
-
-    # 1 / 2 : Column-wise statistics
-    println("1 / 2 : Column-wise statistics are calculated...")
-    Sample_NoCounts = tenxnocounts(tenxfile, group, chunksize, N, M, idp)
-
-    # 2 / 2 : Row-wise statistics
-    println("2 / 2 : Row-wise statistics are calculated...")
-    Feature_Means, Feature_LogMeans, Feature_SqrtMeans, Feature_Vars, Feature_LogVars, Feature_SqrtVars, Feature_CPMMeans, Feature_LogCPMMeans, Feature_SqrtCPMMeans, Feature_CPMVars, Feature_LogCPMVars, Feature_SqrtCPMVars, Feature_CPTMeans, Feature_LogCPTMeans, Feature_SqrtCPTMeans, Feature_CPTVars, Feature_LogCPTVars, Feature_SqrtCPTVars, Feature_CPMEDMeans, Feature_LogCPMEDMeans, Feature_SqrtCPMEDMeans, Feature_CPMEDVars, Feature_LogCPMEDVars, Feature_SqrtCPMEDVars, Feature_CV2s = tenxstats(tenxfile, group, chunksize, N, M, idp, Sample_NoCounts)
-
-    # Save
-    writecsv(joinpath(outdir, "Sample_NoCounts.csv"), Sample_NoCounts)
-
-    writecsv(joinpath(outdir, "Feature_Means.csv"), Feature_Means)
-    writecsv(joinpath(outdir, "Feature_LogMeans.csv"), Feature_LogMeans)
-    writecsv(joinpath(outdir, "Feature_SqrtMeans.csv"), Feature_SqrtMeans)
-
-    writecsv(joinpath(outdir, "Feature_CPMMeans.csv"), Feature_CPMMeans)
-    writecsv(joinpath(outdir, "Feature_LogCPMMeans.csv"), Feature_LogCPMMeans)
-    writecsv(joinpath(outdir, "Feature_SqrtCPMMeans.csv"), Feature_SqrtCPMMeans)
-
-    writecsv(joinpath(outdir, "Feature_CPTMeans.csv"), Feature_CPTMeans)
-    writecsv(joinpath(outdir, "Feature_LogCPTMeans.csv"), Feature_LogCPTMeans)
-    writecsv(joinpath(outdir, "Feature_SqrtCPTMeans.csv"), Feature_SqrtCPTMeans)
-
-    writecsv(joinpath(outdir, "Feature_CPMEDMeans.csv"), Feature_CPMEDMeans)
-    writecsv(joinpath(outdir, "Feature_LogCPMEDMeans.csv"), Feature_LogCPMEDMeans)
-    writecsv(joinpath(outdir, "Feature_SqrtCPMEDMeans.csv"), Feature_SqrtCPMEDMeans)
-
-    writecsv(joinpath(outdir, "Feature_Vars.csv"), Feature_Vars)
-    writecsv(joinpath(outdir, "Feature_LogVars.csv"), Feature_LogVars)
-    writecsv(joinpath(outdir, "Feature_SqrtVars.csv"), Feature_SqrtVars)
-
-    writecsv(joinpath(outdir, "Feature_CPMVars.csv"), Feature_CPMVars)
-    writecsv(joinpath(outdir, "Feature_LogCPMVars.csv"), Feature_LogCPMVars)
-    writecsv(joinpath(outdir, "Feature_SqrtCPMVars.csv"), Feature_SqrtCPMVars)
-
-    writecsv(joinpath(outdir, "Feature_CPTVars.csv"), Feature_CPTVars)
-    writecsv(joinpath(outdir, "Feature_LogCPTVars.csv"), Feature_LogCPTVars)
-    writecsv(joinpath(outdir, "Feature_SqrtCPTVars.csv"), Feature_SqrtCPTVars)
-
-    writecsv(joinpath(outdir, "Feature_CPMEDVars.csv"), Feature_CPMEDVars)
-    writecsv(joinpath(outdir, "Feature_LogCPMEDVars.csv"), Feature_LogCPMEDVars)
-    writecsv(joinpath(outdir, "Feature_SqrtCPMEDVars.csv"), Feature_SqrtCPMEDVars)
-
-    writecsv(joinpath(outdir, "Feature_CV2s.csv"), Feature_CV2s)
 end

@@ -1,12 +1,10 @@
 using Documenter
 using OnlinePCA
 
-makedocs()
-
 makedocs(
-    format = :html,
     sitename = "OnlinePCA.jl",
     modules = [OnlinePCA],
+    format = Documenter.HTML(),
     pages = [
         "Home" => "index.md",
         "Julia API" => "juliaapi.md",
@@ -15,7 +13,6 @@ makedocs(
 
 deploydocs(
     repo = "github.com/rikenbit/OnlinePCA.jl.git",
-    julia = "1.0",
     target = "build",
     deps = nothing,
     make = nothing)

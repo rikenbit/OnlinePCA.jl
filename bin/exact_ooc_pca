@@ -1,0 +1,54 @@
+using OnlinePCA
+using OnlinePCA: write_csv
+using ArgParse:
+    ArgParseSettings, parse_args, @add_arg_table!
+
+# main
+function main()
+    pca = OnlinePCA.EXACT_OOC_PCA()
+    parsed_args = OnlinePCA.parse_commandline(pca)
+    println("Parsed args:")
+    for (arg, val) in parsed_args
+        println("  $arg  =>  ", repr(val))
+    end
+
+    if parsed_args["pseudocount"] == 1.0f0
+        pseudocount = 1.0f0
+    else
+        pseudocount = parse(Float32, parsed_args["pseudocount"])
+    end
+
+    if typeof(parsed_args["dim"]) == String
+        dim = parse(Int64, parsed_args["dim"])
+    else
+        dim = parsed_args["dim"]
+    end
+
+    if typeof(parsed_args["chunksize"]) == String
+        chunksize = parse(Int64, parsed_args["chunksize"])
+    else
+        chunksize = parsed_args["chunksize"]
+    end
+
+    if parsed_args["sparse_mode"] == "true"
+        sparse_mode = true
+    else
+        sparse_mode = false
+    end
+
+    out = OnlinePCA.exact_ooc_pca(input=parsed_args["input"],
+        scale=parsed_args["scale"],
+        pseudocount=pseudocount,
+        dim=dim,
+        chunksize=chunksize,
+        sparse_mode=sparse_mode)
+
+    write_csv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
+    write_csv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
+    write_csv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
+    write_csv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
+    write_csv(joinpath(parsed_args["outdir"], "ExpVar.csv"), out[5])
+    write_csv(joinpath(parsed_args["outdir"], "TotalVar.csv"), out[6])
+end
+
+main()

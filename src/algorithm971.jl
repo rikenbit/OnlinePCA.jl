@@ -38,12 +38,12 @@ function algorithm971(;input::AbstractString="", outdir::Union{Nothing,AbstractS
     out = algorithm971(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, cper)
     # Output
     if outdir isa String
-        writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
-        writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
-        writecsv(joinpath(outdir, "Loadings.csv"), out[3])
-        writecsv(joinpath(outdir, "Scores.csv"), out[4])
-        writecsv(joinpath(outdir, "ExpVar.csv"), out[5])
-        writecsv(joinpath(outdir, "TotalVar.csv"), out[6])
+        write_csv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
+        write_csv(joinpath(outdir, "Eigen_values.csv"), out[2])
+        write_csv(joinpath(outdir, "Loadings.csv"), out[3])
+        write_csv(joinpath(outdir, "Scores.csv"), out[4])
+        write_csv(joinpath(outdir, "ExpVar.csv"), out[5])
+        write_csv(joinpath(outdir, "TotalVar.csv"), out[6])
     end
     return out
 end

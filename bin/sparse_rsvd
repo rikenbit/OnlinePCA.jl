@@ -1,0 +1,94 @@
+using OnlinePCA
+using OnlinePCA: write_csv
+using ArgParse:
+    ArgParseSettings, parse_args, @add_arg_table!
+
+# main
+function main()
+    pca = OnlinePCA.SPARSE_RSVD()
+    parsed_args = OnlinePCA.parse_commandline(pca)
+    println("Parsed args:")
+    for (arg, val) in parsed_args
+        println("  $arg  =>  ", repr(val))
+    end
+
+    if typeof(parsed_args["dim"]) == String
+        dim = parse(Int64, parsed_args["dim"])
+    else
+        dim = parsed_args["dim"]
+    end
+
+    if typeof(parsed_args["noversamples"]) == String
+        noversamples = parse(Int64, parsed_args["noversamples"])
+    else
+        noversamples = parsed_args["noversamples"]
+    end
+
+    if typeof(parsed_args["niter"]) == String
+        niter = parse(Int64, parsed_args["niter"])
+    else
+        niter = parsed_args["niter"]
+    end
+
+    if typeof(parsed_args["chunksize"]) == String
+        chunksize = parse(Int64, parsed_args["chunksize"])
+    else
+        chunksize = parsed_args["chunksize"]
+    end
+
+    if parsed_args["initW"] == nothing
+        initW = parsed_args["initW"]
+    else
+        initW = String(parsed_args["initW"])
+    end
+
+    if parsed_args["initV"] == nothing
+        initV = parsed_args["initV"]
+    else
+        initV = String(parsed_args["initV"])
+    end
+
+    if parsed_args["logdir"] == nothing
+        logdir = parsed_args["logdir"]
+    else
+        logdir = String(parsed_args["logdir"])
+    end
+
+    if parsed_args["perm"] == false
+        perm = false
+    elseif parsed_args["perm"] == "true"
+        perm = true
+    else
+        error("Please specify the perm option as true or false")
+    end
+
+    if parsed_args["cper"] == 1.0f0
+        cper = 1.0f0
+    else
+        cper = parse(Float32, parsed_args["cper"])
+    end
+
+    out = OnlinePCA.sparse_rsvd(input=parsed_args["input"],
+        scale=parsed_args["scale"],
+        rowmeanlist=parsed_args["rowmeanlist"],
+        rowvarlist=parsed_args["rowvarlist"],
+        colsumlist=parsed_args["colsumlist"],
+        dim=dim,
+        noversamples=noversamples,
+        niter=niter,
+        chunksize=chunksize,
+        initW=initW,
+        initV=initV,
+        logdir=logdir,
+        perm=perm,
+        cper=cper)
+
+    write_csv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
+    write_csv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])
+    write_csv(joinpath(parsed_args["outdir"], "Loadings.csv"), out[3])
+    write_csv(joinpath(parsed_args["outdir"], "Scores.csv"), out[4])
+    write_csv(joinpath(parsed_args["outdir"], "ExpVar.csv"), out[5])
+    write_csv(joinpath(parsed_args["outdir"], "TotalVar.csv"), out[6])
+end
+
+main()

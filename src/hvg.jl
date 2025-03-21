@@ -25,12 +25,12 @@ Reference
 ---------
 - [Highly Variable Genes](http://pklab.med.harvard.edu/scw2014/subpop_tutorial.html)
 """
-function hvg(;binfile::AbstractString="", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", rowcv2list::AbstractString="", outdir::AbstractString=".")
+function hvg(; binfile::AbstractString="", rowmeanlist::AbstractString="", rowvarlist::AbstractString="", rowcv2list::AbstractString="", outdir::AbstractString=".")
     # Initialization
     N, M = nm(binfile)
-    rowmeanvec = readcsv(rowmeanlist)
-    rowvarvec = readcsv(rowvarlist)
-    rowcv2vec = readcsv(rowcv2list)
+    rowmeanvec = read_csv(rowmeanlist)
+    rowvarvec = read_csv(rowvarlist)
+    rowcv2vec = read_csv(rowcv2list)
     useForFit = []
     pm = []
     counter = 0
@@ -49,7 +49,7 @@ function hvg(;binfile::AbstractString="", rowmeanlist::AbstractString="", rowvar
     end
 
     # Fitting
-	println("Highly Variable Genes are calculated...")
+    println("Highly Variable Genes are calculated...")
     data = DataFrame(Y=rowcv2vec[useForFit], X=1 ./ rowmeanvec[useForFit])
     fit = glm(@formula(Y ~ X), data, Gamma(), IdentityLink())
     a0, a1 = coef(fit)
@@ -59,15 +59,15 @@ function hvg(;binfile::AbstractString="", rowmeanlist::AbstractString="", rowvar
 
     # P-value
     for n = 1:N
-        pval[n] = ccdf(Chisq(df), varFitRatio[n]*df)
+        pval[n] = ccdf(Chisq(df), varFitRatio[n] * df)
     end
 
     # Save
-    writecsv(joinpath(outdir, "HVG_useForFit.csv"), useForFit)
-    writecsv(joinpath(outdir, "HVG_a0.csv"), a0)
-    writecsv(joinpath(outdir, "HVG_a1.csv"), a1)
-    writecsv(joinpath(outdir, "HVG_afit.csv"), afit)
-    writecsv(joinpath(outdir, "HVG_varFitRatio.csv"), varFitRatio)
-    writecsv(joinpath(outdir, "HVG_df.csv"), df)
-    writecsv(joinpath(outdir, "HVG_pval.csv"), pval)
+    write_csv(joinpath(outdir, "HVG_useForFit.csv"), useForFit)
+    write_csv(joinpath(outdir, "HVG_a0.csv"), a0)
+    write_csv(joinpath(outdir, "HVG_a1.csv"), a1)
+    write_csv(joinpath(outdir, "HVG_afit.csv"), afit)
+    write_csv(joinpath(outdir, "HVG_varFitRatio.csv"), varFitRatio)
+    write_csv(joinpath(outdir, "HVG_df.csv"), df)
+    write_csv(joinpath(outdir, "HVG_pval.csv"), pval)
 end

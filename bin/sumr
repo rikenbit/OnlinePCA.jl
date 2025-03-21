@@ -1,25 +1,29 @@
 using OnlinePCA
 using ArgParse:
-    ArgParseSettings, parse_args, @add_arg_table
+    ArgParseSettings, parse_args, @add_arg_table!
 
 # options
 function parse_commandline()
     s = ArgParseSettings()
 
-    @add_arg_table s begin
+    @add_arg_table! s begin
         "--binfile", "-b"
-            help = "input file (serialized)"
-            arg_type = AbstractString
-            required = true
+        help = "input file (serialized)"
+        arg_type = AbstractString
+        required = true
         "--outdir", "-o"
-            help = "output directory"
-            arg_type = AbstractString
-            default = "."
-            required = false
+        help = "output directory"
+        arg_type = AbstractString
+        default = "."
+        required = false
         "--pseudocount", "-p"
-            help = "log10(exp + pseudocount)"
-            arg_type = Union{Number,AbstractString}
-            default = 1.0f0
+        help = "log10(exp + pseudocount)"
+        arg_type = Union{Number,AbstractString}
+        default = 1.0f0
+        "--sparse_mode", "-s"
+        help = "specified to use sparse matrix or not."
+        arg_type = Bool
+        default = false
     end
 
     return parse_args(s)
@@ -29,17 +33,23 @@ end
 function main()
     parsed_args = parse_commandline()
     println("Parsed args:")
-    for (arg,val) in parsed_args
+    for (arg, val) in parsed_args
         println("  $arg  =>  $val")
     end
 
     if parsed_args["pseudocount"] == 1.0f0
         pseudocount = 1.0f0
     else
-        pseudocount=parse(Float32, parsed_args["pseudocount"])
+        pseudocount = parse(Float32, parsed_args["pseudocount"])
     end
 
-    OnlinePCA.sumr(binfile=parsed_args["binfile"], outdir=parsed_args["outdir"], pseudocount=pseudocount)
+    if parsed_args["sparse_mode"] == "true"
+        sparse_mode = true
+    else
+        sparse_mode = false
+    end
+
+    OnlinePCA.sumr(binfile=parsed_args["binfile"], outdir=parsed_args["outdir"], pseudocount=pseudocount, sparse_mode=sparse_mode)
 end
 
 main()

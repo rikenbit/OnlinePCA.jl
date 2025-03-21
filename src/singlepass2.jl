@@ -30,7 +30,7 @@ Output Arguments
 - `ExpVar` : Explained variance by the eigenvectors
 - `TotalVar` : Total variance of the data matrix
 """
-function singlepass2(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1f0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1f0)
+function singlepass2(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0f0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1.0f0)
     # Initial Setting
     pca = SINGLEPASS2()
     pseudocount, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar = init(input, pseudocount, dim, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, cper, scale)
@@ -38,12 +38,12 @@ function singlepass2(;input::AbstractString="", outdir::Union{Nothing,AbstractSt
     out = singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, cper)
     # Output
     if outdir isa String
-        writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
-        writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
-        writecsv(joinpath(outdir, "Loadings.csv"), out[3])
-        writecsv(joinpath(outdir, "Scores.csv"), out[4])
-        writecsv(joinpath(outdir, "ExpVar.csv"), out[5])
-        writecsv(joinpath(outdir, "TotalVar.csv"), out[6])
+        write_csv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
+        write_csv(joinpath(outdir, "Eigen_values.csv"), out[2])
+        write_csv(joinpath(outdir, "Loadings.csv"), out[3])
+        write_csv(joinpath(outdir, "Scores.csv"), out[4])
+        write_csv(joinpath(outdir, "ExpVar.csv"), out[5])
+        write_csv(joinpath(outdir, "TotalVar.csv"), out[6])
     end
     return out
 end
@@ -55,7 +55,7 @@ function singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist,
     x = zeros(UInt32, M)
     normx = zeros(Float32, M)
     b = round(Int64, dim ./ niter) + noversamples
-    l = niter*b
+    l = niter * b
     Ω = rand(Float32, M, l)
     G = zeros(Float32, N, l)
     H = zeros(Float32, M, l)
@@ -69,7 +69,7 @@ function singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist,
         read!(stream, tmpN)
         read!(stream, tmpM)
         # Each step n
-        while(n <= N)
+        while (n <= N)
             next!(progress)
             # Row vector of data matrix
             read!(stream, x)
@@ -78,11 +78,11 @@ function singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist,
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
-            tmpG = normx'*Ω
+            tmpG = normx' * Ω
             @inbounds for i in 1:size(tmpG)[2]
-                G[n,i] = tmpG[1,i]
+                G[n, i] = tmpG[1, i]
             end
-            H .+= normx*tmpG
+            H .+= normx * tmpG
             n += 1
         end
         close(stream)
@@ -91,16 +91,16 @@ function singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist,
     for i in 1:niter
         block = (i-1)*b+1:i*b
         Ωi = Ω[:, block]
-        Yi = G[:, block] - Q*(B*Ωi)
+        Yi = G[:, block] - Q * (B * Ωi)
         println("Subspace iterations (1/2) : Q = qr(Yi)")
         F1 = qr!(Yi)
         Qi = Array(F1.Q)
         println("Subspace iterations (2/2) : Q = qr(Qi - Q(Q' Qi))")
-        F2 = qr!(Qi - Q * (Q'*Qi))
+        F2 = qr!(Qi - Q * (Q' * Qi))
         Qi = Array(F2.Q)
 
-        Ri = F2.R*F1.R
-        Bi = inv(Ri)'*(H[:,block]' - Yi'*Q*B - Ωi'*B'B)
+        Ri = F2.R * F1.R
+        Bi = inv(Ri)' * (H[:, block]' - Yi' * Q * B - Ωi' * B'B)
         if i == 1
             Q = Qi
             B = Bi
@@ -113,7 +113,7 @@ function singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist,
     # SVD with small matrix
     println("SVD with small matrix : svd(B)")
     W, λ, V = svd(B)
-    U = Q*W
+    U = Q * W
     # PC scores, Explained Variance
     Scores = zeros(Float32, M, dim)
     for n = 1:dim
@@ -121,5 +121,5 @@ function singlepass2(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist,
     end
     ExpVar = sum(λ) / TotalVar
     # Return
-    return (V[:,1:dim], λ[1:dim], U[:,1:dim], Scores[:,1:dim], ExpVar, TotalVar)
+    return (V[:, 1:dim], λ[1:dim], U[:, 1:dim], Scores[:, 1:dim], ExpVar, TotalVar)
 end

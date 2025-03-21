@@ -30,7 +30,7 @@ Output Arguments
 - `ExpVar` : Explained variance by the eigenvectors
 - `TotalVar` : Total variance of the data matrix
 """
-function halko(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1f0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1f0)
+function halko(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0f0, rowmeanlist::AbstractString="", rowvarlist::AbstractString="", colsumlist::AbstractString="", dim::Number=3, noversamples::Number=5, niter::Number=3, initW::Union{Nothing,AbstractString}=nothing, initV::Union{Nothing,AbstractString}=nothing, logdir::Union{Nothing,AbstractString}=nothing, perm::Bool=false, cper::Number=1.0f0)
     # Initial Setting
     pca = HALKO()
     pseudocount, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar = init(input, pseudocount, dim, rowmeanlist, rowvarlist, colsumlist, initW, initV, logdir, pca, cper, scale)
@@ -38,12 +38,12 @@ function halko(;input::AbstractString="", outdir::Union{Nothing,AbstractString}=
     out = halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsumlist, dim, noversamples, niter, logdir, pca, W, D, rowmeanvec, rowvarvec, colsumvec, N, M, TotalVar, perm, cper)
     # Output
     if outdir isa String
-        writecsv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
-        writecsv(joinpath(outdir, "Eigen_values.csv"), out[2])
-        writecsv(joinpath(outdir, "Loadings.csv"), out[3])
-        writecsv(joinpath(outdir, "Scores.csv"), out[4])
-        writecsv(joinpath(outdir, "ExpVar.csv"), out[5])
-        writecsv(joinpath(outdir, "TotalVar.csv"), out[6])
+        write_csv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
+        write_csv(joinpath(outdir, "Eigen_values.csv"), out[2])
+        write_csv(joinpath(outdir, "Loadings.csv"), out[3])
+        write_csv(joinpath(outdir, "Scores.csv"), out[4])
+        write_csv(joinpath(outdir, "ExpVar.csv"), out[5])
+        write_csv(joinpath(outdir, "TotalVar.csv"), out[6])
     end
     return out
 end
@@ -70,7 +70,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
         read!(stream, tmpN)
         read!(stream, tmpM)
         # Each step n
-        while(n <= N)
+        while (n <= N)
             next!(progress)
             # Row vector of data matrix
             read!(stream, x)
@@ -79,7 +79,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 normx .= normx[randperm(length(normx))]
             end
             # Random Projection
-            Y[n,:] .= (normx'*Ω)[1,:]
+            Y[n, :] .= (normx'*Ω)[1, :]
             n += 1
         end
         close(stream)
@@ -99,7 +99,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 read!(stream, tmpN)
                 read!(stream, tmpM)
                 # Each step n
-                while(n <= N)
+                while (n <= N)
                     next!(progress)
                     # Row vector of data matrix
                     read!(stream, x)
@@ -107,7 +107,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    AtQ .+= normx*Q[n,:]'
+                    AtQ .+= normx * Q[n, :]'
                     n += 1
                 end
                 close(stream)
@@ -123,7 +123,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                 read!(stream, tmpN)
                 read!(stream, tmpM)
                 # Each step n
-                while(n <= N)
+                while (n <= N)
                     next!(progress)
                     # Row vector of data matrix
                     read!(stream, x)
@@ -131,7 +131,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
                     if perm
                         normx .= normx[randperm(length(normx))]
                     end
-                    Y[n,:] .= (normx'*G)[1,:]
+                    Y[n, :] .= (normx'*G)[1, :]
                     n += 1
                 end
                 close(stream)
@@ -153,7 +153,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
         read!(stream, tmpN)
         read!(stream, tmpM)
         # Each step n
-        while(n <= N)
+        while (n <= N)
             next!(progress)
             # Row vector of data matrix
             read!(stream, x)
@@ -161,7 +161,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
             if perm
                 normx .= normx[randperm(length(normx))]
             end
-            B .+= Q[n,:]*normx'
+            B .+= Q[n, :] * normx'
             n += 1
         end
         close(stream)
@@ -169,7 +169,7 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     # SVD with small matrix
     println("SVD with small matrix : svd(B)")
     W, σ, V = svd(B)
-    U = Q*W
+    U = Q * W
     λ = σ .* σ ./ M
     # PC scores, Explained Variance
     Scores = zeros(Float32, M, dim)
@@ -178,5 +178,5 @@ function halko(input, outdir, scale, pseudocount, rowmeanlist, rowvarlist, colsu
     end
     ExpVar = sum(λ) / TotalVar
     # Return
-    return (V[:,1:dim], λ[1:dim], U[:,1:dim], Scores[:,1:dim], ExpVar, TotalVar)
+    return (V[:, 1:dim], λ[1:dim], U[:, 1:dim], Scores[:, 1:dim], ExpVar, TotalVar)
 end
