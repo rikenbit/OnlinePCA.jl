@@ -4,6 +4,10 @@ env:
   IMAGE_NAME: onlinepcajl
   repo-name: kokitsuyuzaki/OnlinePCA.jl
 
+permissions:
+  contents: read
+  packages: write
+
 on: [push, pull_request]
 
 jobs:
