@@ -1,11 +1,12 @@
 # OnlinePCA.jl
 Online Principal Component Analysis
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/stable)
-[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/latest)
-[![Build Status](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Build Status](https://travis-ci.org/rikenbit/OnlinePCA.jl.svg?branch=master)](https://travis-ci.org/rikenbit/OnlinePCA.jl)
+[![Build Status](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![DOI](https://zenodo.org/badge/125349253.svg)](https://zenodo.org/badge/latestdoi/125349253)
+
+## 📚 Documentation
+
+[![Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/latest)
 
 ## Description
 OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, performs some online-PCA functions for extreamly large scale matrix.
