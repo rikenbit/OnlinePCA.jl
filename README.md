@@ -5,7 +5,6 @@ Online Principal Component Analysis
 [![DOI](https://zenodo.org/badge/125349253.svg)](https://zenodo.org/badge/latestdoi/125349253)
 
 ## 📚 Documentation
-
 [![Latest](https://img.shields.io/badge/docs-dev-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/latest)
 
 ## Description
