@@ -1,5 +1,7 @@
 FROM julia:1.8.0-rc1-buster
 
+ENV JULIA_DEPOT_PATH=/usr/local/julia
+
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends apt-utils unzip \
 	&& apt-get clean \
