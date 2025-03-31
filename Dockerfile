@@ -5,4 +5,4 @@ RUN apt-get update \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
     && export JULIA_DEPOT_PATH="/usr/local/julia/" \
-    && julia -e 'import Pkg; Pkg.add(url="https://github.com/rikenbit/OnlinePCA.jl"); Pkg.add("PlotlyJS")'
+    && julia -e 'using Pkg; Pkg.Registry.add("General"); Pkg.add(url="https://github.com/rikenbit/OnlinePCA.jl"); Pkg.add("PlotlyJS")'
