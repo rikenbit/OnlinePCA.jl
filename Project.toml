@@ -2,7 +2,7 @@ name = "OnlinePCA"
 uuid = "975b03d1-ab45-5730-8389-540698ac00dc"
 license = "MIT"
 authors = ["Koki Tsuyuzaki <koki.tsuyuzaki@gmail.com>"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
@@ -22,5 +22,9 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 CodecZstd = "0.8"
+DataFrames = "1"
+Distributions = "0.25"
+DelimitedFiles = "1"
 Statistics = "1"
+StatsBase = "0.34"
 julia = "1"
