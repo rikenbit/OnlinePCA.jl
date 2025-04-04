@@ -3,7 +3,7 @@ println("####### Sparse Randomized SVD (Julia API) #######")
 out_sparse_rsvd = sparse_rsvd(input=joinpath(tmp, "Data.mtx.zst"),
 	dim=3,
 	rowmeanlist=joinpath(sparse_path, "Feature_FTTMeans.csv"),
-	logdir=sparse_path, chunksize=100)
+	logdir=sparse_path, chunksize=51)
 
 @test size(out_sparse_rsvd[1]) == (99, 3)
 @test size(out_sparse_rsvd[2]) == (3, )
@@ -14,7 +14,7 @@ out_sparse_rsvd = sparse_rsvd(input=joinpath(tmp, "Data.mtx.zst"),
 
 #####################################
 println("####### Sparse Randomized SVD (Command line) #######")
-run(`$(julia) $(joinpath(bindir, "sparse_rsvd")) --input $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --dim 3 --rowmeanlist $(joinpath(sparse_path, "Feature_FTTMeans.csv")) --logdir $(sparse_path) --chunksize 100`)
+run(`$(julia) $(joinpath(bindir, "sparse_rsvd")) --input $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --dim 3 --rowmeanlist $(joinpath(sparse_path, "Feature_FTTMeans.csv")) --logdir $(sparse_path) --chunksize 51`)
 
 testfilesize(true,
 	joinpath(sparse_path, "Eigen_vectors.csv"),
