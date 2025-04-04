@@ -36,10 +36,11 @@ OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, 
 - ADAGRAD : [John Duchi, et. al., 2011](http://www.jmlr.org/papers/volume12/duchi11a/duchi11a.pdf)
 
 ## Installation
-<!-- ```julia
-julia> Pkg.add("OnlinePCA")
+```julia
+julia> Pkg.add(url="https://github.com/rikenbit/OnlinePCA.jl.git")
+julia> Pkg.add("PlotlyJS")
 ```
- -->
+
 ```julia
 # push the key "]" and type the following command.
 (v1.7) pkg> add https://github.com/rikenbit/OnlinePCA.jl
@@ -453,3 +454,12 @@ done
 
 ps | grep julia
 ```
+
+## Contributing
+
+If you have suggestions for how `OnlineNMF.jl` could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
+
+For more, check out the [Contributing Guide](CONTRIBUTING.md).
+
+## Author
+- Koki Tsuyuzaki
