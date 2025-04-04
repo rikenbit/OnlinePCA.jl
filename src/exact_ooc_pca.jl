@@ -28,9 +28,6 @@ function exact_ooc_pca(; input::AbstractString="", outdir::Union{Nothing,Abstrac
     if dim > min(N, M)
         error("dim must be less than or equal to the minimum of N and M.")
     end
-    if chunksize > N
-        error("chunksize must be less than or equal to N.")
-    end
     # Covariance Matrix
     cov_mat, colmeanvec = ooc_cov(input, scale, pseudocount, chunksize, sparse_mode)
 

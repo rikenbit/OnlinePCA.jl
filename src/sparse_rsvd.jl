@@ -272,9 +272,6 @@ function sparseinit(input::AbstractString, dim::Number, chunksize::Number,
     if dim > min(N, M)
         error("dim must be less than or equal to the minimum of N and M.")
     end
-    if chunksize > N
-        error("chunksize must be less than or equal to N.")
-    end
     if initW == nothing
         W = zeros(Float32, M, dim)
         for i in 1:dim
