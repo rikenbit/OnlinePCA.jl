@@ -34,8 +34,8 @@ function exact_ooc_pca(; input::AbstractString="", outdir::Union{Nothing,Abstrac
     # Eigen value Deconposition
     out_eig = eigen(cov_mat)
     V = out_eig.vectors[:, 1:dim]
-    TotalVar = sum(out_eig.values)
-    ExpVar = sum(out_eig.values[1:dim]) / TotalVar
+    TotalVar = Float32(sum(out_eig.values))
+    ExpVar = Float32(sum(out_eig.values[1:dim]) / TotalVar)
 
     # V, λ, W, Scores
     println("# 3. PC Score (Z = XV) is being calculated.")
@@ -50,7 +50,7 @@ function exact_ooc_pca(; input::AbstractString="", outdir::Union{Nothing,Abstrac
         write_csv(joinpath(outdir, "ExpVar.csv"), ExpVar)
         write_csv(joinpath(outdir, "TotalVar.csv"), TotalVar)
     end
-    return (out[1], out[2], out[3], out[4], ExpVar, TotalVar)  
+    return (out[1], out[2], out[3], out[4], ExpVar, TotalVar)
 end
 
 # Out-of-Core Covariance Matrix Calculator
@@ -81,29 +81,40 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
             while n <= N
                 batch_size = min(chunksize, N - n + 1)
                 max_size = (batch_size + 1) * M # For overflow
-                rows = zeros(UInt32, max_size)
-                cols = zeros(UInt32, max_size)
-                vals = zeros(UInt32, max_size)
+                # pre-allocated buffer
+                rawbuf = Vector{UInt8}(undef, 12 * max_size)
+                readcount = 0
                 count = 0
                 ############### Overflow buffer ###############
                 if !isempty(overflow_buf)
+                    readcount += 1
                     count += 1
+                    rows = Vector{UInt32}(undef, max_size)
+                    cols = Vector{UInt32}(undef, max_size)
+                    vals = Vector{UInt32}(undef, max_size)
                     rows[count] = overflow_buf[1] - n + 1
                     cols[count] = overflow_buf[2]
                     vals[count] = overflow_buf[3]
                     empty!(overflow_buf)
+                else
+                    rows = Vector{UInt32}(undef, max_size)
+                    cols = Vector{UInt32}(undef, max_size)
+                    vals = Vector{UInt32}(undef, max_size)
                 end
                ###############################################
-                while !eof(stream)
-                    buf = zeros(UInt32, 3)
-                    read!(stream, buf)
+                while !eof(stream) && readcount < max_size
+                    nread = readbytes!(stream, view(rawbuf, 1:12))
+                    if nread < 12
+                        break
+                    end
+                    buf = reinterpret(UInt32, rawbuf)[1:3]
                     row, col, val = buf[1], buf[2], buf[3]
-                    if n ≤ row < n + batch_size
+                    if n <= row < n + batch_size
                         count += 1
-                        # Re-mapping row index
                         rows[count] = row - n + 1
                         cols[count] = col
                         vals[count] = val
+                        readcount += 1
                     else
                         overflow_buf = buf
                         break
@@ -113,11 +124,13 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
                 resize!(rows, count)
                 resize!(cols, count)
                 resize!(vals, count)
+                # Construct sparse matrix
                 if count > 0
                     X_chunk = sparse(rows, cols, vals, batch_size, M)
                 else
                     X_chunk = spzeros(batch_size, M)
                 end
+                # Normalize the chunk
                 normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount, colmeanvec)
                 cov_mat .+= normX_chunk' * normX_chunk
                 next!(progress)
@@ -128,9 +141,9 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
             # CSV / Dense Matrix
             ########################################
             X_chunk = zeros(UInt32, chunksize, M)
+            buffer = zeros(UInt32, chunksize * M)
             while n <= N
                 batch_size = min(chunksize, N - n + 1)
-                buffer = zeros(UInt32, chunksize * M)
                 read!(stream, view(buffer, 1:batch_size * M))
                 X_chunk[1:batch_size, :] .= permutedims(reshape(Float32.(buffer[1:batch_size * M]), Int(M), batch_size))
                 normX_chunk = normalize_X_chunk(X_chunk[1:batch_size, :], scale, pseudocount, colmeanvec)
