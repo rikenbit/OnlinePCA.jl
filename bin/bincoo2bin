@@ -1,0 +1,35 @@
+using OnlinePCA
+using ArgParse:
+    ArgParseSettings, parse_args, @add_arg_table!
+
+# options
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table! s begin
+        "--bincoofile", "-m"
+        help = "Binary COO file (e.g., Data.bincoo)."
+        arg_type = AbstractString
+        required = true
+        "--binfile", "-b"
+        help = "output file (Binary format)"
+        arg_type = AbstractString
+        required = true
+    end
+
+    return parse_args(s)
+end
+
+# main
+function main()
+    parsed_args = parse_commandline()
+    println("Parsed args:")
+    for (arg, val) in parsed_args
+        println("  $arg  =>  $val")
+    end
+
+    OnlinePCA.bincoo2bin(bincoofile=parsed_args["bincoofile"],
+        binfile=parsed_args["binfile"])
+end
+
+main()

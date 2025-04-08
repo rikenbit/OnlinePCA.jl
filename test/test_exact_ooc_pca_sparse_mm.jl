@@ -1,7 +1,7 @@
 #####################################
-println("####### Exact Out-of-Core PCA (Sparse, Julia API) #######")
+println("####### Exact Out-of-Core PCA (MM-Sparse, Julia API) #######")
 out_exact_ooc_pca = exact_ooc_pca(input=joinpath(tmp, "Data.mtx.zst"),
-	dim=3, chunksize=51, sparse_mode=true)
+	dim=3, chunksize=51, mode="sparse_mm")
 
 @test size(out_exact_ooc_pca[1]) == (99, 3)
 @test size(out_exact_ooc_pca[2]) == (3, )
@@ -12,8 +12,8 @@ out_exact_ooc_pca = exact_ooc_pca(input=joinpath(tmp, "Data.mtx.zst"),
 #####################################
 
 #####################################
-println("####### Exact Out-of-Core PCA (Sparse, Command line) #######")
-run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --dim 3 --chunksize 51 --sparse_mode "true"`)
+println("####### Exact Out-of-Core PCA (MM-Sparse, Command line) #######")
+run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --dim 3 --chunksize 51 --mode "sparse_mm"`)
 
 testfilesize(true,
 	joinpath(sparse_path, "Eigen_vectors.csv"),

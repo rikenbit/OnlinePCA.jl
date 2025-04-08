@@ -1,6 +1,6 @@
 #####################################
 println("####### Summarization (Julia API) #######")
-sumr(binfile=joinpath(tmp, "Data.mtx.zst"), outdir=sparse_path, sparse_mode=true)
+sumr(binfile=joinpath(tmp, "Data.mtx.zst"), outdir=sparse_path, mode="sparse_mm")
 
 testfilesize(true,
 	joinpath(sparse_path, "Sample_NoCounts.csv"),
@@ -34,7 +34,7 @@ testfilesize(true,
 
 #####################################
 println("####### Summarization (Command line) #######")
-run(`$(julia) $(joinpath(bindir, "sumr")) --binfile $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --sparse_mode "true"`)
+run(`$(julia) $(joinpath(bindir, "sumr")) --binfile $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --mode "sparse_mm"`)
 
 testfilesize(false,
 	joinpath(sparse_path, "Sample_NoCounts.csv"),

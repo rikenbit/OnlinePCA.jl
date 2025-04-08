@@ -36,6 +36,18 @@ write_csv(joinpath(tmp, "Data.csv"), data)
 # Matrix Market (MM)
 mmwrite(joinpath(tmp, "Data.mtx"), sparse(data))
 
+# Binary COO (BinCOO)
+bincoofile = joinpath(tmp, "Data.bincoo")
+open(bincoofile, "w") do io
+    for i in 1:size(data, 1)
+        for j in 1:size(data, 2)
+            if data[i, j] != 0
+                println(io, "$i $j")
+            end
+        end
+    end
+end
+
 # Output Directories
 dense_path = mktempdir()
 sparse_path = mktempdir()
@@ -45,6 +57,7 @@ println("Running all tests...")
 
 include("test_csv2bin.jl")
 include("test_mm2bin.jl")
+include("test_bincoo2bin.jl")
 include("test_sumr_dense.jl")
 include("test_sumr_sparse.jl")
 include("test_hvg.jl")
@@ -66,6 +79,7 @@ include("test_singlepass.jl")
 include("test_singlepass2.jl")
 include("test_sparse_rsvd.jl")
 include("test_exact_ooc_pca_dense.jl")
-include("test_exact_ooc_pca_sparse.jl")
+include("test_exact_ooc_pca_sparse_mm.jl")
+include("test_exact_ooc_pca_sparse_bincoo.jl")
 
 println("All tests completed.")

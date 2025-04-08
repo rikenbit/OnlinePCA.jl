@@ -20,10 +20,10 @@ function parse_commandline()
         help = "log10(exp + pseudocount)"
         arg_type = Union{Number,AbstractString}
         default = 1.0f0
-        "--sparse_mode", "-s"
-        help = "specified to use sparse matrix or not."
-        arg_type = Bool
-        default = false
+        "--mode", "-m"
+        help = "'dense' or 'sparse_mm' can be specified."
+        arg_type = AbstractString
+        default = "dense"
     end
 
     return parse_args(s)
@@ -43,13 +43,7 @@ function main()
         pseudocount = parse(Float32, parsed_args["pseudocount"])
     end
 
-    if parsed_args["sparse_mode"] == "true"
-        sparse_mode = true
-    else
-        sparse_mode = false
-    end
-
-    OnlinePCA.sumr(binfile=parsed_args["binfile"], outdir=parsed_args["outdir"], pseudocount=pseudocount, sparse_mode=sparse_mode)
+    OnlinePCA.sumr(binfile=parsed_args["binfile"], outdir=parsed_args["outdir"], pseudocount=pseudocount, mode=parsed_args["mode"])
 end
 
 main()

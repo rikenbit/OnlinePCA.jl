@@ -30,18 +30,12 @@ function main()
         chunksize = parsed_args["chunksize"]
     end
 
-    if parsed_args["sparse_mode"] == "true"
-        sparse_mode = true
-    else
-        sparse_mode = false
-    end
-
     out = OnlinePCA.exact_ooc_pca(input=parsed_args["input"],
         scale=parsed_args["scale"],
         pseudocount=pseudocount,
         dim=dim,
         chunksize=chunksize,
-        sparse_mode=sparse_mode)
+        mode=parsed_args["mode"])
 
     write_csv(joinpath(parsed_args["outdir"], "Eigen_vectors.csv"), out[1])
     write_csv(joinpath(parsed_args["outdir"], "Eigen_values.csv"), out[2])

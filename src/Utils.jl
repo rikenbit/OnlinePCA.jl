@@ -36,7 +36,7 @@ function tv(TotalVar::Number, X::AbstractArray)
 end
 
 # Column-wise statistics for sumr and exact_ooc_pca
-function nocounts(binfile::AbstractString, sparse_mode::Bool=false)
+function nocounts(binfile::AbstractString, mode::AbstractString)
     N, M = nm(binfile)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -44,28 +44,54 @@ function nocounts(binfile::AbstractString, sparse_mode::Bool=false)
     progress = Progress(N)
     open(binfile) do file
         stream = ZstdDecompressorStream(file)
-        read!(stream, tmpN)
-        read!(stream, tmpM)
-        if sparse_mode
-            # MM / Sparse Matrix
-            while !eof(stream)
-                buf = zeros(UInt32, 3)  # (row, col, val)
-                read!(stream, buf)
-                _, col, val = buf[1], buf[2], buf[3]
-
-                if 1 ≤ col ≤ M  # col の範囲チェック
-                    nc[col] += val
-                else
-                    println("Warning: Out-of-bounds column index ", col)
-                end
-            end
-        else
+        if mode == "dense" || mode == "sparse_mm"
+            read!(stream, tmpN)
+            read!(stream, tmpM)
+        end
+        ########################################
+        # CSV / Dense Matrix
+        ########################################
+        if mode == "dense"
             # CSV / Dense Matrix
             x = zeros(UInt32, M)
             for n = 1:N
                 read!(stream, x)
                 nc .+= x
                 next!(progress)
+            end
+        end
+        ########################################
+        # MM / Sparse Matrix
+        ########################################
+        if mode == "sparse_mm"
+            # MM / Sparse Matrix
+            while !eof(stream)
+                buf = zeros(UInt32, 3)  # (row, col, val)
+                read!(stream, buf)
+                _, col, val = buf[1], buf[2], buf[3]
+
+                if 1 ≤ col ≤ M
+                    nc[col] += val
+                else
+                    println("Warning: Out-of-bounds column index ", col)
+                end
+            end
+        end
+        ########################################
+        # Binary COO / Sparse Matrix
+        ########################################
+        if mode == "sparse_bincoo"
+            record = Vector{UInt8}(undef, 8)
+            while !eof(stream)
+                nread = readbytes!(stream, record)
+                if nread < 8
+                    break
+                end
+                rcv = reinterpret(UInt32, record)
+                row = rcv[1]
+                col = 1 * rcv[2]
+                @assert 1 ≤ col ≤ M "Invalid column index: $col"
+                nc[col] += 1
             end
         end
         close(stream)
@@ -201,10 +227,10 @@ function parse_commandline(pca::EXACT_OOC_PCA)
         help = "The number of rows reading at once (e.g. 1)."
         arg_type = Union{Number,AbstractString}
         default = 1
-        "--sparse_mode", "-s"
-        help = "If the input file is in the Matrix Market format, set this to `true`."
-        arg_type = Union{Number,AbstractString}
-        default = "false"
+        "--mode", "-m"
+        help = "'dense', 'sparse_mm', or 'sparse_bincoo' can be specified."
+        arg_type = AbstractString
+        default = "dense"
     end
 
     return parse_args(s)

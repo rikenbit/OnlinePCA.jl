@@ -320,7 +320,7 @@ out_tenxpca = tenxpca(tenxfile="Data.h5", scale="sqrt",
 mm2bin(mmfile=joinpath(tmp, "Data.mtx"), binfile=joinpath(tmp, "Data.mtx.zst"))
 
 sparse_path = mktempdir()
-sumr(binfile=joinpath(tmp, "Data.mtx.zst"), outdir=sparse_path, sparse_mode=true)
+sumr(binfile=joinpath(tmp, "Data.mtx.zst"), outdir=sparse_path, mode="sparse_mm")
 ```
 
 ### Sparse Randomized SVD for MM format
@@ -353,18 +353,33 @@ csv2bin(csvfile=joinpath(tmp2, "Data2.csv"), binfile=joinpath(tmp2, "Data2.zst")
 # Matrix Market (MM)
 mmwrite(joinpath(tmp2, "Data2.mtx"), sparse(data2))
 
-# Binarization (Zstandard)
+# Binary COO (BinCOO)
+bincoofile = joinpath(tmp2, "Data2.bincoo")
+open(bincoofile, "w") do io
+    for i in 1:size(data2, 1)
+        for j in 1:size(data2, 2)
+            if data2[i, j] != 0
+                println(io, "$i $j")
+            end
+        end
+    end
+end
+
+# Binarization (CSV + Zstandard)
 csv2bin(csvfile=joinpath(tmp2, "Data2.csv"), binfile=joinpath(tmp2, "Data2.zst"))
 
-# Binarization (Zstandard)
+# Binarization (MM + Zstandard)
 mm2bin(mmfile=joinpath(tmp2, "Data2.mtx"), binfile=joinpath(tmp2, "Data2.mtx.zst"))
+
+# Binarziation (BinCOO + Zstandard)
+bincoo2bin(bincoofile=bincoofile, binfile=joinpath(tmp2, "Data2.bincoo.zst"))
 ```
 
 ```julia
 # Dense-mode
 out_exact_ooc_pca_dense = exact_ooc_pca(
 	input=joinpath(tmp2, "Data2.zst"),
-	scale="ftt", dim=3, chunksize=10, sparse_mode=false)
+	scale="ftt", dim=3, chunksize=10)
 
 subplots(out_exact_ooc_pca_dense[3], group)
 ```
@@ -374,11 +389,11 @@ subplots(out_exact_ooc_pca_dense[3], group)
 # Sparse-mode
 out_exact_ooc_pca_sparse = exact_ooc_pca(
 	input=joinpath(tmp2, "Data2.mtx.zst"),
-	scale="ftt", dim=3, chunksize=10, sparse_mode=true)
+	scale="ftt", dim=3, chunksize=10, mode="sparse_mm")
 
 subplots(out_exact_ooc_pca_sparse[3], group)
 ```
-![exact_ooc_pca_sparse](./docs/src/figure/exact_ooc_pca_sparse.png)
+![exact_ooc_pca_sparse_mm](./docs/src/figure/exact_ooc_pca_sparse_mm.png)
 
 ## Command line usage
 All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.

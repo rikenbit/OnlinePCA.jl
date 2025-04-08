@@ -27,11 +27,12 @@ using Distributions:
 using CodecZstd:
     ZstdCompressorStream, ZstdDecompressorStream
 
-export output, parse_commandline, csv2bin, sumr, tenxsumr, filtering, hvg, sgd, oja, ccipca, gd, rsgd, svrg, rsvrg, orthiter, arnoldi, lanczos, halko, algorithm971, rbkiter, singlepass, singlepass2, tenxpca, mm2bin, sparse_rsvd, exact_ooc_pca
+export output, parse_commandline, csv2bin, sumr, tenxsumr, filtering, hvg, sgd, oja, ccipca, gd, rsgd, svrg, rsvrg, orthiter, arnoldi, lanczos, halko, algorithm971, rbkiter, singlepass, singlepass2, tenxpca, mm2bin, sparse_rsvd, exact_ooc_pca, bincoo2bin
 
 include("Utils.jl")
 include("csv2bin.jl")
 include("mm2bin.jl")
+include("bincoo2bin.jl")
 include("sumr.jl")
 include("tenxsumr.jl")
 include("filtering.jl")
