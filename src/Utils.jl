@@ -67,7 +67,6 @@ function nocounts(binfile::AbstractString, mode::AbstractString, chunksize::Int)
                 buf = zeros(UInt32, 3)  # (row, col, val)
                 read!(stream, buf)
                 _, col, val = buf[1], buf[2], buf[3]
-
                 if 1 ≤ col ≤ M
                     nc[col] += val
                 else
@@ -79,22 +78,14 @@ function nocounts(binfile::AbstractString, mode::AbstractString, chunksize::Int)
         # Binary COO / Sparse Matrix
         ########################################
         if mode == "sparse_bincoo"
-            record_size = 8 # 2 * UInt32
-            buf = Vector{UInt8}(undef, record_size * chunksize)
+            buf = zeros(UInt32, 2)
             while !eof(stream)
-                nread = readbytes!(stream, buf)
-                if nread % record_size != 0
-                    error("Corrupted bincoo stream: $nread bytes is not a multiple of $record_size")
-                end
-                coords = reinterpret(UInt32, view(buf, 1:nread))
-                ncoords = div(nread, 4)
-                @inbounds for i in 1:2:ncoords
-                    col = coords[i + 1]
-                    if 1 ≤ col ≤ M
-                        nc[col] += 1
-                    else
-                        @warn "Out-of-bounds column index $col"
-                    end
+                read!(stream, buf)
+                _, col = buf
+                if 1 ≤ col ≤ M
+                    nc[col] += 1
+                else
+                    println("Warning: Out-of-bounds column index ", col)
                 end
             end
         end

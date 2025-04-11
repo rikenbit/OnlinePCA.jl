@@ -148,8 +148,6 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
         ########################################
         if mode == "sparse_bincoo"
             overflow_buf = UInt32[]
-            record_size = 8 # UInt32 (row) + UInt32 (col)
-            buf = Vector{UInt8}(undef, record_size)
             while n <= N
                 batch_size = min(chunksize, N - n + 1)
                 max_size = (batch_size + 1) * M
@@ -158,59 +156,41 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
                 vals = ones(UInt32, max_size)
                 count = 0
                 ############### Overflow buffer ###############
-                overflow_count = length(overflow_buf) ÷ 2
-                overflow_used = 0
-                for i in 1:overflow_count
-                    row, col = overflow_buf[2i-1], overflow_buf[2i]
-                    if row >= n && row < n + batch_size
+                if !isempty(overflow_buf)
+                    row, col = overflow_buf
+                    if n ≤ row < n + batch_size
                         count += 1
-                        # Re-mapping row index
                         rows[count] = row - n + 1
                         cols[count] = col
-                        overflow_used += 2
-                    else
-                        break
+                        empty!(overflow_buf)
                     end
                 end
-                overflow_buf = overflow_buf[(overflow_used + 1):end]
                 ###############################################
-                # Read data
+                buf = zeros(UInt32, 2)
                 while !eof(stream)
                     read!(stream, buf)
-                    rcv = reinterpret(UInt32, buf)
-                    row, col = rcv[1], rcv[2]
-        
-                    if row >= n && row < n + batch_size
+                    row, col = buf
+                    if n ≤ row < n + batch_size
                         count += 1
                         rows[count] = row - n + 1
                         cols[count] = col
                     else
-                        append!(overflow_buf, [row, col])
+                        overflow_buf = [row, col]
                         break
                     end
                 end
-                # Process remaining overflow data after EOF
-                if eof(stream) && !isempty(overflow_buf)
-                    continue
-                end
-                # Remove 0s from the end
                 resize!(rows, count)
                 resize!(cols, count)
                 resize!(vals, count)
-                # Construct sparse matrix
                 if count > 0
                     X_chunk = sparse(rows, cols, vals, batch_size, M)
                 else
                     X_chunk = spzeros(batch_size, M)
                 end
-                # Normalize the chunk
                 normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount, colmeanvec)
                 cov_mat .+= normX_chunk' * normX_chunk
                 next!(progress)
                 n += batch_size
-                if eof(stream) && isempty(overflow_buf)
-                    break
-                end
             end
         end
     end
@@ -315,41 +295,35 @@ function VλW(V::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
         # Binary COO / Sparse Matrix
         ########################################
         if mode == "sparse_bincoo"
-            record = Vector{UInt8}(undef, 8)
-            overflow_buf = UInt8[]
+            overflow_buf = UInt32[]
             while n <= N
                 batch_size = min(chunksize, N - n + 1)
                 max_size = (batch_size + 1) * M
-                rows = Vector{UInt32}(undef, max_size)
-                cols = Vector{UInt32}(undef, max_size)
+                rows = zeros(UInt32, max_size)
+                cols = zeros(UInt32, max_size)
                 vals = ones(Float32, max_size)
                 count = 0
                 ########### Overflow buffer ############
                 if !isempty(overflow_buf)
-                    if length(overflow_buf) < 8
-                        error("Corrupted overflow_buf")
+                    row, col = overflow_buf
+                    if n ≤ row < n + batch_size
+                        count += 1
+                        rows[count] = row - n + 1
+                        cols[count] = col
+                        empty!(overflow_buf)
                     end
-                    rcv = reinterpret(UInt32, overflow_buf)
-                    count += 1
-                    rows[count] = rcv[1] - n + 1
-                    cols[count] = rcv[2]
-                    empty!(overflow_buf)
                 end
                 ########################################
+                buf = zeros(UInt32, 2)
                 while !eof(stream)
-                    nread = readbytes!(stream, record)
-                    if nread < 8
-                        break
-                    end
-                    rcv = reinterpret(UInt32, record)
-                    row, col = rcv[1], rcv[2]
+                    read!(stream, buf)
+                    row, col = buf
                     if n ≤ row < n + batch_size
                         count += 1
                         rows[count] = row - n + 1
                         cols[count] = col
                     else
-                        resize!(overflow_buf, 8)
-                        overflow_buf .= record
+                        overflow_buf = [row, col]
                         break
                     end
                 end

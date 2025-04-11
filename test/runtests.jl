@@ -7,6 +7,7 @@ using Statistics
 using Distributions
 using SparseArrays
 using MatrixMarket
+using LinearAlgebra
 
 # Setting
 ## Input Directory
@@ -25,10 +26,7 @@ function testfilesize(remove::Bool, x...)
 	end
 end
 
-data = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 300, 99)))
-data[1:50, 1:33] .= 100*data[1:50, 1:33]
-data[51:100, 34:66] .= 100*data[51:100, 34:66]
-data[101:150, 67:99] .= 100*data[101:150, 67:99]
+data = Int64.(ceil.(rand(Binomial(1, 0.5), 300, 99)))
 
 # CSV
 write_csv(joinpath(tmp, "Data.csv"), data)
@@ -78,8 +76,6 @@ include("test_algorithm971.jl")
 include("test_singlepass.jl")
 include("test_singlepass2.jl")
 include("test_sparse_rsvd.jl")
-include("test_exact_ooc_pca_dense.jl")
-include("test_exact_ooc_pca_sparse_mm.jl")
-include("test_exact_ooc_pca_sparse_bincoo.jl")
+include("test_exact_ooc_pca.jl")
 
 println("All tests completed.")

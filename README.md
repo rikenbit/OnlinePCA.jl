@@ -386,14 +386,24 @@ subplots(out_exact_ooc_pca_dense[3], group)
 ![exact_ooc_pca_dense](./docs/src/figure/exact_ooc_pca_dense.png)
 
 ```julia
-# Sparse-mode
-out_exact_ooc_pca_sparse = exact_ooc_pca(
+# Sparse-mode (MM)
+out_exact_ooc_pca_sparse_mm = exact_ooc_pca(
 	input=joinpath(tmp2, "Data2.mtx.zst"),
 	scale="ftt", dim=3, chunksize=10, mode="sparse_mm")
 
-subplots(out_exact_ooc_pca_sparse[3], group)
+subplots(out_exact_ooc_pca_sparse_mm[3], group)
 ```
 ![exact_ooc_pca_sparse_mm](./docs/src/figure/exact_ooc_pca_sparse_mm.png)
+
+```julia
+# Sparse-mode (BinCOO)
+out_exact_ooc_pca_sparse_bincoo = exact_ooc_pca(
+	input=joinpath(tmp2, "Data2.mtx.zst"),
+	scale="ftt", dim=3, chunksize=10, mode="sparse_bincoo")
+
+subplots(out_exact_ooc_pca_sparse_bincoo[3], group)
+```
+![exact_ooc_pca_sparse_bincoo](./docs/src/figure/exact_ooc_pca_sparse_mm.png)
 
 ## Command line usage
 All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.
