@@ -36,7 +36,7 @@ function tv(TotalVar::Number, X::AbstractArray)
 end
 
 # Column-wise statistics for sumr and exact_ooc_pca
-function nocounts(binfile::AbstractString, mode::AbstractString)
+function nocounts(binfile::AbstractString, mode::AbstractString, chunksize::Int)
     N, M = nm(binfile)
     tmpN = zeros(UInt32, 1)
     tmpM = zeros(UInt32, 1)
@@ -44,10 +44,8 @@ function nocounts(binfile::AbstractString, mode::AbstractString)
     progress = Progress(N)
     open(binfile) do file
         stream = ZstdDecompressorStream(file)
-        if mode == "dense" || mode == "sparse_mm"
-            read!(stream, tmpN)
-            read!(stream, tmpM)
-        end
+        read!(stream, tmpN)
+        read!(stream, tmpM)
         ########################################
         # CSV / Dense Matrix
         ########################################
@@ -81,17 +79,23 @@ function nocounts(binfile::AbstractString, mode::AbstractString)
         # Binary COO / Sparse Matrix
         ########################################
         if mode == "sparse_bincoo"
-            record = Vector{UInt8}(undef, 8)
+            record_size = 8 # 2 * UInt32
+            buf = Vector{UInt8}(undef, record_size * chunksize)
             while !eof(stream)
-                nread = readbytes!(stream, record)
-                if nread < 8
-                    break
+                nread = readbytes!(stream, buf)
+                if nread % record_size != 0
+                    error("Corrupted bincoo stream: $nread bytes is not a multiple of $record_size")
                 end
-                rcv = reinterpret(UInt32, record)
-                row = rcv[1]
-                col = 1 * rcv[2]
-                @assert 1 ≤ col ≤ M "Invalid column index: $col"
-                nc[col] += 1
+                coords = reinterpret(UInt32, view(buf, 1:nread))
+                ncoords = div(nread, 4)
+                @inbounds for i in 1:2:ncoords
+                    col = coords[i + 1]
+                    if 1 ≤ col ≤ M
+                        nc[col] += 1
+                    else
+                        @warn "Out-of-bounds column index $col"
+                    end
+                end
             end
         end
         close(stream)

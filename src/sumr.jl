@@ -1,5 +1,5 @@
 """
-    sumr(; binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0, mode::AbstractString="dense")
+    sumr(; binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0, mode::AbstractString="dense", chunksize::Int=1)
 
 Extract the summary information of data matrix.
 
@@ -9,6 +9,7 @@ Input Arguments
 - `outdir` is specified the directory you want to save the result.
 - `pseudocount` is specified to avoid NaN by log10(0) and used when `Feature_LogMeans.csv` <log10(mean+pseudocount) value of each feature> is generated.
 - `mode` : "dense" or "sparse_mm" can be specified.
+- `chunksize` : The number of rows to be read at once.
 
 Output Files
 ---------
@@ -22,12 +23,12 @@ Output Files
 - `Feature_CV2s.csv` : Coefficient of Variation in each row.
 - `Feature_NoZeros.csv` : Number of zero-elements in each row.
 """
-function sumr(; binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0, mode::AbstractString="dense")
+function sumr(; binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0, mode::AbstractString="dense", chunksize::Int=1)
     # Argument Check
     @assert mode in ("dense", "sparse_mm")
     # 1 / 2 : Column-wise statistics
     println("1 / 2 : Column-wise statistics are calculated...")
-    Sample_NoCounts = nocounts(binfile, mode)
+    Sample_NoCounts = nocounts(binfile, mode, chunksize)
 
     # 2 / 2 : Row-wise statistics
     println("2 / 2 : Row-wise statistics are calculated...")
