@@ -84,8 +84,12 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
                 batch_size = min(chunksize, N - n + 1)
                 read!(stream, view(buffer, 1:batch_size * M))
                 X_chunk[1:batch_size, :] .= permutedims(reshape(Float32.(buffer[1:batch_size * M]), Int(M), batch_size))
-                normX_chunk = normalize_X_chunk(X_chunk[1:batch_size, :], scale, pseudocount, colmeanvec)
-                cov_mat .+= normX_chunk' * normX_chunk
+                if scale == "raw"
+                    cov_mat .+= X_chunk' * X_chunk
+                else
+                    normX_chunk = normalize_X_chunk(X_chunk[1:batch_size, :], scale, pseudocount)
+                    cov_mat .+= normX_chunk' * normX_chunk
+                end
                 next!(progress)
                 n += batch_size
             end
@@ -136,9 +140,13 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
                 else
                     X_chunk = spzeros(batch_size, M)
                 end
-                # Normalize the chunk
-                normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount, colmeanvec)
-                cov_mat .+= normX_chunk' * normX_chunk
+                if scale == "raw"
+                    cov_mat .+= X_chunk' * X_chunk
+                else
+                    # Normalize the chunk
+                    normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount)
+                    cov_mat .+= normX_chunk' * normX_chunk
+                end
                 next!(progress)
                 n += batch_size
             end
@@ -187,25 +195,34 @@ function ooc_cov(input::AbstractString="", scale::AbstractString="ftt", pseudoco
                 else
                     X_chunk = spzeros(batch_size, M)
                 end
-                normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount, colmeanvec)
-                cov_mat .+= normX_chunk' * normX_chunk
+                if scale == "raw"
+                    cov_mat .+= X_chunk' * X_chunk
+                else
+                    # Normalize the chunk
+                    normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount)
+                    cov_mat .+= normX_chunk' * normX_chunk
+                end
                 next!(progress)
                 n += batch_size
             end
         end
     end
     finish!(progress)
+    if scale == "raw"
+        cov_mat -= (colmeanvec * colmeanvec') ./ N
+    end
     cov_mat = cov_mat ./ (N - 1)
     return cov_mat, colmeanvec
 end
 
 # normalize X w/o rowmeanlist, rowmeanvec, rowvarlist, rowvarvec, colsumlist, colsumvec
-function normalize_X_chunk(X_chunk, scale::AbstractString, pseudocount::Number, colmeanvec::Vector{Float32})
+function normalize_X_chunk(X_chunk, scale::AbstractString, pseudocount::Number)
     if scale == "log"
         X_chunk = log10.(X_chunk .+ pseudocount)
     elseif scale == "ftt"
         X_chunk = sqrt.(X_chunk) .+ sqrt.(X_chunk .+ 1.0f0)
     end
+    colmeanvec = vec(mean(X_chunk, dims=1))
     return X_chunk .- reshape(colmeanvec, 1, :)
 end
 
@@ -235,7 +252,7 @@ function VλW(V::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
                 end
                 read!(stream, view(buffer, 1:batch_size * M))
                 X_chunk[1:batch_size, :] .= permutedims(reshape(Float32.(buffer[1:batch_size * M]), Int(M), batch_size))
-                normX_chunk = normalize_X_chunk(X_chunk[1:batch_size, :], scale, pseudocount, colmeanvec)
+                normX_chunk = normalize_X_chunk(X_chunk[1:batch_size, :], scale, pseudocount)
                 W[batch_count+1:batch_count+batch_size, :] .= normX_chunk * V
                 batch_count += batch_size
                 next!(progress)
@@ -285,7 +302,7 @@ function VλW(V::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
                 else
                     X_chunk = spzeros(batch_size, M)
                 end
-                normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount, colmeanvec)
+                normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount)
                 W[n:n+batch_size-1, :] .= normX_chunk * V
                 n += batch_size
                 next!(progress)
@@ -335,7 +352,7 @@ function VλW(V::AbstractArray, input::AbstractString, dim::Number, scale::Abstr
                 else
                     X_chunk = spzeros(batch_size, M)
                 end
-                normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount, colmeanvec)
+                normX_chunk = normalize_X_chunk(X_chunk, scale, pseudocount)
                 W[n:n+batch_size-1, :] .= normX_chunk * V
                 n += batch_size
                 next!(progress)

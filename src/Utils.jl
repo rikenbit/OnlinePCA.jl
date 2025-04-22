@@ -929,6 +929,8 @@ function nm(input::AbstractString)
         read!(stream, M)
         close(stream)
     end
+    @assert isa(N[1], UInt32)
+    @assert isa(M[1], UInt32)
     return N[], M[]
 end
 
