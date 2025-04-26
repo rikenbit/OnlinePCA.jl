@@ -16,7 +16,12 @@ function bincoo2bin(; bincoofile::AbstractString="", binfile::AbstractString="")
     # Step 1: Read the BinCOO file and get max_row and max_col
     open(bincoofile, "r") do infile
         for line in eachline(infile)
-            row, col = parse.(UInt32, split(line))
+            parts = split(line; keepempty=false)
+            if length(parts) != 2
+                error("Invalid line format: expected 2 fields, got $(length(parts)): $line")
+            end
+            row = parse(UInt32, parts[1])
+            col = parse(UInt32, parts[2])
             push!(data, (row, col))
             max_row = max(max_row, row)
             max_col = max(max_col, col)
@@ -24,7 +29,6 @@ function bincoo2bin(; bincoofile::AbstractString="", binfile::AbstractString="")
     end
     # Step 2: Column-wise Sorting
     sorted_data = sort(data, by = x -> (x[1], x[2]))
-
     # Step 3: Write to compressed binary file
     open(binfile, "w") do outfile
         stream = ZstdCompressorStream(outfile)
@@ -37,3 +41,4 @@ function bincoo2bin(; bincoofile::AbstractString="", binfile::AbstractString="")
         close(stream)
     end
 end
+
