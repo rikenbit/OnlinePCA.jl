@@ -9,7 +9,7 @@ using DelimitedFiles:
 using Statistics:
     mean, var, median
 using LinearAlgebra:
-    Diagonal, lu!, qr!, svd, svd!, dot, norm, eigvecs, tr, eigen
+    Diagonal, lu!, qr!, svd, svd!, dot, norm, eigvecs, tr, eigen, I
 using Random:
     randperm
 using ProgressMeter:

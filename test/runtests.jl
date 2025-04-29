@@ -27,6 +27,10 @@ function testfilesize(remove::Bool, x...)
 end
 
 data = Int64.(ceil.(rand(Binomial(1, 0.5), 300, 99)))
+data[1:100, 1:33] .= Int64.(ceil.(rand(Binomial(1, 0.8), 100, 33)))
+data[101:200, 34:66] .= Int64.(ceil.(rand(Binomial(1, 0.8), 100, 33)))
+data[201:300, 67:99] .= Int64.(ceil.(rand(Binomial(1, 0.8), 100, 33)))
+centered_data = data .- mean(data, dims=1) # for test_exact_ooc_pca.jl
 
 # CSV
 write_csv(joinpath(tmp, "Data.csv"), data)

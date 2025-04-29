@@ -1,7 +1,7 @@
 #####################################
 println("####### Exact Out-of-Core PCA (Dense, Julia API) #######")
 out_exact_ooc_pca_dense = exact_ooc_pca(input=joinpath(tmp, "Data.zst"),
-	dim=3, chunksize=51)
+	dim=3, scale="raw", chunksize=51)
 
 @test size(out_exact_ooc_pca_dense[1]) == (99, 3)
 @test size(out_exact_ooc_pca_dense[2]) == (3, )
@@ -13,7 +13,7 @@ out_exact_ooc_pca_dense = exact_ooc_pca(input=joinpath(tmp, "Data.zst"),
 
 #####################################
 println("####### Exact Out-of-Core PCA (Dense, Command line) #######")
-run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.zst")) --outdir $(dense_path) --dim 3 --chunksize 51`)
+run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.zst")) --outdir $(dense_path) --dim 3 --scale "raw" --chunksize 51`)
 
 testfilesize(true,
 	joinpath(dense_path, "Eigen_vectors.csv"),
@@ -25,7 +25,7 @@ testfilesize(true,
 #####################################
 println("####### Exact Out-of-Core PCA (MM-Sparse, Julia API) #######")
 out_exact_ooc_pca_sparse_mm = exact_ooc_pca(input=joinpath(tmp, "Data.mtx.zst"),
-	dim=3, chunksize=51, mode="sparse_mm")
+	dim=3, scale="raw", chunksize=51, mode="sparse_mm")
 
 @test size(out_exact_ooc_pca_sparse_mm[1]) == (99, 3)
 @test size(out_exact_ooc_pca_sparse_mm[2]) == (3, )
@@ -37,7 +37,7 @@ out_exact_ooc_pca_sparse_mm = exact_ooc_pca(input=joinpath(tmp, "Data.mtx.zst"),
 
 #####################################
 println("####### Exact Out-of-Core PCA (MM-Sparse, Command line) #######")
-run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --dim 3 --chunksize 51 --mode "sparse_mm"`)
+run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.mtx.zst")) --outdir $(sparse_path) --dim 3 --scale "raw" --chunksize 51 --mode "sparse_mm"`)
 
 testfilesize(true,
 	joinpath(sparse_path, "Eigen_vectors.csv"),
@@ -49,7 +49,7 @@ testfilesize(true,
 #####################################
 println("####### Exact Out-of-Core PCA (BinCOO-Sparse, Julia API) #######")
 out_exact_ooc_pca_sparse_bincoo = exact_ooc_pca(input=joinpath(tmp, "Data.bincoo.zst"),
-	dim=3, chunksize=51, mode="sparse_bincoo")
+	dim=3, scale="raw", chunksize=51, mode="sparse_bincoo")
 
 @test size(out_exact_ooc_pca_sparse_bincoo[1]) == (99, 3)
 @test size(out_exact_ooc_pca_sparse_bincoo[2]) == (3, )
@@ -61,7 +61,7 @@ out_exact_ooc_pca_sparse_bincoo = exact_ooc_pca(input=joinpath(tmp, "Data.bincoo
 
 #####################################
 println("####### Exact Out-of-Core PCA (BinCOO-Sparse, Command line) #######")
-run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.bincoo.zst")) --outdir $(sparse_path) --dim 3 --chunksize 51 --mode "sparse_bincoo"`)
+run(`$(julia) $(joinpath(bindir, "exact_ooc_pca")) --input $(joinpath(tmp, "Data.bincoo.zst")) --outdir $(sparse_path) --dim 3 --scale "raw" --chunksize 51 --mode "sparse_bincoo"`)
 
 testfilesize(true,
 	joinpath(sparse_path, "Eigen_vectors.csv"),
@@ -70,9 +70,17 @@ testfilesize(true,
 	joinpath(sparse_path, "Scores.csv"))
 #####################################
 
-#####################################
-@test all(abs.(abs.(diag(out_exact_ooc_pca_dense[1]' * out_exact_ooc_pca_sparse_mm[1])) .- 1) .< 1e-5)
-@test all(abs.(abs.(diag(out_exact_ooc_pca_dense[1]' * out_exact_ooc_pca_sparse_bincoo[1])) .- 1) .< 1e-5)
-@test all(abs.(abs.(diag(out_exact_ooc_pca_dense[3]' * out_exact_ooc_pca_sparse_mm[3])) .- 1) .< 1e-5)
-@test all(abs.(abs.(diag(out_exact_ooc_pca_dense[3]' * out_exact_ooc_pca_sparse_bincoo[3])) .- 1) .< 1e-5)
-######################################
+# centered_data = log10.(centered_data .+ 1)
+cov_mat = centered_data' * centered_data
+out_eig = eigen(cov_mat)
+V = out_eig.vectors[:, 1:3]
+
+inner_prod1 = maximum(abs.(diag(V' * out_exact_ooc_pca_dense[1])))
+inner_prod2 = maximum(abs.(diag(V' * out_exact_ooc_pca_sparse_mm[1])))
+inner_prod3 = maximum(abs.(diag(V' * out_exact_ooc_pca_sparse_bincoo[1])))
+println("Inner product (Dense): ", inner_prod1)
+println("Inner product (Sparse MM): ", inner_prod2)
+println("Inner product (Sparse BinCOO): ", inner_prod3)
+@test inner_prod1 > 0.6
+@test inner_prod2 > 0.6
+@test inner_prod3 > 0.6

@@ -42,7 +42,7 @@ function nocounts(binfile::AbstractString, mode::AbstractString, chunksize::Int)
     tmpM = zeros(UInt32, 1)
     nc = zeros(UInt32, M)
     progress = Progress(N)
-    open(binfile) do file
+    open(binfile, "r") do file
         stream = ZstdDecompressorStream(file)
         read!(stream, tmpN)
         read!(stream, tmpM)

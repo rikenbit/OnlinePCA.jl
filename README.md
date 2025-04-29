@@ -341,6 +341,10 @@ Unlike other PCAs, this function assumes matrix data with data x dimensions. It 
 ```julia
 # CSV
 tmp2 = mktempdir()
+# data2 = Int64.(ceil.(rand(Binomial(1, 0.2), 300, 99)))
+# data2[1:100, 1:33] .= 1
+# data2[101:200, 34:66] .= 1
+# data2[201:300, 67:99] .= 1
 data2 = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 99, 30)))
 data2[1:33, 1:10] .= 100*data2[1:33, 1:10]
 data2[34:66, 11:20] .= 100*data2[34:66, 11:20]
@@ -379,7 +383,7 @@ bincoo2bin(bincoofile=bincoofile, binfile=joinpath(tmp2, "Data2.bincoo.zst"))
 # Dense-mode
 out_exact_ooc_pca_dense = exact_ooc_pca(
 	input=joinpath(tmp2, "Data2.zst"),
-	scale="ftt", dim=3, chunksize=10)
+	scale="raw", dim=3, chunksize=10)
 
 subplots(out_exact_ooc_pca_dense[3], group)
 ```
@@ -389,7 +393,7 @@ subplots(out_exact_ooc_pca_dense[3], group)
 # Sparse-mode (MM)
 out_exact_ooc_pca_sparse_mm = exact_ooc_pca(
 	input=joinpath(tmp2, "Data2.mtx.zst"),
-	scale="ftt", dim=3, chunksize=10, mode="sparse_mm")
+	scale="raw", dim=3, chunksize=10, mode="sparse_mm")
 
 subplots(out_exact_ooc_pca_sparse_mm[3], group)
 ```
@@ -398,12 +402,12 @@ subplots(out_exact_ooc_pca_sparse_mm[3], group)
 ```julia
 # Sparse-mode (BinCOO)
 out_exact_ooc_pca_sparse_bincoo = exact_ooc_pca(
-	input=joinpath(tmp2, "Data2.mtx.zst"),
-	scale="ftt", dim=3, chunksize=10, mode="sparse_bincoo")
+	input=joinpath(tmp2, "Data2.bincoo.zst"),
+	scale="raw", dim=3, chunksize=10, mode="sparse_bincoo")
 
 subplots(out_exact_ooc_pca_sparse_bincoo[3], group)
 ```
-![exact_ooc_pca_sparse_bincoo](./docs/src/figure/exact_ooc_pca_sparse_mm.png)
+![exact_ooc_pca_sparse_bincoo](./docs/src/figure/exact_ooc_pca_sparse_bincoo.png)
 
 ## Command line usage
 All the CSV preprocess functions and PCA functions also can be performed as command line tools with same parameter names like below.
