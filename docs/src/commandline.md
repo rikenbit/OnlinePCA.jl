@@ -20,6 +20,13 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/mm2bin \
 --binfile OUTDIR/Data.mtx.zst
 ```
 
+## Binarization (Binary COO <BinCOO> file)
+```bash
+shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/bincoo2bin \
+--mmfile Data.bincoo \
+--binfile OUTDIR/Data.bincoo.zst
+```
+
 ## Summarization (CSV file)
 ```bash
 shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/sumr \
@@ -457,7 +464,7 @@ shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/sparse_rsvd \
 shell> julia YOUR_HOME_DIR/.julia/v1.x/OnlinePCA/bin/exact_ooc_pca \
 --input Data.mtx.zst \
 --outdir OUTDIR \
---scale ftt \
+--scale raw \
 --pseudocount 1f0 \
 --dim 3 \
 --chunksize 5000 \

@@ -10,6 +10,11 @@ csv2bin(;csvfile::AbstractString="", binfile::AbstractString="")
 mm2bin(;mmfile::AbstractString="", binfile::AbstractString="")
 ```
 
+## Binarization (Binary COO <BinCOO> file)
+```@docs
+bincoo2bin(;bincoofile::AbstractString="", binfile::AbstractString="")
+```
+
 ## Summarization
 ```@docs
 sumr(; binfile::AbstractString="", outdir::AbstractString=".", pseudocount::Number=1.0, sparse_mode::Bool=false)
@@ -117,5 +122,5 @@ sparse_rsvd(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=no
 
 ## Exact Out-of-Core PCA
 ```@docs
-exact_ooc_pca(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="ftt", pseudocount::Number=1.0f0, dim::Number=3, chunksize::Number=1, sparse_mode::Bool=false)
+exact_ooc_pca(; input::AbstractString="", outdir::Union{Nothing,AbstractString}=nothing, scale::AbstractString="raw", pseudocount::Number=1.0f0, dim::Number=3, chunksize::Number=1, sparse_mode::Bool=false)
 ```
