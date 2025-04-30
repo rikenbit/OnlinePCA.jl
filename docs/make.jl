@@ -14,6 +14,7 @@ makedocs(
 deploydocs(
     repo = "github.com/rikenbit/OnlinePCA.jl.git",
     devbranch = "master",
+    versions = ["latest" => "master"],
     target = "build",
     deps = nothing,
     make = nothing)
