@@ -4,7 +4,7 @@ using OnlinePCA
 makedocs(
     sitename = "OnlinePCA.jl",
     modules = [OnlinePCA],
-    format = Documenter.HTML(),
+    format = Documenter.HTML(prettyurls = true),
     pages = [
         "Home" => "index.md",
         "Julia API" => "juliaapi.md",
