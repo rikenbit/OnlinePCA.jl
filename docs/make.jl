@@ -13,7 +13,7 @@ makedocs(
 
 deploydocs(
     repo = "github.com/rikenbit/OnlinePCA.jl.git",
-    devbranch = "docs-only",
+    devbranch = "master",
     versions = ["latest" => "master"],
     target = "build",
     deps = nothing,
