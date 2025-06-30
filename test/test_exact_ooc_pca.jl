@@ -72,15 +72,15 @@ testfilesize(true,
 
 # centered_data = log10.(centered_data .+ 1)
 cov_mat = centered_data' * centered_data
-out_eig = eigen(cov_mat)
-V = out_eig.vectors[:, 1:3]
+out_svd = svd(cov_mat)
+V = out_svd.Vt[1:3, :]
 
-inner_prod1 = maximum(abs.(diag(V' * out_exact_ooc_pca_dense[1])))
-inner_prod2 = maximum(abs.(diag(V' * out_exact_ooc_pca_sparse_mm[1])))
-inner_prod3 = maximum(abs.(diag(V' * out_exact_ooc_pca_sparse_bincoo[1])))
+inner_prod1 = maximum(abs.(diag(V * out_exact_ooc_pca_dense[1])))
+inner_prod2 = maximum(abs.(diag(V * out_exact_ooc_pca_sparse_mm[1])))
+inner_prod3 = maximum(abs.(diag(V * out_exact_ooc_pca_sparse_bincoo[1])))
 println("Inner product (Dense): ", inner_prod1)
 println("Inner product (Sparse MM): ", inner_prod2)
 println("Inner product (Sparse BinCOO): ", inner_prod3)
-@test inner_prod1 > 0.6
-@test inner_prod2 > 0.6
-@test inner_prod3 > 0.6
+@test inner_prod1 > 0.9
+@test inner_prod2 > 0.9
+@test inner_prod3 > 0.9

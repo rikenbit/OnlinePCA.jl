@@ -341,10 +341,6 @@ Unlike other PCAs, this function assumes matrix data with data x dimensions. It 
 ```julia
 # CSV
 tmp2 = mktempdir()
-# data2 = Int64.(ceil.(rand(Binomial(1, 0.2), 300, 99)))
-# data2[1:100, 1:33] .= 1
-# data2[101:200, 34:66] .= 1
-# data2[201:300, 67:99] .= 1
 data2 = Int64.(ceil.(rand(NegativeBinomial(1, 0.5), 99, 30)))
 data2[1:33, 1:10] .= 100*data2[1:33, 1:10]
 data2[34:66, 11:20] .= 100*data2[34:66, 11:20]
@@ -358,11 +354,16 @@ csv2bin(csvfile=joinpath(tmp2, "Data2.csv"), binfile=joinpath(tmp2, "Data2.zst")
 mmwrite(joinpath(tmp2, "Data2.mtx"), sparse(data2))
 
 # Binary COO (BinCOO)
-bincoofile = joinpath(tmp2, "Data2.bincoo")
+data3 = Int64.(ceil.(rand(Binomial(1, 0.2), 99, 33)))
+data3[1:33, 1:11] .= 1
+data3[34:66, 12:22] .= 1
+data3[67:99, 23:33] .= 1
+
+bincoofile = joinpath(tmp2, "Data3.bincoo")
 open(bincoofile, "w") do io
-    for i in 1:size(data2, 1)
-        for j in 1:size(data2, 2)
-            if data2[i, j] != 0
+    for i in 1:size(data3, 1)
+        for j in 1:size(data3, 2)
+            if data3[i, j] != 0
                 println(io, "$i $j")
             end
         end
@@ -376,7 +377,7 @@ csv2bin(csvfile=joinpath(tmp2, "Data2.csv"), binfile=joinpath(tmp2, "Data2.zst")
 mm2bin(mmfile=joinpath(tmp2, "Data2.mtx"), binfile=joinpath(tmp2, "Data2.mtx.zst"))
 
 # Binarziation (BinCOO + Zstandard)
-bincoo2bin(bincoofile=bincoofile, binfile=joinpath(tmp2, "Data2.bincoo.zst"))
+bincoo2bin(bincoofile=bincoofile, binfile=joinpath(tmp2, "Data3.bincoo.zst"))
 ```
 
 ```julia
@@ -402,7 +403,7 @@ subplots(out_exact_ooc_pca_sparse_mm[3], group)
 ```julia
 # Sparse-mode (BinCOO)
 out_exact_ooc_pca_sparse_bincoo = exact_ooc_pca(
-	input=joinpath(tmp2, "Data2.bincoo.zst"),
+	input=joinpath(tmp2, "Data3.bincoo.zst"),
 	scale="raw", dim=3, chunksize=10, mode="sparse_bincoo")
 
 subplots(out_exact_ooc_pca_sparse_bincoo[3], group)

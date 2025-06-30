@@ -32,11 +32,12 @@ function exact_ooc_pca(; input::AbstractString="", outdir::Union{Nothing,Abstrac
     # Covariance Matrix
     cov_mat, colmeanvec = ooc_cov(input, scale, pseudocount, chunksize, mode)
 
-    # Eigen value Deconposition
-    out_eig = eigen(cov_mat)
-    V = out_eig.vectors[:, 1:dim]
-    TotalVar = Float32(sum(out_eig.values))
-    ExpVar = Float32(sum(out_eig.values[1:dim]) / TotalVar)
+    # Singular Value Decomposition
+    out_svd = svd(cov_mat)
+    V = out_svd.Vt[1:dim, :]'
+    S = out_svd.S
+    TotalVar = Float32(sum(S .^ 2))
+    ExpVar = Float32(sum(S[1:dim] .^ 2) / TotalVar)
 
     # V, λ, W, Scores
     println("# 3. PC Score (Z = XV) is being calculated.")
