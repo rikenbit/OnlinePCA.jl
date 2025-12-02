@@ -86,9 +86,6 @@ csv2bin(csvfile=joinpath(tmp, "Data.csv"), binfile=joinpath(tmp, "Data.zst"))
 # Matrix Market (MM)
 mmwrite(joinpath(tmp, "Data.mtx"), sparse(data))
 
-# Binarization (Zstandard)
-csv2bin(csvfile=joinpath(tmp, "Data.csv"), binfile=joinpath(tmp, "Data.zst"))
-
 # Summary of data for CSV/Dense Matrix
 dense_path = mktempdir()
 sumr(binfile=joinpath(tmp, "Data.zst"), outdir=dense_path)

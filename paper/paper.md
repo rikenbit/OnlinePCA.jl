@@ -56,7 +56,7 @@ julia> Pkg.add(url="https://github.com/rikenbit/OnlinePCA.jl.git")
 
 ## Preprocess of CSV
 
-Then, write a synthetic data as a CSV file, convert it to a compressed binary format using Zstandard, and prepare summary statistics for PCA. MM format is also supported for sparse matrices.
+Then, write a synthetic data as a CSV file, convert it to a compressed binary format using Zstandard, and prepare summary statistics for PCA. Matrix Market (MM) format is also supported for sparse matrices.
 
 ```julia
 using OnlinePCA
@@ -96,6 +96,7 @@ This example performs PCA using Halko's randomized SVD method on dense CSV input
 
 ```julia
 out_halko = halko(input=joinpath(tmp, "Data.zst"), dim=3,
+    scale="log",
     rowmeanlist=joinpath(dense_path, "Feature_LogMeans.csv"))
 
 subplots(out_halko[1], group)
