@@ -1,25 +1,21 @@
 name: Documentation
-
 on:
   push:
     branches:
       - master
-
 jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - name: Set up Julia
         uses: julia-actions/setup-julia@v1
         with:
           version: '1'
-
       - name: Install dependencies
         run: |
-          julia --project=docs -e 'using Pkg; Pkg.instantiate(); Pkg.develop(path=".")'
-
+          rm -f docs/Manifest.toml
+          julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()'
       - name: Build and deploy documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
