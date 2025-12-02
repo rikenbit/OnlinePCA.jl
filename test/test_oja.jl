@@ -24,6 +24,7 @@ out_oja4 = oja(input=joinpath(tmp, "Data.zst"),
 	rowmeanlist=joinpath(dense_path, "Feature_FTTMeans.csv"),
 	logdir=dense_path)
 
+# Size tests
 @test size(out_oja1[1]) == (99, 3)
 @test size(out_oja1[2]) == (3, )
 @test size(out_oja1[3]) == (300, 3)
@@ -51,6 +52,40 @@ out_oja4 = oja(input=joinpath(tmp, "Data.zst"),
 @test size(out_oja4[4]) == (99, 3)
 @test size(out_oja4[5]) == ()
 @test size(out_oja4[6]) == ()
+
+# Accuracy tests:
+# eigenvalues should be non-negative and sorted in descending order
+## Non-negative eigenvalues
+@test all(out_oja1[2] .>= 0)
+@test all(out_oja2[2] .>= 0)
+@test all(out_oja3[2] .>= 0)
+@test all(out_oja4[2] .>= 0)
+
+## Descending order (PC1 > PC2 > PC3)
+@test issorted(out_oja1[2], rev=true)
+@test issorted(out_oja2[2], rev=true)
+@test issorted(out_oja3[2], rev=true)
+@test issorted(out_oja4[2], rev=true)
+
+## Loadings should have unit norm (columns are orthonormal)
+for j in 1:3
+    @test isapprox(norm(out_oja1[3][:, j]), 1.0, atol=0.1)
+end
+for j in 1:3
+    @test isapprox(norm(out_oja2[3][:, j]), 1.0, atol=0.1)
+end
+for j in 1:3
+    @test isapprox(norm(out_oja3[3][:, j]), 1.0, atol=0.1)
+end
+for j in 1:3
+    @test isapprox(norm(out_oja4[3][:, j]), 1.0, atol=0.1)
+end
+
+## Total variance explained should be positive
+@test sum(out_oja1[2]) > 0
+@test sum(out_oja2[2]) > 0
+@test sum(out_oja3[2]) > 0
+@test sum(out_oja4[2]) > 0
 #####################################
 
 #####################################

@@ -8,7 +8,7 @@ Online Principal Component Analysis
 [![Documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/dev)
 
 ## Description
-OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, performs some online-PCA functions for extreamly large scale matrix.
+OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, performs some online-PCA functions for extreamely large scale matrix.
 
 ## Algorithms
 - Gradient-based
@@ -36,15 +36,29 @@ OnlinePCA.jl binarizes CSV file, summarizes the information of data matrix and, 
 - ADAGRAD : [John Duchi, et. al., 2011](http://www.jmlr.org/papers/volume12/duchi11a/duchi11a.pdf)
 
 ## Installation
+
+### Requirements
+- Julia 1.0 or later
+
+### Installation Methods
+
+**Method 1: Using Pkg.add()**
 ```julia
 julia> Pkg.add(url="https://github.com/rikenbit/OnlinePCA.jl.git")
-julia> Pkg.add("PlotlyJS")
 ```
 
+**Method 2: Using Pkg REPL mode**
 ```julia
 # push the key "]" and type the following command.
 (v1.7) pkg> add https://github.com/rikenbit/OnlinePCA.jl
-# After that, push Ctrl + C to leave from Pkg REPL mode
+# Press Backspace or Ctrl+C to return to Julia REPL
+```
+
+### Optional Dependencies
+
+For interactive visualization of PCA results:
+```julia
+Pkg.add("PlotlyJS")
 ```
 
 ## Basic API usage
@@ -487,7 +501,7 @@ ps | grep julia
 
 ## Contributing
 
-If you have suggestions for how `OnlineNMF.jl` could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
+If you have suggestions for how `OnlinePCA.jl` could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
 
 For more, check out the [Contributing Guide](CONTRIBUTING.md).
 

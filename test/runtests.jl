@@ -8,6 +8,7 @@ using Distributions
 using SparseArrays
 using MatrixMarket
 using LinearAlgebra
+using Random
 
 # Setting
 ## Input Directory
@@ -26,6 +27,7 @@ function testfilesize(remove::Bool, x...)
 	end
 end
 
+Random.seed!(1111)
 data = Int64.(ceil.(rand(Binomial(1, 0.5), 300, 99)))
 data[1:100, 1:33] .= Int64.(ceil.(rand(Binomial(1, 0.8), 100, 33)))
 data[101:200, 34:66] .= Int64.(ceil.(rand(Binomial(1, 0.8), 100, 33)))

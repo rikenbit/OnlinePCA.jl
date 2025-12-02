@@ -46,10 +46,10 @@ function sparse_rsvd(; input::AbstractString="", outdir::Union{Nothing,AbstractS
         initW, initV, logdir, cper, scale, perm
     )
 
-    # PCA実行
+    # PCA Computation
     out = sparse_rsvd_core(input, outdir, scale, rowmeanvec, rowvarvec, rowvarlist, colsumvec, dim, noversamples, niter, chunksize, logdir, W, D, N, M, TotalVar, perm, cper)
 
-    # 結果の保存
+    # Save Results
     if outdir isa String
         write_csv(joinpath(outdir, "Eigen_vectors.csv"), out[1])
         write_csv(joinpath(outdir, "Eigen_values.csv"), out[2])

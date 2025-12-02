@@ -3,12 +3,29 @@ println("####### Exact Out-of-Core PCA (Dense, Julia API) #######")
 out_exact_ooc_pca_dense = exact_ooc_pca(input=joinpath(tmp, "Data.zst"),
 	dim=3, scale="raw", chunksize=51)
 
+# Size tests
 @test size(out_exact_ooc_pca_dense[1]) == (99, 3)
 @test size(out_exact_ooc_pca_dense[2]) == (3, )
 @test size(out_exact_ooc_pca_dense[3]) == (300, 3)
 @test size(out_exact_ooc_pca_dense[4]) == (300, 3)
 @test size(out_exact_ooc_pca_dense[5]) == ()
 @test size(out_exact_ooc_pca_dense[6]) == ()
+
+# Accuracy tests:
+# eigenvalues should be non-negative and sorted in descending order
+## Non-negative eigenvalues
+@test all(out_exact_ooc_pca_dense[2] .>= 0)
+
+## Descending order (PC1 > PC2 > PC3)
+@test issorted(out_exact_ooc_pca_dense[2], rev=true)
+
+## Loadings should have unit norm (columns are orthonormal)
+for j in 1:3
+    @test isapprox(norm(out_exact_ooc_pca_dense[3][:, j]), 1.0, atol=0.1)
+end
+
+## Total variance explained should be positive
+@test sum(out_exact_ooc_pca_dense[2]) > 0
 #####################################
 
 #####################################
@@ -27,12 +44,29 @@ println("####### Exact Out-of-Core PCA (MM-Sparse, Julia API) #######")
 out_exact_ooc_pca_sparse_mm = exact_ooc_pca(input=joinpath(tmp, "Data.mtx.zst"),
 	dim=3, scale="raw", chunksize=51, mode="sparse_mm")
 
+# Size tests
 @test size(out_exact_ooc_pca_sparse_mm[1]) == (99, 3)
 @test size(out_exact_ooc_pca_sparse_mm[2]) == (3, )
 @test size(out_exact_ooc_pca_sparse_mm[3]) == (300, 3)
 @test size(out_exact_ooc_pca_sparse_mm[4]) == (300, 3)
 @test size(out_exact_ooc_pca_sparse_mm[5]) == ()
 @test size(out_exact_ooc_pca_sparse_mm[6]) == ()
+
+# Accuracy tests:
+# eigenvalues should be non-negative and sorted in descending order
+## Non-negative eigenvalues
+@test all(out_exact_ooc_pca_sparse_mm[2] .>= 0)
+
+## Descending order (PC1 > PC2 > PC3)
+@test issorted(out_exact_ooc_pca_sparse_mm[2], rev=true)
+
+## Loadings should have unit norm (columns are orthonormal)
+for j in 1:3
+    @test isapprox(norm(out_exact_ooc_pca_sparse_mm[3][:, j]), 1.0, atol=0.1)
+end
+
+## Total variance explained should be positive
+@test sum(out_exact_ooc_pca_sparse_mm[2]) > 0
 #####################################
 
 #####################################
@@ -51,12 +85,29 @@ println("####### Exact Out-of-Core PCA (BinCOO-Sparse, Julia API) #######")
 out_exact_ooc_pca_sparse_bincoo = exact_ooc_pca(input=joinpath(tmp, "Data.bincoo.zst"),
 	dim=3, scale="raw", chunksize=51, mode="sparse_bincoo")
 
+# Size tests
 @test size(out_exact_ooc_pca_sparse_bincoo[1]) == (99, 3)
 @test size(out_exact_ooc_pca_sparse_bincoo[2]) == (3, )
 @test size(out_exact_ooc_pca_sparse_bincoo[3]) == (300, 3)
 @test size(out_exact_ooc_pca_sparse_bincoo[4]) == (300, 3)
 @test size(out_exact_ooc_pca_sparse_bincoo[5]) == ()
 @test size(out_exact_ooc_pca_sparse_bincoo[6]) == ()
+
+# Accuracy tests:
+# eigenvalues should be non-negative and sorted in descending order
+## Non-negative eigenvalues
+@test all(out_exact_ooc_pca_sparse_bincoo[2] .>= 0)
+
+## Descending order (PC1 > PC2 > PC3)
+@test issorted(out_exact_ooc_pca_sparse_bincoo[2], rev=true)
+
+## Loadings should have unit norm (columns are orthonormal)
+for j in 1:3
+    @test isapprox(norm(out_exact_ooc_pca_sparse_bincoo[3][:, j]), 1.0, atol=0.1)
+end
+
+## Total variance explained should be positive
+@test sum(out_exact_ooc_pca_sparse_bincoo[2]) > 0
 #####################################
 
 #####################################
@@ -75,6 +126,7 @@ cov_mat = centered_data' * centered_data
 out_svd = svd(cov_mat)
 V = out_svd.Vt[1:3, :]
 
+# Accuracy tests
 inner_prod1 = maximum(abs.(diag(V * out_exact_ooc_pca_dense[1])))
 inner_prod2 = maximum(abs.(diag(V * out_exact_ooc_pca_sparse_mm[1])))
 inner_prod3 = maximum(abs.(diag(V * out_exact_ooc_pca_sparse_bincoo[1])))

@@ -24,6 +24,7 @@ out_rsvrg4 = rsvrg(input=joinpath(tmp, "Data.zst"),
 	rowmeanlist=joinpath(dense_path, "Feature_FTTMeans.csv"),
 	logdir=dense_path)
 
+# Size tests
 @test size(out_rsvrg1[1]) == (99, 3)
 @test size(out_rsvrg1[2]) == (3, )
 @test size(out_rsvrg1[3]) == (300, 3)
@@ -51,6 +52,40 @@ out_rsvrg4 = rsvrg(input=joinpath(tmp, "Data.zst"),
 @test size(out_rsvrg4[4]) == (99, 3)
 @test size(out_rsvrg4[5]) == ()
 @test size(out_rsvrg4[6]) == ()
+
+# Accuracy tests:
+# eigenvalues should be non-negative and sorted in descending order
+## Non-negative eigenvalues
+@test all(out_rsvrg1[2] .>= 0)
+@test all(out_rsvrg2[2] .>= 0)
+@test all(out_rsvrg3[2] .>= 0)
+@test all(out_rsvrg4[2] .>= 0)
+
+## Descending order (PC1 > PC2 > PC3)
+@test issorted(out_rsvrg1[2], rev=true)
+@test issorted(out_rsvrg2[2], rev=true)
+@test issorted(out_rsvrg3[2], rev=true)
+@test issorted(out_rsvrg4[2], rev=true)
+
+## Loadings should have unit norm (columns are orthonormal)
+for j in 1:3
+    @test isapprox(norm(out_rsvrg1[3][:, j]), 1.0, atol=0.1)
+end
+for j in 1:3
+    @test isapprox(norm(out_rsvrg2[3][:, j]), 1.0, atol=0.1)
+end
+for j in 1:3
+    @test isapprox(norm(out_rsvrg3[3][:, j]), 1.0, atol=0.1)
+end
+for j in 1:3
+    @test isapprox(norm(out_rsvrg4[3][:, j]), 1.0, atol=0.1)
+end
+
+## Total variance explained should be positive
+@test sum(out_rsvrg1[2]) > 0
+@test sum(out_rsvrg2[2]) > 0
+@test sum(out_rsvrg3[2]) > 0
+@test sum(out_rsvrg4[2]) > 0
 #####################################
 
 #####################################
