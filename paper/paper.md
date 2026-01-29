@@ -207,6 +207,6 @@ There are various implementations of PCA and some of them are OOC-type or sparse
 | \texttt{sparse\_rsvd} | Julia | Yes | MM |
 | \texttt{exact\_ooc\_pca} | Julia | Yes | CSV/MM/BinCOO |
 
-For a more comprehensive comparison, see the Figure 2 in [@onlinepcajl].
+For a more comprehensive comparison, see the Figure 2 in @onlinepcajl.
 
 # References
