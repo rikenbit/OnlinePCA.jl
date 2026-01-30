@@ -3,6 +3,7 @@ Online Principal Component Analysis
 
 [![Build Status](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/rikenbit/OnlinePCA.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![DOI](https://zenodo.org/badge/125349253.svg)](https://zenodo.org/badge/latestdoi/125349253)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.09343/status.svg)](https://doi.org/10.21105/joss.09343)
 
 ## 📚 Documentation
 [![Documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://rikenbit.github.io/OnlinePCA.jl/dev)
